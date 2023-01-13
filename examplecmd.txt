@@ -1,0 +1,2 @@
+./run.py test_data/rawdata test_data/derivatives/cvrmap participant --fmriprep_dir test_data/derivatives/fmriprep --space MNI152NLin6Asym --method all --sloppy --participant_label 002
+./run.py test_data/rawdata test_data/derivatives/cvrmap participant --fmriprep_dir test_data/derivatives/fmriprep --space MNI152NLin6Asym --method all --participant_label 004 --task gas
