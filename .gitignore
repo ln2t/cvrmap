@@ -1,4 +1,4 @@
-test_data/*
+data/*
 core/__pycache__/*
 .idea/*
 jupyter/*
