@@ -1,0 +1,5 @@
+test_data/*
+core/__pycache__/*
+.idea/*
+jupyter/*
+.DS_Store
