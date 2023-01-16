@@ -23,7 +23,6 @@ Created: May 2022
 # todo: register results to patient space; include PET image in report
 # todo: make histogram of delays
 # todo: normalize delay shift by computing delay of ROI of reference
-# todo: when computing delays, put a threshold on goodness of fit and nan bad points (I suspect delay=-15 points are an artefact...)
 # todo: ROI delay analysis
 # todo: signal of grey matter compared to etCO2, recording of delay, include this in the report
 
@@ -85,6 +84,7 @@ def main():
 
     #  Step 1: arguments
     #  setup the arguments
+    # Note: action='store_true' means that if option is used, the arg is set to true. Used for flags (not options with arguments).
     parser = argparse.ArgumentParser(description = 'Entrypoint script.')
     parser.add_argument('bids_dir', help='The directory with the input '
                                          'dataset formatted according to '
@@ -109,6 +109,7 @@ def main():
     parser.add_argument('--sloppy', help='Only for testing, computes a small part of the maps to save time. Off by default.', action='store_true')
     parser.add_argument('--use_aroma', help='If set, the noise regressors will be those as determined by aroma.', action='store_true')
     parser.add_argument('--overwrite', help='If set, existing results will be overwritten if they exist.', action='store_true')
+    parser.add_argument('--label', help='If set, labels the output with custom label.')
     parser.add_argument('-v', '--version', action='version', version='BIDS-App example version {}'.format(__version__))
     #  parse
     args = parser.parse_args()
@@ -201,6 +202,13 @@ def main():
     else:
         overwrite_flag = False
 
+    # label?
+    if args.label:
+        custom_label = '_label-' + args.label
+        msg_info('Outputs will be labeled using %s' % custom_label)
+    else:
+        custom_label = ''
+
     # create output dir
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -274,17 +282,17 @@ def main():
             # set paths for various outputs
             outputs = {}
             if args.use_aroma:
-               denoise_label = 'AROMA'
+               denoise_label = "_denoising-" +'AROMA'
             else:
-                denoise_label = 'custom'
+                denoise_label = ''
             subject_prefix = os.path.join(subject_output_dir,
                                   "sub-" + subject_label)
-            prefix = subject_prefix + "_space-" + space + "_denoising-" + denoise_label + '_'
+            prefix = subject_prefix + "_space-" + space + denoise_label + custom_label
             nifti_extension = '.nii.gz'
             report_extension = '.html'
-            outputs['cvr'] = prefix + 'cvr' + nifti_extension
-            outputs['delay'] = prefix + 'delay' + nifti_extension
-            outputs['report'] = prefix + 'report' + report_extension
+            outputs['cvr'] = prefix + '_cvr' + nifti_extension
+            outputs['delay'] = prefix + '_delay' + nifti_extension
+            outputs['report'] = prefix + '_report' + report_extension
             outputs['etco2'] = subject_prefix + '_desc-etco2_timecourse'
 
             # add subject to filter
@@ -298,8 +306,8 @@ def main():
             # clean previous tmp files, if any
             files = glob.glob(subject_work_dir + '/*')
             if not len(files) == 0:
+                msg_info('Removing temporary files found in %s' % subject_work_dir)
                 for f in files:
-                    msg_info('Removing temporary files found in %s' % subject_work_dir)
                     os.remove(f)
 
             # add task to filter
