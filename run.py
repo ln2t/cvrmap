@@ -104,7 +104,7 @@ def main():
     parser.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation', action='store_true')
     parser.add_argument('--fmriprep_dir', help='Path of the fmriprep derivatives. If ommited, set to bids_dir/derivatives/fmriprep')
     parser.add_argument('--task', help='Name of the task to be used. If omitted, will search for \'gas\'.')
-    parser.add_argument('--space', help='Name of the space to be used. Must be associated with fmriprep output. Ex: \'MNI152NLin6Asym\'.')
+    parser.add_argument('--space', help='Name of the space to be used. Must be associated with fmriprep output. Default: \'MNI152NLin6Asym\'.')
     parser.add_argument('--work_dir', help='Work dir for temporary files. If omitted, set to \'output_dir/work\'')
     parser.add_argument('--sloppy', help='Only for testing, computes a small part of the maps to save time. Off by default.', action='store_true')
     parser.add_argument('--use_aroma', help='If set, the noise regressors will be those as determined by aroma.', action='store_true')
@@ -123,8 +123,8 @@ def main():
 
     # check 2: space given?
     if not args.space:
-        msg_error("Argument \'--space\' is non-optional")
-        sys.exit(1)
+        args.space = 'MNI152NLin6Asym'
+        msg_info('Defaulting to space %s' % args.space)
 
     # check 3: bids_dir is bids-valid?
     if not args.skip_bids_validator:
