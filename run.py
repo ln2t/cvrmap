@@ -151,7 +151,7 @@ def main():
                           "bids database." % subj)
                 sys.exit(1)
     else:  # for all subjects
-        subjects_to_analyze = layout.get_subjects()
+        subjects_to_analyze = sorted(layout.get_subjects())
 
     #  fmriprep dir definition
     if args.fmriprep_dir:
