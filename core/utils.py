@@ -778,6 +778,9 @@ def compute_response(intercept, slope, regressorbaseline, regressormean):
                         response_data[i_x, i_y, i_z] = 100*slope_data[i_x, i_y, i_z]/denominator
                     else:
                         response_data[i_x, i_y, i_z] = float('nan')
+                    if np.abs(response_data[i_x, i_y, i_z]) > 100:
+                        #msg_warning('Very high value of CVR computed, probably at division-by-close-to-zero artefact.')
+                        response_data[i_x, i_y, i_z] = float('nan')
 
         printProgressBar(loop_counter, total_voxels, prefix=script_progress_sentence)
 
