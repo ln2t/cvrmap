@@ -715,7 +715,7 @@ def gaussian_max(data):
     hist, bin_edges = np.histogram(data, density=True)
     bin_centres = (bin_edges[:-1] + bin_edges[1:])/2
     p0 = [0.1, 0.1, 0.1]
-    coeff, var_matrix = curve_fit(gauss, bin_centres, hist)
+    coeff, var_matrix = curve_fit(gauss, bin_centres, hist, p0=p0)
     mu = coeff[0]
     # hist_fit = gauss(bin_centres, *coeff)
     return mu
