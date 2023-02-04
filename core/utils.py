@@ -707,6 +707,11 @@ def gaussian_max(data):
     """
     import numpy as np
     from scipy.optimize import curve_fit
+
+    def gauss(x, *p):
+        A, mu, sigma = p
+        return A * np.exp(-(x - mu) ** 2 / (2. * sigma ** 2))
+
     hist, bin_edges = np.histogram(data, density=True)
     bin_centres = (bin_edges[:-1] + bin_edges[1:])/2
     p0 = [1., 0., 1.]
