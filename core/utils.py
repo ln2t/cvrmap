@@ -666,12 +666,12 @@ def compute_delays(reference, probe, shifts_option):
 
                 # iterate over all values of the array
                 for shift in shifts_option:
-                    shift = int(shift)
+                    # shift = int(shift)
                     slope[shift], intercept[shift], correlation[shift], p, std = compute_delays(reference, probe, shift)
 
                 # extract maximum and return corresponding values
                 # the maximum is found first by fitting a gaussian to avoid hitting exeptional values
-                max_loc = gaussian_max(correlation)
+                max_loc = gaussian_max(np.fromiter(correlation.values(), dtype = float))
                 # at this shift, we a priori don't have the values of the intercpet and correlation, so let us computed them
                 slope[max_loc], intercept[max_loc], correlation[max_loc], p, std = compute_delays(reference, probe, max_loc)
 
