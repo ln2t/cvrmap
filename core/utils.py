@@ -676,7 +676,8 @@ def compute_delays(reference, probe, shifts_option):
                     # at this shift, we a priori don't have the values of the intercpet and correlation, so let us computed them
                     slope[max_loc], intercept[max_loc], correlation[max_loc], p, std = compute_delays(reference, probe, max_loc)
                 except RuntimeError:
-                    max_loc = 42
+                    # todo: there is an issue here because when doing this, somehow the function build_shifted_signal gets called with Delta_t = Nan. This should not happen, what's going wong?
+                    max_loc = float('nan')
                     slope[max_loc] = float('nan')
                     intercept[max_loc] = float('nan')
                     correlation[max_loc] = float('nan')
