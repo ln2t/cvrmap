@@ -638,11 +638,11 @@ def compute_delays(reference, probe, shifts_option):
                         absolute_delay_data[i_x, i_y, i_z], slope_data[i_x, i_y, i_z], intercept_data[i_x, i_y, i_z], correlation_data[i_x, i_y, i_z] = compute_delays(bold, probe, absolute_shift_list)
             printProgressBar(loop_counter, total_voxels, prefix=script_progress_sentence)
 
-        delay_data = absolute_delay_data.copy() - shift_origin
+        delay_data = absolute_delay_data.copy() - shift_origin  # note that this behaves well even if some values are nan's
         # before we finish, we discard points in the delay map having correlation < 0.6, but we keep them for intercept and slope:
-        delay_data = np.where(correlation_data > 0.6, delay_data, float('nan'))
-        #slope_data = np.where(correlation_data > 0.6, slope_data, float('nan'))
-        #intercept_data = np.where(correlation_data > 0.6, intercept_data, float('nan'))
+        # delay_data = np.where(correlation_data > 0.6, delay_data, float('nan'))
+        # slope_data = np.where(correlation_data > 0.6, slope_data, float('nan'))
+        # intercept_data = np.where(correlation_data > 0.6, intercept_data, float('nan'))
 
         delay = DataObj(data=delay_data, data_type='map', measurement_type='delay')
         slope = DataObj(data=slope_data, data_type='map')
@@ -671,9 +671,15 @@ def compute_delays(reference, probe, shifts_option):
 
                 # extract maximum and return corresponding values
                 # the maximum is found first by fitting a gaussian to avoid hitting exeptional values
-                max_loc = gaussian_max(np.fromiter(correlation.values(), dtype = float))
-                # at this shift, we a priori don't have the values of the intercpet and correlation, so let us computed them
-                slope[max_loc], intercept[max_loc], correlation[max_loc], p, std = compute_delays(reference, probe, max_loc)
+                try:
+                    max_loc = gaussian_max(np.fromiter(correlation.values(), dtype=float))
+                    # at this shift, we a priori don't have the values of the intercpet and correlation, so let us computed them
+                    slope[max_loc], intercept[max_loc], correlation[max_loc], p, std = compute_delays(reference, probe, max_loc)
+                except RuntimeError:
+                    max_loc = float('nan')
+                    slope[max_loc] = float('nan')
+                    intercept[max_loc] = float('nan')
+                    correlation[max_loc] = float('nan')
 
                 return max_loc, slope[max_loc], intercept[max_loc], correlation[max_loc]
             else:
