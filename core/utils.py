@@ -670,8 +670,10 @@ def compute_delays(reference, probe, shifts_option):
                     slope[shift], intercept[shift], correlation[shift], p, std = compute_delays(reference, probe, shift)
 
                 # extract maximum and return corresponding values
-
-                max_loc = max(correlation, key=correlation.get)
+                # the maximum is found first by fitting a gaussian to avoid hitting exeptional values
+                max_loc = gaussian_max(correlation)
+                # at this shift, we a priori don't have the values of the intercpet and correlation, so let us computed them
+                slope[max_loc], intercept[max_loc], correlation[max_loc], p, std = compute_delays(reference, probe, max_loc)
 
                 return max_loc, slope[max_loc], intercept[max_loc], correlation[max_loc]
             else:
@@ -687,6 +689,32 @@ def compute_delays(reference, probe, shifts_option):
             return scipy.stats.linregress(probe.data, reference.data)
 
 
+def gaussian_max(data):
+    """
+    Fit a gaussian to the data, and returns the mean of the gaussian. This corresponds to the location of the maximum
+    of the fitted curve.
+
+    Arguments:
+    __________
+
+        data: a numpy array.
+
+    Return:
+    _______
+
+        mu: a float, corresponding to the mean of the fitted gaussian.
+
+    """
+    import numpy as np
+    from scipy.optimize import curve_fit
+    hist, bin_edges = np.histogram(data, density=True)
+    bin_centres = (bin_edges[:-1] + bin_edges[1:])/2
+    p0 = [1., 0., 1.]
+    coeff, var_matrix = curve_fit(gauss, bin_centres, hist, p0=p0)
+    mu = coeff[0]
+    # hist_fit = gauss(bin_centres, *coeff)
+    return mu
+
 def build_shifted_signal(probe, target, delta_t):
     """
     Shifts the probe signal by the amount delta_t, putting baseline values when extrapolation is needed.
@@ -698,7 +726,7 @@ def build_shifted_signal(probe, target, delta_t):
 
         probe: a DataObj with probe.data_type = 'timecourse'
         target: a DataObj with probe.data_type = 'timecourse'.
-        delta_t: an integer (positive, negative or zero)
+        delta_t: any real number, corresponding to the time interval for the shift, in the units of inverse of probe.sampling_frequency
 
     Return:
     _______

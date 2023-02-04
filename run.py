@@ -39,7 +39,8 @@ from datetime import datetime  # for logging purposes
 import pandas as pd  # to deal with .tsv files
 import sys  # to exit execution
 import numpy as np
-import glob # to list files in folders
+import glob  # to list files in folders
+import nilearn as nl
 
 # modules
 def run(command, env={}):
