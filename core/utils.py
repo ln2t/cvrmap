@@ -676,7 +676,7 @@ def compute_delays(reference, probe, shifts_option):
                     # at this shift, we a priori don't have the values of the intercpet and correlation, so let us computed them
                     slope[max_loc], intercept[max_loc], correlation[max_loc], p, std = compute_delays(reference, probe, max_loc)
                 except RuntimeError:
-                    max_loc = float('nan')
+                    max_loc = 42
                     slope[max_loc] = float('nan')
                     intercept[max_loc] = float('nan')
                     correlation[max_loc] = float('nan')
@@ -686,7 +686,7 @@ def compute_delays(reference, probe, shifts_option):
                 # level 2
                 # shift the probe signal and then proceed with the fit
                 # here shifts_option is an int used to build keys in the dict shifted_probes
-                if shifts_option not in shifted_probes:
+                if shifts_option not in shifted_probes:  # to avoid computing twice the same stuff
                     shifted_probes[shifts_option] = build_shifted_signal(probe, reference, shifts_option)
 
                 return compute_delays(reference, shifted_probes[shifts_option], None)
@@ -788,7 +788,6 @@ def build_shifted_signal(probe, target, delta_t):
 
     return DataObj(data=data, label=('probe timecourse shifted by %s seconds' % delta_t), data_type='timecourse',
                              sampling_frequency=target_sf)
-
 
 def compute_response(intercept, slope, regressorbaseline, regressormean):
     """
