@@ -429,8 +429,7 @@ def main():
             absolute_shift_list = np.arange(-30, 30, 1)
             global_signal_shift = compute_delays(global_signal, probe, absolute_shift_list)[0]
 
-            #relative_shift_list = np.arange(-30, 30, 1)
-            relative_shift_list = np.arange(-1, 1, 1)
+            relative_shift_list = np.arange(-30, 30, 1)
 
             if not os.path.exists(outputs['delay']) or overwrite_flag:
                 # compute delays and fit parameters (this is the most time-consuming step)
