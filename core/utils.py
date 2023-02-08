@@ -40,7 +40,7 @@ class DataObj:
     measurement_type is the type of the actual values, like 'CVR' or 'delay', or 'concentration'.
     mask is a binary map, can be used to mask data in the case of 'map' or 'bold'data_type.
     """
-    def __init__(self, data=None, sampling_frequency=None, data_type=None, path=None, label=None, figs=None, measurement_type=None, mask=None, baseline=None):
+    def __init__(self, data=None, sampling_frequency=None, data_type=None, path=None, label=None, figs=None, measurement_type=None, mask=None, baseline=None, units=None):
         self.sampling_frequency = sampling_frequency
         self.data = data
         self.data_type = data_type
@@ -50,6 +50,7 @@ class DataObj:
         self.measurement_type = measurement_type
         self.mask = mask
         self.baseline = baseline
+        self.units = units
 
     def bids_load(self, layout, filters, data_type, **kwargs):
         """Load DataObj from a BIDS layout and filters
@@ -68,6 +69,13 @@ class DataObj:
                 data_path = layout.get(**filters, extension='tsv.gz')[0]
                 data = numpy.loadtxt(data_path, usecols=kwargs['col'])
                 sampling_frequency = lf['SamplingFrequency']
+                units = lf['co2']['Units']
+                if units == '%':
+                    # convert % of co2 partial pressure to mmHg
+                    data = data/7.6
+                else:
+                    if not units == 'mmHg':
+                        msg_warning('The units read from json file, %s, are unknown. This affects the units of CVR.' % str(units))
             else:
                 data_path = layout.get(**filters, extension='nii.gz')[0]
                 data = nibabel.load(data_path).get_fdata()
@@ -80,6 +88,7 @@ class DataObj:
         self.data = data
         self.data_type = data_type
         self.path = data_path
+        self.units = units
 
     def nifti_load(self, path):
         """
