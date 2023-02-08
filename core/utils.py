@@ -773,7 +773,7 @@ def compute_response(intercept, slope, regressorbaseline, regressormean):
                 if np.isnan(intercept_data[i_x, i_y, i_z]):
                     response_data[i_x, i_y, i_z] = float('nan')
                 else:
-                    denominator = intercept_data[i_x, i_y, i_z] + (regressorbaseline - regressormean)*slope_data[i_x, i_y, i_z]
+                    denominator = intercept_data[i_x, i_y, i_z] + regressorbaseline*slope_data[i_x, i_y, i_z]
                     if not denominator == 0:
                         response_data[i_x, i_y, i_z] = 100*slope_data[i_x, i_y, i_z]/denominator
                     else:
