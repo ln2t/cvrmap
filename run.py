@@ -78,8 +78,8 @@ def run(command, env={}):
 def main():
 
     #  Step 0: get current version and print
-    __version__ = open(join(os.path.dirname(os.path.realpath(__file__)),
-                            'version')).read()
+    __version__ = open(join(os.path.dirname(os.path.realpath(__file__)), '.git',
+                            'HEAD')).read()
     msg_info("Version: %s"%__version__)
 
     #  Step 1: arguments
