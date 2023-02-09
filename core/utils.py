@@ -72,8 +72,7 @@ class DataObj:
                 units = lf['co2']['Units']
                 if units == '%':
                     # convert % of co2 partial pressure to mmHg
-                    data = data/7.6
-                    units = 'mmHg'
+                    data = data*7.6
                 else:
                     if not units == 'mmHg':
                         msg_warning('The units read from json file, %s, are unknown. This affects the units of CVR.' % str(units))
@@ -90,6 +89,7 @@ class DataObj:
         self.data = data
         self.data_type = data_type
         self.path = data_path
+        self.units = units
 
     def nifti_load(self, path):
         """
