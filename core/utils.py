@@ -89,7 +89,6 @@ class DataObj:
         self.data = data
         self.data_type = data_type
         self.path = data_path
-        self.units = units
 
     def nifti_load(self, path):
         """
