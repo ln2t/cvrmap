@@ -72,7 +72,7 @@ class DataObj:
                 units = lf['co2']['Units']
                 if units == '%':
                     # convert % of co2 partial pressure to mmHg
-                    data = data/7.6
+                    data = data*7.6
                 else:
                     if not units == 'mmHg':
                         msg_warning('The units read from json file, %s, are unknown. This affects the units of CVR.' % str(units))
