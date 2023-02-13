@@ -25,6 +25,8 @@ Created: May 2022
 # todo: normalize delay shift by computing delay of ROI of reference
 # todo: ROI delay analysis
 # todo: signal of grey matter compared to etCO2, recording of delay, include this in the report
+# todo: write sidecar json files
+# todo: read CO2 col header in tsv
 
 # imports
 import argparse  # to deal with all the app arguments
