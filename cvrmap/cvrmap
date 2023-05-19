@@ -39,10 +39,10 @@ from datetime import datetime  # for logging purposes
 import pandas as pd  # to deal with .tsv files
 import sys  # to exit execution
 import numpy as np
-import glob # to list files in folders
+import glob  # to list files in folders
 
-import core  # custom utilities from the package
-from core.utils import *  # custom utilities from the package
+from utils import *
+#from utils.utils import *  # custom utilities from the package
 
 # modules
 def run(command, env={}):
@@ -326,7 +326,7 @@ def main():
             physio.bids_load(layout, physio_filter, 'timecourse', **{'col': 1})
 
             # extract upper envelope and baseline
-            probe, baseline = core.endtidalextract.run(physio)
+            probe, baseline = endtidalextract(physio)
 
             # save the result
             probe.timecourse_save(outputs['etco2'])
@@ -386,7 +386,7 @@ def main():
                 corrected_noise = []
                 for noise_idx in aroma_noise_ic_list:
                     ic = DataObj(data=melodic_mixing_df.values[:, int(noise_idx) - 1], sampling_frequency=preproc.sampling_frequency, data_type='timecourse', path=None)
-                    if core.tccorr.run(ic, probe) < noise_ic_pearson_r_threshold:
+                    if tccorr(ic, probe) < noise_ic_pearson_r_threshold:
                         corrected_noise.append(noise_idx)
 
                 tmp_output = os.path.join(subject_work_dir, 'tmp.nii.gz')
@@ -455,7 +455,7 @@ def main():
                 # save the obtained map
                 results['delay'].nifti_save(denoised.path, outputs['delay'])
                 # compute and save response maps
-                response = compute_response(results['intercept'], results['slope'], probe.baseline, numpy.mean(probe.data))
+                response = compute_response(results['intercept'], results['slope'], probe.baseline, np.mean(probe.data))
                 response.nifti_save(denoised.path, outputs['cvr'])
             else:
                 results = dict()

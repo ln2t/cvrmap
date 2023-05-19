@@ -1,12 +1,13 @@
-#!/usr/bin/env python3
+"""
+Various tools and wrappers for simple computations
+"""
 
-# IMPORTS
+# import
 
 import numpy as np
+import scipy
 from scipy.signal import resample
 from scipy.stats import pearsonr
-
-help_message = "This is a python tool to compute correlation between two time courses and find optimal delay"
 
 def match_timecourses(y1, y2, delay):
     delay = int(delay)
@@ -23,11 +24,8 @@ def match_timecourses(y1, y2, delay):
             y2_matched = y2[:len(y2)]
     return y1_matched, y2_matched
 
-# MAIN
 
-# loading data...
-
-def run(data_object1, data_object2):
+def tccorr(data_object1, data_object2):
 
     tc1 = data_object1.data
     sf1 = data_object1.sampling_frequency
@@ -96,4 +94,70 @@ def run(data_object1, data_object2):
     # msg_info("Sign convention: a POSITIVE delay means that the FIRST timecourse must be shifted RIGHT")
 
     return pearson_r_max
+
+
+def build_shifted_signal(probe, target, delta_t):
+    """
+    Shifts the probe signal by the amount delta_t, putting baseline values when extrapolation is needed.
+    The baseline is read from probe.baseline; if undefined, the function first calls probe.build_baseline() to ensure it exists.
+    Target is a signal used as a reference for the length and sampling frequency of the output.
+
+    Arguments:
+    __________
+
+        probe: a DataObj with probe.data_type = 'timecourse'
+        target: a DataObj with probe.data_type = 'timecourse'.
+        delta_t: an integer (positive, negative or zero)
+
+    Return:
+    _______
+        DataObj with self.data with shifted points according to the given delta_t. Moreover, it is resampled to the sampling frequency in target, and it's length is also adjusted to the one of the target.
+    """
+
+    from .processing import DataObj  # to avoid circular import
+
+    # compute baseline if necessary
+    if probe.baseline is None:
+        probe.build_baseline()
+
+    # copy length and fill with baseline
+    n = len(probe.data)
+    data = probe.baseline * np.ones(n)
+    probe_sf = probe.sampling_frequency
+
+    # number of points corresponding to delta_t
+    delta_n = int(delta_t * probe_sf)
+
+    # shift and copy the original data
+    if delta_n == 0:
+        data[:] = probe.data
+
+    # this is where the sign convention for delay is made. We choose that a POSITIVE delay means that the data signal occurs AFTER the probe signal.
+    if delta_n < 0:
+        data[:n+delta_n] = probe.data[-delta_n:]
+    if delta_n > 0:
+        data[delta_n:] = probe.data[:n-delta_n]
+    # we keep here the code used for the opposite signe convention, just in case.
+    # if delta_n > 0:
+    #     data[:n-delta_n] = probe.data[delta_n:]
+    # if delta_n < 0:
+    #     data[-delta_n:] = probe.data[:n+delta_n]
+
+    # cut or add points to fit size of target
+    target_n = len(target.data)
+    target_sf = target.sampling_frequency
+    target_t = target_n/target_sf
+    probe_t = n/probe_sf
+
+    if probe_t > target_t:
+        data = data[:int(target_t*probe_sf)]
+    elif probe_t < target_t:
+        baseline_padding = probe.baseline * np.ones(int(target_t*probe_sf - n))
+        data = [*data, *baseline_padding]
+
+    # resample
+    data = scipy.signal.resample(data, target_n)
+
+    return DataObj(data=data, label=('probe timecourse shifted by %s seconds' % delta_t), data_type='timecourse',
+                             sampling_frequency=target_sf)
 

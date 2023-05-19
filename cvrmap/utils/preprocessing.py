@@ -1,12 +1,16 @@
+"""
+Preprocessing tools for physiological and fMRI data
+"""
+
 # IMPORTS
 
-from .utils import *
+from .processing import DataObj
 import numpy as np
 from scipy.ndimage import gaussian_filter
 import peakutils
 from scipy.interpolate import interp1d
 
-def run(physio):
+def endtidalextract(physio):
     """Analyse physiological breathing data to extract etco2 curve
 
     Inputs:
