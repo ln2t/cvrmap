@@ -1,3 +1,5 @@
+https://img.shields.io/aur/license/ln2t/cvrmap
+
 # Important Notice:
 
 Still in active development!
@@ -13,7 +15,7 @@ The paper describing the toolbox will be pulished soon, together with more docum
 
 # Installation
 
-As of now, the only supported installation procedure is to clone this git repo and make `run.py` executable. Make sure you have all python3 dependencies installed:
+As of now, the only supported installation procedure is to clone this git repo, make `cvrmap` executable and add it to your path. Make sure you have all python3 dependencies installed:
 
 ```
 pip install -r requirements.txt
@@ -66,7 +68,7 @@ fmriprep /path/to/bids_dir /path/to/derivatives/fmriprep participant --fs-licens
 We are now good to go and launch CVRmap with
 
 ```
-run.py /path/to/bids_dir /path/to/derivatives/cvrmap participant --fmriprep_dir /path/to/derivatives/fmriprep
+cvrmap /path/to/bids_dir /path/to/derivatives/cvrmap participant --fmriprep_dir /path/to/derivatives/fmriprep
 ```
 
 Notes:
@@ -74,7 +76,7 @@ Notes:
 - if the BOLD taskname is not `gas`, you must add `--taskname your_task_name`.
 - if you want the outputs in another space, and if this space was included in the fMRIPrep call, you must add `--space your_custom_space`. The default space is `MNI152NLin6Asym`.
 - if you want to use the ICA-AROMA classification for signal confounds, then add `--use-aroma` and CVRmap will fetch the non-aggressively denoised BOLD series as procuded by fMRIPrep. Otherwise, when the flag is omitted, CVRmap will perform non-aggressive denoising itself using a refinement of the ICA-AROMA classification of noise sources (see paper for more details).
-- more info and options can be found when asking politely for help with `run.py --help`.
+- more info and options can be found when asking politely for help with `cvrmap --help`.
 
 CVRmap will run for about 2 hours on recent computers. The results are stored in `/path/to/derivatives/cvrmap` following BIDS standard for derivatives. The outputs will typically look as follows:
 
