@@ -93,17 +93,10 @@ def main():
         args.space = 'MNI152NLin6Asym'
         msg_info('Defaulting to space %s' % args.space)
 
-    # check 3: bids_dir is bids-valid?
-    if not args.skip_bids_validator:
-        # todo: check if bids-validator is in path. Alternative: directly
-        #  call the appropriate pip package - see example in fmriprep
-        run('bids-validator --ignoreWarnings %s' % args.bids_dir)
-    else:
-        msg_info("Skipping bids-validation")
-
     # initiate BIDS layout
     msg_info("Indexing BIDS dataset...")
-    layout = bidslayout(args.bids_dir)
+
+    layout = bidslayout(args.bids_dir, validate=not args.skip_bids_validator)
 
     # check 4: valid subjects?
     subjects_to_analyze = []
