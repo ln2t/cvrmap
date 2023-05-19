@@ -21,7 +21,7 @@ pip install -r requirements.txt
 
 # Usage
 
-To run CVRmap, you must first have data to crunch. The data are supposed to a BIDS (https://bids-specification.readthedocs.io/en/stable/) dataset. For each subject, you must have a T1w image, a BOLD image and a physiological file contained the breathing data (CO2) recorded during the fMRI scan. For instance, for `sub-01`, the data should look like this:
+To run CVRmap, you must first have data to crunch. The data are supposed to a BIDS (https://bids-specification.readthedocs.io/en/stable/) dataset. For each subject, you must have a T1w image, a BOLD image and a physiological file containing the breathing data (CO2) recorded during the fMRI scan. For instance, for `sub-01`, the data should look like this:
 
 ```
 sub-01/anat/sub-01_T1w.nii.gz
@@ -34,7 +34,7 @@ sub-01/func/sub-01_task-gas_physio.json
 
 In this example, the taskname BIDS entity is `gas`. If yours differs, that's not a problem and you'll be able to run CVRmap provided you add the option `--taskname your_task_name` when launching the software.
 
-Note that the `sub-01/func/sub-01_task-gas_physio.json` file must containt a `SamplingFrequency` field as well as a `co2` field to specify the units of measurement of CO2 levels. A example of `sub-01/func/sub-01_task-gas_physio.json` would be:
+Note that the `sub-01/func/sub-01_task-gas_physio.json` file must containt a `SamplingFrequency` field as well as a `co2` field to specify the units of measurement of CO2 levels. An example of `sub-01/func/sub-01_task-gas_physio.json` would be:
 
 ```
 {
@@ -49,15 +49,15 @@ Note that the `sub-01/func/sub-01_task-gas_physio.json` file must containt a `Sa
 }
 ```
 
-In this example, the `sub-01/func/sub-01_task-gas_physio.tsv.gz` must have only one colunm, giving the CO2 readings at a sampling frequency of 100 Hz, in the units of `%` (which means 'percentage of co2 concentration'). If the CO2 readings are in mmHg (which is also a common units), the the "Units" field must be "mmHg". CVRmap converts percentages to mmHg automatically. Finally, the total duration of the CO2 reccording must not necessarily match the duration of the BOLD acquisition: if needed, CVRmap trims or uses a baseline interpolation automatically.
+In this example, the `sub-01/func/sub-01_task-gas_physio.tsv.gz` must have only one colunm, giving the CO2 readings at a sampling frequency of 100 Hz, in the units of `%` (which means 'percentage of co2 concentration'). If the CO2 readings are in mmHg (which is a common unit), the "Units" field must be "mmHg". CVRmap converts percentages to mmHg automatically. Finally, the total duration of the CO2 recording must not necessarily match the duration of the BOLD acquisition: depending on the case, CVRmap trims or uses a baseline extrapolation automatically.
 
-The rawdata must also have been processed using fMRIPrep. A typical fMRIPrep (https://fmriprep.org/en/stable). A minimalistic fMRIPrep call compatible with CVRmap is:
+The rawdata must also have been processed using fMRIPrep (https://fmriprep.org/en/stable). A minimalistic fMRIPrep call compatible with CVRmap is:
 
 ```
 fmriprep /path/to/bids_dir /path/to/derivatives/fmriprep participant --fs-license-file /path/to/fslicense --use-aroma --output-spaces MNI152NLin6Asym
 ```
 
-Note that this include the AROMA flag of fMRIPrep. If more output spaces are required for the computation of CVRmaps, say in original, participant's space, then the fMRIPrep call must be adapted by modifying the `--spaces` options accordingly. For instance:
+Note that this includes the AROMA flag of fMRIPrep. If more output spaces are required for the computation of CVRmaps, say in original, participant's space, then the fMRIPrep call must be adapted by modifying the `--spaces` options accordingly. For instance:
 
 ```
 fmriprep /path/to/bids_dir /path/to/derivatives/fmriprep participant --fs-license-file /path/to/fslicense --use-aroma --output-spaces MNI152NLin6Asym T1w
@@ -70,13 +70,13 @@ run.py /path/to/bids_dir /path/to/derivatives/cvrmap participant --fmriprep_dir 
 ```
 
 Notes:
-- the `--fmriprep_dir` option can be ommitted if the fMRIPrep devitatives are located in `/path/to/bids_dir/derivatives/fmriprep`.
-- if the BOLD taskname is not `gas`, then you add `--taskname your_task_name`.
-- if you want the outputs in another space, and that this space was included in the fMRIPrep call, add `--space your_custom_space1 your_custom_space2`. The default space is `MNI152NLin6Asym`.
-- if you want to use the ICA-AROMA classification for signal confounds, then add `--use-aroma`. In that case, CVRmap will use the  If omitted, CVRmap will fetch the non-aggressively denoised BOLD series as procuded by fMRIPrep. Otherwise, CVRmap will perform non-aggressive denoising itself, using a refinement of the ICA-AROMA classification of noise sources (see paper for more details).
+- the `--fmriprep_dir` option can be ommitted if the fMRIPrep derivatives are located in `/path/to/bids_dir/derivatives/fmriprep`.
+- if the BOLD taskname is not `gas`, you must add `--taskname your_task_name`.
+- if you want the outputs in another space, and if this space was included in the fMRIPrep call, you must add `--space your_custom_space`. The default space is `MNI152NLin6Asym`.
+- if you want to use the ICA-AROMA classification for signal confounds, then add `--use-aroma` and CVRmap will fetch the non-aggressively denoised BOLD series as procuded by fMRIPrep. Otherwise, when the flag is omitted, CVRmap will perform non-aggressive denoising itself using a refinement of the ICA-AROMA classification of noise sources (see paper for more details).
 - more info and options can be found when asking politely for help with `run.py --help`.
 
-CVRmap will run for about 2 hours on modern computers. The results are stored in `/path/to/derivatives/cvrmap` following BIDS standard for derivatives. The outputs will typically look as follows:
+CVRmap will run for about 2 hours on recent computers. The results are stored in `/path/to/derivatives/cvrmap` following BIDS standard for derivatives. The outputs will typically look as follows:
 
 ```
 sub-01/sub-01_desc-etco2_timecourse.tsv.gz
@@ -88,4 +88,8 @@ sub-01/sub-01_space-MNI152NLin6Asym_cvr.json
 sub-01/sub-01_space-MNI152NLin6Asym_report.html
 ```
 
-The `etco2` file contains the end-tidal timecourse extracted from the original CO2 readings. The delay map contains the computed time delays (or time lags) in seconds, and normalized to the global signal delay. The main map of interest is of course the CVR map, must for a quick analysis an html report is also included.
+The `etco2` file contains the end-tidal timecourse extracted from the original CO2 readings. The delay map contains the computed time delays (or time lags) in seconds, and normalized to the global signal delay. The main map of interest is of course the CVR map! For a quick analysis, an html report is also included.
+
+# Bugs of questions
+
+Should you enconter any bug, weird behaviour or if you have questions, do not hesitate to open an issue and we'll happily try to answer!
