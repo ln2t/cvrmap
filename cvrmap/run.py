@@ -30,18 +30,19 @@ Created: May 2022
 
 # imports
 import argparse  # to deal with all the app arguments
-import os  # to interact with dirs (join apths etc)
+import os  # to interact with dirs
 from os.path import join  # to build input/tmp/output paths
-import subprocess  # to call bin outside of python
+import subprocess  # to call stuff outside of python
 from pathlib import Path  # to create dirs
-import core  # custom utilities from the package
 from bids import BIDSLayout as bidslayout  # to handle BIDS data
-from core.utils import *  # custom utilities from the package
 from datetime import datetime  # for logging purposes
 import pandas as pd  # to deal with .tsv files
 import sys  # to exit execution
 import numpy as np
 import glob # to list files in folders
+
+import core  # custom utilities from the package
+from core.utils import *  # custom utilities from the package
 
 # modules
 def run(command, env={}):
