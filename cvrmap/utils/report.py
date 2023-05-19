@@ -115,3 +115,80 @@ class Report:
         with open(self.path, "a") as f:
             f.write('</body>\n')
             f.write('</html>\n')
+
+
+# functions
+
+
+def build_report(subject_label, args, __version__, physio, probe, baseline, global_signal, global_signal_shift, aroma_noise_ic_list, corrected_noise, fwhm, t1w, hpsigma, outputs, response, results):
+    from datetime import datetime
+    from .viz import gather_figures
+    # Report
+    # init
+    report = Report(
+        outputs['report'])
+    report.init(subject=subject_label,
+                date_and_time=datetime.now(),
+                version=__version__, cmd=args.__dict__)
+    # Physio data
+    # create figures for report
+    physio.make_fig(fig_type='plot',
+                    **{'title': r'$\text{Raw CO}_2$',
+                       'xlabel': r'$\text{Time (s)}$',
+                       'ylabel': r'$\text{CO}_2\text{ '
+                                 r'concentration (%)}$'})
+    probe.make_fig(fig_type='plot',
+                   **{'title': r'$\text{Raw CO}_2$',
+                      'xlabel': r'$\text{Time (s)}$',
+                      'ylabel': r'$\text{CO}_2\text{ '
+                                r'concentration (%)}$'})
+    baseline.make_fig(fig_type='plot',
+                      **{'title': r'$\text{Raw CO}_2$',
+                         'xlabel': r'$\text{Time (s)}$',
+                         'ylabel': r'$\text{CO}_2\text{ concentration (%)}$'})
+    report.add_subsection(title='Physiological data')
+    report.add_sentence(
+        sentence="Physiological data, with reconstructed "
+                 "upper envelope and baseline:")
+    report.add_image(
+        gather_figures([probe, baseline, physio]))
+    # global signal and etco2
+    report.add_section(title='Global Signal and etCO2')
+    report.add_sentence(sentence="The computed shift is %s seconds" % global_signal_shift)
+    global_signal.make_fig(fig_type='plot', **{
+        'title': r'Whole-brain mean BOLD signal',
+        'xlabel': r'$\text{Time (s)}$',
+        'ylabel': r'BOLD signal (arbitrary units)'})
+
+    # report.add_image(global_signal.figs['plot'])
+    report.add_image(gather_figures([global_signal, probe]))
+
+    # info on denoising
+    report.add_section(title='Info on denoising')
+    if not args.use_aroma:
+        report.add_sentence(sentence="The noise regressors as classified by AROMA are (total: %s): %s" % (
+        len(aroma_noise_ic_list), ','.join(aroma_noise_ic_list)))
+        report.add_sentence(
+            sentence="Keeping only those that do not correlate too much with the probe regressor gives the following list (total: %s): %s" % (
+            len(corrected_noise), ','.join(corrected_noise)))
+        report.add_sentence(sentence="Data are smoothed with a FWHM of %s mm" % fwhm)
+        report.add_sentence(sentence="Highpass filter cut-off set to %s Hz" % hpsigma)
+    else:
+        report.add_sentence(sentence="Denoised data from the AROMA classification of noise regressors")
+
+    report.add_section(title='Results')
+    # Delay map
+    report.add_subsection(title='Delay map')
+    results['delay'].make_fig(fig_type='lightbox', **{'background': t1w})
+    report.add_image(results['delay'].figs['lightbox'])
+    report.add_sentence(
+        sentence="Delay map histogram")
+    # todo: add some stats (mean and std) of delay map
+    results['delay'].make_fig(fig_type='histogram')
+    report.add_image(results['delay'].figs['histogram'])
+    # CVR
+    report.add_subsection(title="CVR map")
+    response.make_fig(fig_type='lightbox')
+    report.add_image(response.figs['lightbox'])
+    # finish the report
+    report.finish()

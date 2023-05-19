@@ -161,3 +161,57 @@ def build_shifted_signal(probe, target, delta_t):
     return DataObj(data=data, label=('probe timecourse shifted by %s seconds' % delta_t), data_type='timecourse',
                              sampling_frequency=target_sf)
 
+
+def compute_global_signal(data):
+    """
+    Inputs: data, a DataObj for some fMRI data
+
+    Returns:
+
+    DataObj of timecourse type with computed global signal
+    """
+
+    from .processing import DataObj
+
+    global_signal = DataObj(label='Whole brain BOLD signal')
+    global_signal.data = data.data.mean(axis=0).mean(axis=0).mean(axis=0)
+    global_signal.data = global_signal.data / global_signal.data.mean()  # convenient step that we can do since anyway BOLD signal has no units
+    global_signal.sampling_frequency = data.sampling_frequency
+    global_signal.data_type = 'timecourse'
+    return global_signal
+
+def run(command, env={}):
+    """Execute command as in a terminal
+
+    Also prints any output of the command into the python shell
+    Inputs:
+        command: string
+            the command (including arguments and options) to be executed
+        env: to add stuff in the environment before running the command
+
+    Returns:
+        nothing
+    """
+
+    import os
+    import subprocess  # to call stuff outside of python
+
+    # Update env
+    merged_env = os.environ
+    merged_env.update(env)
+
+    # Run command
+    process = subprocess.Popen(command, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, shell=True,
+                               env=merged_env)
+
+    # Read whatever is printed by the command and print it into the
+    # python console
+    while True:
+        line = process.stdout.readline()
+        line = str(line, 'utf-8')[:-1]
+        print(line)
+        if line == '' and process.poll() != None:
+            break
+    if process.returncode != 0:
+        raise Exception("Non zero return code: %d" % process.returncode)

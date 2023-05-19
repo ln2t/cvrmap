@@ -32,7 +32,6 @@ Created: May 2022
 import argparse  # to deal with all the app arguments
 import os  # to interact with dirs
 from os.path import join  # to build input/tmp/output paths
-import subprocess  # to call stuff outside of python
 from pathlib import Path  # to create dirs
 from bids import BIDSLayout as bidslayout  # to handle BIDS data
 from datetime import datetime  # for logging purposes
@@ -44,41 +43,9 @@ import glob  # to list files in folders
 from utils import *  # custom utilities
 
 # modules
-def run(command, env={}):
-    """Execute command as in a terminal
 
-    Also prints any output of the command into the python shell
-    Inputs:
-        command: string
-            the command (including arguments and options) to be executed
-        env: to add stuff in the environment before running the command
-
-    Returns:
-        nothing
-    """
-
-    # Update env
-    merged_env = os.environ
-    merged_env.update(env)
-
-    # Run command
-    process = subprocess.Popen(command, stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, shell=True,
-                               env=merged_env)
-
-    # Read whatever is printed by the command and print it into the
-    # python console
-    while True:
-        line = process.stdout.readline()
-        line = str(line, 'utf-8')[:-1]
-        print(line)
-        if line == '' and process.poll() != None:
-            break
-    if process.returncode != 0:
-        raise Exception("Non zero return code: %d" % process.returncode)
 
 def main():
-
     # Get and print version
     __version__ = get_version()
     msg_info("Version: %s" % __version__)
@@ -98,8 +65,7 @@ def main():
                                                'independently (in parallel)'
                                                ' using the same '
                                                'output_dir.',
-                        choices=['participant',
-                                   'group'])
+                        choices=['participant', 'group'])
     parser.add_argument('--participant_label', help='The label(s) of the participant(s) that should be analyzed. The label corresponds to sub-<participant_label> from the BIDS spec (so it does not include "sub-"). If this parameter is not provided all subjects should be analyzed. Multiple participants can be specified with a space separated list.', nargs = "+")
     parser.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation', action='store_true')
     parser.add_argument('--fmriprep_dir', help='Path of the fmriprep derivatives. If ommited, set to bids_dir/derivatives/fmriprep')
@@ -282,7 +248,7 @@ def main():
             # set paths for various outputs
             outputs = {}
             if args.use_aroma:
-               denoise_label = "_denoising-" +'AROMA'
+               denoise_label = "_denoising-AROMA"
             else:
                 denoise_label = ''
             subject_prefix = os.path.join(subject_output_dir,
@@ -340,7 +306,7 @@ def main():
             # get bold data filtered using aroma
             aroma_filter = basic_filter.copy()
 
-            # aroma denoised data are only create in MNI152NLin6Asym with fMRIPrep
+            # aroma denoised data are only created in MNI152NLin6Asym with fMRIPrep
 
             aroma_filter.update({'space': 'MNI152NLin6Asym'})
             if not space == 'T1w':
@@ -393,7 +359,6 @@ def main():
                 run(fsl_regfilt_cmd)
 
                 tmp_output_smooth = os.path.join(subject_work_dir, 'tmp_smooth.nii.gz')
-                # todo: check 3dmerge is in PATH/find a better solution than hardcoding the path to abin
                 # todo: get fwhm from a config file
                 fwhm = 5
                 smoothing_cmd = "$HOME/abin/3dmerge -1blur_fwhm %s -doall -prefix %s %s" % (fwhm, tmp_output_smooth, tmp_output)
@@ -420,12 +385,8 @@ def main():
                     # todo: perform denoising in T1w space if space=T1w use_aroma is true
                     msg_warning('You are using aroma denoised maps with space=T1w, which has NOT been tested.')
 
-            # compute global signal
-            global_signal = DataObj(label='Whole brain BOLD signal')
-            global_signal.data = denoised.data.mean(axis=0).mean(axis=0).mean(axis=0)
-            global_signal.data = global_signal.data/global_signal.data.mean()  # convenient step that we can do since anyway BOLD signal has no units
-            global_signal.sampling_frequency = denoised.sampling_frequency
-            global_signal.data_type = 'timecourse'
+            # get global signal
+            global_signal = compute_global_signal(denoised)
 
             # define time 0 by shifting probe to global_signal
             absolute_shift_list = np.arange(-30, 30, 1)
@@ -467,72 +428,7 @@ def main():
 
             msg_info("Building report...")
 
-            # Report
-            # init
-            report = Report(
-                outputs['report'])
-            report.init(subject=subject_label,
-                        date_and_time=datetime.now(),
-                        version=__version__, cmd=args.__dict__)
-            # Physio data
-            # create figures for report
-            physio.make_fig(fig_type='plot',
-                            **{'title': r'$\text{Raw CO}_2$',
-                               'xlabel': r'$\text{Time (s)}$',
-                               'ylabel': r'$\text{CO}_2\text{ '
-                                         r'concentration (%)}$'})
-            probe.make_fig(fig_type='plot',
-                           **{'title': r'$\text{Raw CO}_2$',
-                              'xlabel': r'$\text{Time (s)}$',
-                              'ylabel': r'$\text{CO}_2\text{ '
-                                        r'concentration (%)}$'})
-            baseline.make_fig(fig_type='plot',
-                              **{'title': r'$\text{Raw CO}_2$',
-                                 'xlabel': r'$\text{Time (s)}$',
-                                 'ylabel': r'$\text{CO}_2\text{ concentration (%)}$'})
-            report.add_subsection(title='Physiological data')
-            report.add_sentence(
-                sentence="Physiological data, with reconstructed "
-                         "upper envelope and baseline:")
-            report.add_image(
-                gather_figures([probe, baseline, physio]))
-            # global signal and etco2
-            report.add_section(title='Global Signal and etCO2')
-            report.add_sentence(sentence="The computed shift is %s seconds" % global_signal_shift)
-            global_signal.make_fig(fig_type='plot', **{
-                'title': r'Whole-brain mean BOLD signal',
-                'xlabel': r'$\text{Time (s)}$',
-                'ylabel': r'BOLD signal (arbitrary units)'})
-
-            # report.add_image(global_signal.figs['plot'])
-            report.add_image(gather_figures([global_signal, probe]))
-
-            # info on denoising
-            report.add_section(title='Info on denoising')
-            if not args.use_aroma:
-                report.add_sentence(sentence="The noise regressors as classified by AROMA are (total: %s): %s" % (len(aroma_noise_ic_list), ','.join(aroma_noise_ic_list)))
-                report.add_sentence(sentence="Keeping only those that do not correlate too much with the probe regressor gives the following list (total: %s): %s" % (len( corrected_noise),','.join(corrected_noise)))
-                report.add_sentence(sentence="Data are smoothed with a FWHM of %s mm" % fwhm)
-                report.add_sentence(sentence="Highpass filter cut-off set to %s Hz" % hpsigma)
-            else:
-                report.add_sentence(sentence="Denoised data from the AROMA classification of noise regressors")
-
-            report.add_section(title='Results')
-            # Delay map
-            report.add_subsection(title='Delay map')
-            results['delay'].make_fig(fig_type='lightbox', **{'background': t1w})
-            report.add_image(results['delay'].figs['lightbox'])
-            report.add_sentence(
-                sentence="Delay map histogram")
-            # todo: add some stats (mean and std) of delay map
-            results['delay'].make_fig(fig_type='histogram')
-            report.add_image(results['delay'].figs['histogram'])
-            # CVR
-            report.add_subsection(title="CVR map")
-            response.make_fig(fig_type='lightbox')
-            report.add_image(response.figs['lightbox'])
-            # finish the report
-            report.finish()
+            build_report(subject_label, args, __version__, physio, probe, baseline, global_signal, global_signal_shift, aroma_noise_ic_list, corrected_noise, fwhm, hpsigma, t1w, outputs, response, results)
 
     # running group level
     elif args.analysis_level == "group":
