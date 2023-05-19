@@ -66,7 +66,7 @@ fmriprep /path/to/bids_dir /path/to/derivatives/fmriprep participant --fs-licens
 We are now good to go and launch CVRmap with
 
 ```
-run.py /path/to/bids_dir /path/to/derivatives/cvrmap participant --fmriprep_dir /path/to/derivatives/fmriprep 
+run.py /path/to/bids_dir /path/to/derivatives/cvrmap participant --fmriprep_dir /path/to/derivatives/fmriprep
 ```
 
 Notes:
@@ -93,3 +93,16 @@ The `etco2` file contains the end-tidal timecourse extracted from the original C
 # Bugs of questions
 
 Should you enconter any bug, weird behaviour or if you have questions, do not hesitate to open an issue and we'll happily try to answer!
+
+# Complementary informations
+
+We recommend to use a python3 virtual environment to install CVRmap. We can do this using e.g. `conda`:
+
+```
+# create empty environment named "cvrmap"
+conda create -n cvrmap python
+# activate
+conda activate -n cvrmap
+# install the packages
+pip install -r requirements.txt
+```
