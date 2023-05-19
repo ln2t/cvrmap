@@ -68,3 +68,16 @@ def printProgressBar (iteration, total, prefix = '', suffix = 'Complete', decima
     # Print New Line on Complete
     if iteration == total:
         print()
+
+def get_version ():
+    """
+    Print version from git info
+    Returns:
+    __version__
+    """
+    from os.path import join, dirname, realpath
+    __version__ = open(join(dirname(realpath(__file__)), '..', '..', '.git',
+                            'HEAD')).read()
+
+
+    return __version__

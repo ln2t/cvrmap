@@ -41,8 +41,7 @@ import sys  # to exit execution
 import numpy as np
 import glob  # to list files in folders
 
-from utils import *
-#from utils.utils import *  # custom utilities from the package
+from utils import *  # custom utilities
 
 # modules
 def run(command, env={}):
@@ -80,15 +79,13 @@ def run(command, env={}):
 
 def main():
 
-    #  Step 0: get current version and print
-    __version__ = open(join(os.path.dirname(os.path.realpath(__file__)), '..', '.git',
-                            'HEAD')).read()
-    msg_info("Version: %s"%__version__)
+    # Get and print version
+    __version__ = get_version()
+    msg_info("Version: %s" % __version__)
 
-    #  Step 1: arguments
-    #  setup the arguments
-    # Note: action='store_true' means that if option is used, the arg is set to true. Used for flags (not options with arguments).
-    parser = argparse.ArgumentParser(description = 'Entrypoint script.')
+    #  Deal with arguments
+
+    parser = argparse.ArgumentParser(description='Entrypoint script.')
     parser.add_argument('bids_dir', help='The directory with the input '
                                          'dataset formatted according to '
                                          'the BIDS standard.')
@@ -101,7 +98,7 @@ def main():
                                                'independently (in parallel)'
                                                ' using the same '
                                                'output_dir.',
-                        choices = ['participant',
+                        choices=['participant',
                                    'group'])
     parser.add_argument('--participant_label', help='The label(s) of the participant(s) that should be analyzed. The label corresponds to sub-<participant_label> from the BIDS spec (so it does not include "sub-"). If this parameter is not provided all subjects should be analyzed. Multiple participants can be specified with a space separated list.', nargs = "+")
     parser.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation', action='store_true')
@@ -400,7 +397,9 @@ def main():
                 # todo: get fwhm from a config file
                 fwhm = 5
                 smoothing_cmd = "$HOME/abin/3dmerge -1blur_fwhm %s -doall -prefix %s %s" % (fwhm, tmp_output_smooth, tmp_output)
-                run(smoothing_cmd)
+                # run(smoothing_cmd)
+                from nilearn.image import smooth_img
+                smooth_img(tmp_output, fwhm).to_filename(tmp_output_smooth)
                 tmp_output_mean = os.path.join(subject_work_dir, 'tmp_mean.nii.gz')
                 tmp_output_preproc = os.path.join(subject_work_dir, 'tmp_preproc.nii.gz')
                 compute_mean_cmd = "fslmaths %s -Tmean %s" % (tmp_output_smooth, tmp_output_mean)
