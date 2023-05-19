@@ -1,5 +1,3 @@
-https://img.shields.io/aur/license/ln2t/cvrmap
-
 # Important Notice:
 
 Still in active development!
