@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[project]
+name = "cvrmap"
+version = "v0.1"
+authors = [
+  { name="Antonin Rovai", email="antonin.rovai@hubruxelles.be" },
+]
+description = "Tool to compute maps of Cerebrovascular Reactivity from fMRI data"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/ln2t/cvrmap"
+"Bug Tracker" = "https://github.com/ln2t/cvrmap/issues"
