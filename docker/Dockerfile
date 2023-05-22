@@ -11,6 +11,8 @@ RUN git clone https://github.com/ln2t/cvrmap.git && \
 
 RUN pip install -r /opt/cvrmap/requirements.txt
 
+RUN cd /opt && rm -rf cvrmap && git clone https://github.com/ln2t/cvrmap.git
+
 # Set the default command to run when the container starts
 CMD ["/opt/cvrmap/src/cvrmap/cvrmap -h"]
 
