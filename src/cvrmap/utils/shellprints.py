@@ -76,7 +76,7 @@ def get_version ():
     __version__
     """
     from os.path import join, dirname, realpath
-    __version__ = open(join(dirname(realpath(__file__)), '..', '..', '.git',
+    __version__ = open(join(dirname(realpath(__file__)), '..', '..', '..', '.git',
                             'HEAD')).read()
 
 

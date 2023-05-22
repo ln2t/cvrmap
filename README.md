@@ -13,7 +13,7 @@ The paper describing the toolbox will be pulished soon, together with more docum
 
 # Installation
 
-As of now, the only supported installation procedure is to clone this git repo, make `cvrmap` executable and add it to your path. Make sure you have all python3 dependencies installed:
+The simplest installation procedure is to clone this git repo, make `cvrmap` executable and add it to your path. Make sure you have all python3 dependencies installed:
 
 ```
 pip install -r requirements.txt
