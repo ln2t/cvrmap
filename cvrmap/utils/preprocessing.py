@@ -9,6 +9,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 import peakutils
 from scipy.interpolate import interp1d
+from statsmodels.regression.linear_model import OLS
 
 def endtidalextract(physio):
     """Analyse physiological breathing data to extract etco2 curve
@@ -55,3 +56,50 @@ def endtidalextract(physio):
     baseline = DataObj(data=np.mean(baseline_data)*np.ones(len(baseline_data)), sampling_frequency=sampling_freq, data_type='timecourse', label=r'$\text{etCO}_2\text{ baseline}$')
 
     return probe, baseline
+
+
+def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes):
+    """
+    Loops over all voxel not in mask for non_agg_denoise
+    Args:
+        bold_fn: path to 4D nii to denoise
+        mask_fn: path to mask
+        melodic_mixing_df: pandas df with IC's
+        noise_indexes: list of int labelling the noise, 0-based
+
+    Returns:
+        denoised data
+    """
+    import nibabel as nb
+    bold_img = nb.load(bold_fn)
+    bold_data = bold_img.get_fdata()
+    mask = nb.load(mask_fn).get_fdata()
+
+    denoised = bold_data.copy()
+
+    nx, ny, nz = bold_data.shape[:3]
+    for x in np.arange(nx):
+        for y in np.arange(ny):
+            for z in np.arange(nz):
+                if mask[x, y, z]:
+                    # extract time series
+                    Y = bold_data[x, y, z, :]
+                    # denoise
+                    denoised[x, y, z, :] = non_agg_denoise(Y, melodic_mixing_df, noise_indexes)
+    return nb.Nifti1Image(denoised, bold_img.affine, bold_img.header)
+
+
+def non_agg_denoise(signal, design_matrix_df, noise_indexes):
+    """
+    This is the in-house implementation of non-aggressive denoising. It is basically doing the same thing as fsl_regfilt
+    """
+    # define model with ALL regressors
+    model = OLS(signal, design_matrix_df.values)
+    # fit the model
+    results = model.fit()
+    # get the fitted parameters for the noise components only
+    noise_params = results.params[noise_indexes]
+    # get the noise part of the design matrix
+    noise_values = design_matrix_df[noise_indexes].values
+    # remove noise from full signal
+    return signal - np.dot(noise_values, noise_params)

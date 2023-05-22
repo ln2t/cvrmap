@@ -120,7 +120,7 @@ class Report:
 # functions
 
 
-def build_report(subject_label, args, __version__, physio, probe, baseline, global_signal, global_signal_shift, aroma_noise_ic_list, corrected_noise, fwhm, t1w, hpsigma, outputs, response, results):
+def build_report(subject_label, args, __version__, physio, probe, baseline, global_signal, global_signal_shift, aroma_noise_ic_list, corrected_noise, fwhm, t1w, outputs, response, results):
     from datetime import datetime
     from .viz import gather_figures
     # Report
@@ -170,9 +170,10 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
         len(aroma_noise_ic_list), ','.join(aroma_noise_ic_list)))
         report.add_sentence(
             sentence="Keeping only those that do not correlate too much with the probe regressor gives the following list (total: %s): %s" % (
-            len(corrected_noise), ','.join(corrected_noise)))
+            #len(corrected_noise), ','.join(corrected_noise)))
+            len(corrected_noise), str(corrected_noise)))
         report.add_sentence(sentence="Data are smoothed with a FWHM of %s mm" % fwhm)
-        report.add_sentence(sentence="Highpass filter cut-off set to %s Hz" % hpsigma)
+        #report.add_sentence(sentence="Highpass filter cut-off set to %s Hz" % hpsigma)
     else:
         report.add_sentence(sentence="Denoised data from the AROMA classification of noise regressors")
 

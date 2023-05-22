@@ -334,42 +334,48 @@ def main():
                 melodic_mixing_filter = aroma_noise_ic_filter.copy()
                 melodic_mixing_filter.update({'desc': 'MELODIC', 'suffix': 'mixing', 'extension': '.tsv'})
                 melodic_mixing = layout.get(**melodic_mixing_filter)[0]
-                melodic_mixing_df = pd.read_csv(melodic_mixing, sep='\t')
+                melodic_mixing_df = pd.read_csv(melodic_mixing, sep='\t', header=None)
 
                 # todo: put this value in some config file
                 noise_ic_pearson_r_threshold = 0.6
+                #noise_ic_pearson_r_threshold = 0.2
 
                 corrected_noise = []
                 for noise_idx in aroma_noise_ic_list:
                     ic = DataObj(data=melodic_mixing_df.values[:, int(noise_idx) - 1], sampling_frequency=preproc.sampling_frequency, data_type='timecourse', path=None)
                     if tccorr(ic, probe) < noise_ic_pearson_r_threshold:
-                        corrected_noise.append(noise_idx)
+                        #corrected_noise.append(noise_idx)
+                        corrected_noise.append(int(noise_idx)-1)
 
                 tmp_output = os.path.join(subject_work_dir, 'tmp.nii.gz')
 
-                msg_info("Data filtering: non-aggressive denoising and highpass")
-                fsl_regfilt_cmd = "fsl_regfilt --in=%s --filter=%s --design=%s --out=%s" % (preproc.path, ','.join(corrected_noise), melodic_mixing, tmp_output)
-                run(fsl_regfilt_cmd)
+                msg_info("Data denoising in progress")
 
+                #fsl_regfilt_cmd = "fsl_regfilt --in=%s --filter=%s --design=%s --out=%s" % (preproc.path, ','.join(corrected_noise), melodic_mixing, tmp_output)
+                #run(fsl_regfilt_cmd)
+
+                denoise(preproc.path, mask.path, melodic_mixing_df, corrected_noise).to_filename(tmp_output)
                 tmp_output_smooth = os.path.join(subject_work_dir, 'tmp_smooth.nii.gz')
                 # todo: get fwhm from a config file
                 fwhm = 5
-                smoothing_cmd = "$HOME/abin/3dmerge -1blur_fwhm %s -doall -prefix %s %s" % (fwhm, tmp_output_smooth, tmp_output)
+                # smoothing_cmd = "$HOME/abin/3dmerge -1blur_fwhm %s -doall -prefix %s %s" % (fwhm, tmp_output_smooth, tmp_output)
                 # run(smoothing_cmd)
                 from nilearn.image import smooth_img
                 smooth_img(tmp_output, fwhm).to_filename(tmp_output_smooth)
-                tmp_output_mean = os.path.join(subject_work_dir, 'tmp_mean.nii.gz')
-                tmp_output_preproc = os.path.join(subject_work_dir, 'tmp_preproc.nii.gz')
-                compute_mean_cmd = "fslmaths %s -Tmean %s" % (tmp_output_smooth, tmp_output_mean)
+
+                #tmp_output_mean = os.path.join(subject_work_dir, 'tmp_mean.nii.gz')
+                #tmp_output_preproc = os.path.join(subject_work_dir, 'tmp_preproc.nii.gz')
+                #compute_mean_cmd = "fslmaths %s -Tmean %s" % (tmp_output_smooth, tmp_output_mean)
 
                 # todo: compute high-pass filter by taking 2*center frequency of etCO2 curve
-                hpsigma = preproc.sampling_frequency*128/2 # 128/TR/2
-                highpass_cmd = "fslmaths %s -bptf %s -1 -add %s %s" % (tmp_output_smooth, hpsigma, tmp_output_mean, tmp_output_preproc)
-                run(compute_mean_cmd)
-                run(highpass_cmd)
+                #hpsigma = preproc.sampling_frequency*128/2 # 128/TR/2
+                #highpass_cmd = "fslmaths %s -bptf %s -1 -add %s %s" % (tmp_output_smooth, hpsigma, tmp_output_mean, tmp_output_preproc)
+                #run(compute_mean_cmd)
+                #run(highpass_cmd)
 
                 denoised = DataObj(label='Denoised data build out of custom classification of noise IC')
-                denoised.nifti_load(path=tmp_output_preproc)
+                #denoised.nifti_load(path=tmp_output_preproc)
+                denoised.nifti_load(path=tmp_output_smooth)
 
             else:
                 denoised = aroma
@@ -421,7 +427,7 @@ def main():
 
             msg_info("Building report...")
 
-            build_report(subject_label, args, __version__, physio, probe, baseline, global_signal, global_signal_shift, aroma_noise_ic_list, corrected_noise, fwhm, hpsigma, t1w, outputs, response, results)
+            build_report(subject_label, args, __version__, physio, probe, baseline, global_signal, global_signal_shift, aroma_noise_ic_list, corrected_noise, fwhm, t1w, outputs, response, results)
 
     # running group level
     elif args.analysis_level == "group":
