@@ -34,7 +34,7 @@ sub-01/func/sub-01_task-gas_physio.json
 
 In this example, the taskname BIDS entity is `gas`. If yours differs, that's not a problem and you'll be able to run CVRmap provided you add the option `--taskname your_task_name` when launching the software.
 
-Note that the `sub-01/func/sub-01_task-gas_physio.json` file must containt a `SamplingFrequency` field as well as a `co2` field to specify the units of measurement of CO2 levels. An example of `sub-01/func/sub-01_task-gas_physio.json` would be:
+Note that the `sub-01/func/sub-01_task-gas_physio.json` file must contain a `SamplingFrequency` field as well as a `co2` field to specify the units of measurement of CO2 levels. An example of `sub-01/func/sub-01_task-gas_physio.json` would be:
 
 ```
 {
@@ -90,7 +90,7 @@ sub-01/sub-01_space-MNI152NLin6Asym_report.html
 
 The `etco2` file contains the end-tidal timecourse extracted from the original CO2 readings. The delay map contains the computed time delays (or time lags) in seconds, and normalized to the global signal delay. The main map of interest is of course the CVR map! For a quick analysis, an html report is also included.
 
-# Bugs of questions
+# Bugs or questions
 
 Should you enconter any bug, weird behaviour or if you have questions, do not hesitate to open an issue and we'll happily try to answer!
 
