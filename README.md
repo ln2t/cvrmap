@@ -11,12 +11,70 @@ The software is compatible with the Brain Imagning Data Structure standard for a
 
 The paper describing the toolbox will be pulished soon, together with more documentation about the pipeline.
 
-# Installation
+# Installations
 
-The simplest installation procedure is to clone this git repo, make `cvrmap` executable and add it to your path. Make sure you have all python3 dependencies installed:
+# Option 1: python environment (using git)
+
+The most basic way to install `cvrmap` is to clone this git repo, make `cvrmap` executable and add it to your path. Make sure you have all python3 dependencies installed:
 
 ```
 pip install -r requirements.txt
+```
+
+In that case, `cvrmap` can be launched by typing `cvrmap` in a terminal, e.g.
+
+```
+cvrmap --version
+```
+
+# Option 2: python environment (using pip) - work in progress
+
+`cvrmap` is also distributed as a `pip` package. It can be installed using
+
+```
+pip install cvrmap
+```
+
+pip doesn't add the executable to your path so you have to do it manually. This is mostly useful if you want to use some internal tools of the software without using the full software.
+
+# Option 3: docker (recommended option!)
+
+The easiest way to install `cvrmap` is to use docker:
+
+```
+docker pull arovai/cvrmap:VERSION
+```
+
+where `VERSION` is the version you wish to use. Check out the docker hub page (https://hub.docker.com/repository/docker/arovai/cvrmap/general) to find more info on the available images.
+
+To launch `cvrmap`, you can use for instance
+
+```
+docker run arovai/cvrmap:VERSION --version
+```
+
+This will output the version of `cvrmap`. You can also type
+
+```
+docker run arovai/cvrmap:VERSION --help
+```
+
+for help.
+
+Finally, to pass some data to the docker image, you can use something like:
+
+```
+docker run -v /path/to/your/bids/folder:/rawdata -v /path/to/your/derivatives:/derivatives arovai/cvrmap:VERSION /rawdata /derivatives participant
+```
+
+For more information about the command line options, see the **Usage** section.
+
+# Option 4: Singularity (good for HPC) - work in progress
+
+You can also build a Singularity image file using
+
+```
+singularity build arovai.cvrmap.VERSION.sif docker://arovai/cvrmap:VERSION
 ```
 
 # Usage
@@ -70,6 +128,7 @@ cvrmap /path/to/bids_dir /path/to/derivatives/cvrmap participant --fmriprep_dir 
 ```
 
 Notes:
+- the exact `cvrmap` command might depend on the installation option you choose.
 - the `--fmriprep_dir` option can be ommitted if the fMRIPrep derivatives are located in `/path/to/bids_dir/derivatives/fmriprep`.
 - if the BOLD taskname is not `gas`, you must add `--taskname your_task_name`.
 - if you want the outputs in another space, and if this space was included in the fMRIPrep call, you must add `--space your_custom_space`. The default space is `MNI152NLin6Asym`.
@@ -92,9 +151,9 @@ The `etco2` file contains the end-tidal timecourse extracted from the original C
 
 # Bugs or questions
 
-Should you enconter any bug, weird behaviour or if you have questions, do not hesitate to open an issue and we'll happily try to answer!
+Should you encounter any bug, weird behavior or if you have questions, do not hesitate to open an issue and we'll happily try to answer!
 
-# Complementary informations
+# Complementary information
 
 We recommend to use a python3 virtual environment to install CVRmap. We can do this using e.g. `conda`:
 
