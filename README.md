@@ -1,13 +1,8 @@
-# Important Notice:
-
-Still in active development!
-More info to come soon (expected Q2 2023).
-
 # About
 
 CVRmap is an opensource (license AGPLv3) software to compute maps of Cerebro-Vascular Reactivity (CVR).
 
-The software is compatible with the Brain Imagning Data Structure standard for applications.
+The software is compatible with the Brain Imagning Data Structure (BIDS) standard for applications.
 
 The paper describing the toolbox will be pulished soon, together with more documentation about the pipeline.
 
@@ -68,7 +63,7 @@ In that case, `cvrmap` can be launched by typing `cvrmap` in a terminal, e.g.
 cvrmap --version
 ```
 
- By the way in that setup we recommend to use a python3 virtual environment. We can do this using e.g. `conda`:
+ By the way: in this setup we recommend to use a python3 virtual environment. We can do this using e.g. `conda`:
 
 ```
 # create empty environment named "cvrmap"
@@ -78,6 +73,8 @@ conda activate -n cvrmap
 # install the packages
 pip install -r requirements.txt
 ```
+
+Note that the docker image is essentially build using this procedure, as you can see in the `Dockerfile` located in the `docker` folder of this repo.
 
 # Usage
 
@@ -109,7 +106,7 @@ Note that the `sub-01/func/sub-01_task-gas_physio.json` file must contain a `Sam
 }
 ```
 
-In this example, the `sub-01/func/sub-01_task-gas_physio.tsv.gz` must have only one colunm, giving the CO2 readings at a sampling frequency of 100 Hz, in the units of mmHg. If the CO2 readings are in percentage of co2 concentration (which is also often used), the "Units" field must be "%", and in that case CVRmap will convert percentages to mmHg automatically. Finally, the total duration of the CO2 recording must not necessarily match the duration of the BOLD acquisition: depending on the case, CVRmap trims or uses a baseline extrapolation automatically.
+In this example, the `sub-01/func/sub-01_task-gas_physio.tsv.gz` must have only one colunm, giving the CO2 readings at a sampling frequency of 100 Hz, starting at time 0 with respect to the first valid fMRI volume, in the units of mmHg. Note though that the `StartTime` field is not used at all by `cvrmap`, as it explores various time lags by itself. If the CO2 readings are in percentage of co2 concentration (which is also often used), the "Units" field must be "%", and in that case CVRmap will convert percentages to mmHg automatically. Finally, the total duration of the CO2 recording must not necessarily match the duration of the BOLD acquisition: depending on the case, CVRmap trims or uses a baseline extrapolation automatically.
 
 The rawdata must also have been processed using fMRIPrep (https://fmriprep.org/en/stable). A minimalistic fMRIPrep call compatible with CVRmap is:
 
