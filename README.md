@@ -155,7 +155,7 @@ Should you encounter any bug, weird behavior or if you have questions, do not he
 
 # Complementary information
 
-We recommend to use a python3 virtual environment to install CVRmap. We can do this using e.g. `conda`:
+If you plan to install cvrmap using option 1, we recommend to use a python3 virtual environment. We can do this using e.g. `conda`:
 
 ```
 # create empty environment named "cvrmap"
