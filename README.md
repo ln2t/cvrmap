@@ -27,17 +27,7 @@ In that case, `cvrmap` can be launched by typing `cvrmap` in a terminal, e.g.
 cvrmap --version
 ```
 
-# Option 2: python environment (using pip) - work in progress
-
-`cvrmap` is also distributed as a `pip` package. It can be installed using
-
-```
-pip install cvrmap
-```
-
-pip doesn't add the executable to your path so you have to do it manually. This is mostly useful if you want to use some internal tools of the software without using the full software.
-
-# Option 3: docker (recommended option!)
+# Option 2: docker (recommended option!)
 
 The easiest way to install `cvrmap` is to use docker:
 
@@ -69,7 +59,7 @@ docker run -v /path/to/your/bids/folder:/rawdata -v /path/to/your/derivatives:/d
 
 For more information about the command line options, see the **Usage** section.
 
-# Option 4: Singularity (good for HPC) - work in progress
+# Option 3: Singularity (good for HPC) - work in progress
 
 You can also build a Singularity image file using
 
@@ -102,12 +92,12 @@ Note that the `sub-01/func/sub-01_task-gas_physio.json` file must contain a `Sam
         "co2"
     ],
     "co2": {
-        "Units": "%"
+        "Units": "mmHg"
     }
 }
 ```
 
-In this example, the `sub-01/func/sub-01_task-gas_physio.tsv.gz` must have only one colunm, giving the CO2 readings at a sampling frequency of 100 Hz, in the units of `%` (which means 'percentage of co2 concentration'). If the CO2 readings are in mmHg (which is a common unit), the "Units" field must be "mmHg". CVRmap converts percentages to mmHg automatically. Finally, the total duration of the CO2 recording must not necessarily match the duration of the BOLD acquisition: depending on the case, CVRmap trims or uses a baseline extrapolation automatically.
+In this example, the `sub-01/func/sub-01_task-gas_physio.tsv.gz` must have only one colunm, giving the CO2 readings at a sampling frequency of 100 Hz, in the units of mmHg. If the CO2 readings are in percentage of co2 concentration (which is also often used), the "Units" field must be "%", and in that case CVRmap will convert percentages to mmHg automatically. Finally, the total duration of the CO2 recording must not necessarily match the duration of the BOLD acquisition: depending on the case, CVRmap trims or uses a baseline extrapolation automatically.
 
 The rawdata must also have been processed using fMRIPrep (https://fmriprep.org/en/stable). A minimalistic fMRIPrep call compatible with CVRmap is:
 
