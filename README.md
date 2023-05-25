@@ -4,7 +4,7 @@ CVRmap is an opensource (license AGPLv3) software to compute maps of Cerebro-Vas
 
 The software is compatible with the Brain Imagning Data Structure (BIDS) standard for applications.
 
-The paper describing the toolbox will be pulished soon, together with more documentation about the pipeline.
+The paper describing the toolbox will be pulished (hopefully!) soon.
 
 # Installation
 
