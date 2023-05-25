@@ -11,7 +11,7 @@ The software is compatible with the Brain Imagning Data Structure standard for a
 
 The paper describing the toolbox will be pulished soon, together with more documentation about the pipeline.
 
-# Installations
+# Installation
 
 
 # Option 1: docker (recommended option!)
