@@ -13,21 +13,8 @@ The paper describing the toolbox will be pulished soon, together with more docum
 
 # Installations
 
-# Option 1: python environment (using git)
 
-The most basic way to install `cvrmap` is to clone this git repo, make `cvrmap` executable and add it to your path. Make sure you have all python3 dependencies installed:
-
-```
-pip install -r requirements.txt
-```
-
-In that case, `cvrmap` can be launched by typing `cvrmap` in a terminal, e.g.
-
-```
-cvrmap --version
-```
-
-# Option 2: docker (recommended option!)
+# Option 1: docker (recommended option!)
 
 The easiest way to install `cvrmap` is to use docker:
 
@@ -59,12 +46,37 @@ docker run -v /path/to/your/bids/folder:/rawdata -v /path/to/your/derivatives:/d
 
 For more information about the command line options, see the **Usage** section.
 
-# Option 3: Singularity (good for HPC) - work in progress
+# Option 2: Singularity (good for HPC) - work in progress
 
 You can also build a Singularity image file using
 
 ```
 singularity build arovai.cvrmap.VERSION.sif docker://arovai/cvrmap:VERSION
+```
+
+# Option 3: python environment (using git)
+
+The most basic way to install `cvrmap` is to clone this git repo, make `cvrmap` executable and add it to your path. Make sure you have all python3 dependencies installed:
+
+```
+pip install -r requirements.txt
+```
+
+In that case, `cvrmap` can be launched by typing `cvrmap` in a terminal, e.g.
+
+```
+cvrmap --version
+```
+
+ By the way in that setup we recommend to use a python3 virtual environment. We can do this using e.g. `conda`:
+
+```
+# create empty environment named "cvrmap"
+conda create -n cvrmap python
+# activate
+conda activate -n cvrmap
+# install the packages
+pip install -r requirements.txt
 ```
 
 # Usage
@@ -142,16 +154,3 @@ The `etco2` file contains the end-tidal timecourse extracted from the original C
 # Bugs or questions
 
 Should you encounter any bug, weird behavior or if you have questions, do not hesitate to open an issue and we'll happily try to answer!
-
-# Complementary information
-
-If you plan to install cvrmap using option 1, we recommend to use a python3 virtual environment. We can do this using e.g. `conda`:
-
-```
-# create empty environment named "cvrmap"
-conda create -n cvrmap python
-# activate
-conda activate -n cvrmap
-# install the packages
-pip install -r requirements.txt
-```
