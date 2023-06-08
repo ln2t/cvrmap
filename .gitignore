@@ -4,3 +4,4 @@ cvrmap/core/__pycache__/*
 .idea/*
 jupyter/*
 .DS_Store
+cvrmap/utils/__pycache__/*

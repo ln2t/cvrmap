@@ -1,8 +1,6 @@
 """
-Various tools and wrappers for simple computations
+Various tools and wrappers for basic tasks or simple computations
 """
-
-# import
 
 import numpy as np
 import scipy
@@ -180,6 +178,7 @@ def compute_global_signal(data):
     global_signal.data_type = 'timecourse'
     return global_signal
 
+
 def run(command, env={}):
     """Execute command as in a terminal
 
@@ -215,3 +214,401 @@ def run(command, env={}):
             break
     if process.returncode != 0:
         raise Exception("Non zero return code: %d" % process.returncode)
+
+
+def arguments_manager(version):
+    """
+    Wrapper to define and read arguments for main function call
+    Args:
+        version: version to output when calling with -h
+
+    Returns:
+        args as read from command line call
+    """
+    import argparse
+    #  Deal with arguments
+    parser = argparse.ArgumentParser(description='Entrypoint script.')
+    parser.add_argument('bids_dir', help='The directory with the input '
+                                         'dataset formatted according to '
+                                         'the BIDS standard.')
+    parser.add_argument('output_dir', help='The directory where the output '
+                                           'files will be stored.')
+    parser.add_argument('analysis_level', help='Level of the analysis that '
+                                               'will be performed. '
+                                               'Multiple participant level '
+                                               'analyses can be run '
+                                               'independently (in parallel)'
+                                               ' using the same '
+                                               'output_dir.',
+                        choices=['participant', 'group'])
+    parser.add_argument('--participant_label',
+                        help='The label(s) of the participant(s) that should be analyzed. The label corresponds to sub-<participant_label> from the BIDS spec (so it does not include "sub-"). If this parameter is not provided all subjects should be analyzed. Multiple participants can be specified with a space separated list.',
+                        nargs="+")
+    parser.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
+                        action='store_true')
+    parser.add_argument('--fmriprep_dir',
+                        help='Path of the fmriprep derivatives. If ommited, set to bids_dir/derivatives/fmriprep')
+    parser.add_argument('--task', help='Name of the task to be used. If omitted, will search for \'gas\'.')
+    parser.add_argument('--space',
+                        help='Name of the space to be used. Must be associated with fmriprep output. Default: \'MNI152NLin6Asym\'.')
+    parser.add_argument('--work_dir', help='Work dir for temporary files. If omitted, set to \'output_dir/work\'')
+    parser.add_argument('--sloppy',
+                        help='Only for testing, computes a small part of the maps to save time. Off by default.',
+                        action='store_true')
+    parser.add_argument('--use_aroma', help='If set, the noise regressors will be those as determined by aroma.',
+                        action='store_true')
+    parser.add_argument('--overwrite', help='If set, existing results will be overwritten if they exist.',
+                        action='store_true')
+    parser.add_argument('--label', help='If set, labels the output with custom label.')
+    parser.add_argument('-v', '--version', action='version', version='BIDS-App example version {}'.format(version))
+    return parser.parse_args()
+
+
+def get_subjects_to_analyze(args, layout):
+    """
+    Generate list of subjects to analyze given the options and available subjects
+    Args:
+        args: return from arguments_manager
+        layout: BIDS layout
+    Returns:
+        list of subjects to loop over
+    """
+    from .shellprints import msg_error
+    import sys
+    if args.participant_label:  # only for a subset of subjects
+        subjects_to_analyze = args.participant_label
+        # in that case we must ensure the subjects exist in the layout:
+        for subj in subjects_to_analyze:
+            if subj not in layout.get_subjects():
+                msg_error("Subject %s in not included in the "
+                          "bids database." % subj)
+                sys.exit(1)
+    else:  # for all subjects
+        subjects_to_analyze = sorted(layout.get_subjects())
+    return subjects_to_analyze
+
+
+def get_fmriprep_dir(args):
+    """
+    Get and check existence of fmriprep dir from options or default
+    Args:
+        args: return from arguments_manager
+
+    Returns:
+        path to fmriprep dir
+    """
+    from os.path import join, isdir
+    from .shellprints import msg_error
+    #  fmriprep dir definition
+    if args.fmriprep_dir:
+        fmriprep_dir = args.fmriprep_dir
+    else:
+        fmriprep_dir = join(args.bids_dir, "derivatives", "fmriprep")
+    # exists?
+    if not isdir(fmriprep_dir):
+        msg_error("fmriprep dir %s not found." % fmriprep_dir)
+
+    return fmriprep_dir
+
+
+def get_task(args, layout):
+    """
+    Get and check task option or set to default
+    Args:
+        args: return from arguments_manager
+        layout: BIDS layout
+
+    Returns:
+        string for task entity
+    """
+    from .shellprints import msg_error
+    import sys
+    if args.task:
+        task = args.task
+    else:
+        # fall back to default value
+        task = "gas"
+
+    if task not in layout.get_tasks():
+        msg_error("Selected task %s is not in the BIDS dataset. "
+                  "Available tasks are %s." % (args.task,
+                                               layout.get_tasks()))
+        sys.exit(1)
+
+    return task
+
+
+def get_custom_label(args):
+    """
+    Create custom label if specified
+    Args:
+        args: return from arguments_manager
+
+    Returns:
+        string for task entity
+    """
+    from .shellprints import msg_info
+    if args.label:
+        custom_label = '_label-' + args.label
+        msg_info('Outputs will be labeled using %s' % custom_label)
+    else:
+        custom_label = ''
+
+    return custom_label
+
+
+def get_space(args, layout):
+    """
+    Get space and checks if present in layout (rawdata and derivatives)
+    Args:
+        args: return from arguments_manager
+        layout: BIDS layout
+
+    Returns:
+        string for space entity
+    """
+    from .shellprints import msg_info, msg_error
+    import sys
+    if args.space:
+        space = args.space
+    else:
+        space = 'MNI152NLin6Asym'
+        msg_info('Defaulting to space %s' % space)
+
+    # space in fmriprep output?
+    spaces = layout.get_spaces(scope='derivatives')
+    if space not in spaces:
+        msg_error("Selected space %s is invalid. Valid spaces are %s" % (args.space, spaces))
+        sys.exit(1)
+
+    return space
+
+
+def setup_output_dir(args, version, layout):
+    import os
+    from pathlib import Path  # to create dirs
+    # create output dir
+    Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+    # initiate dataset_description file for outputs
+    dataset_description = os.path.join(args.output_dir,
+                                       'dataset_description.json')
+    with open(dataset_description, 'w') as ds_desc:
+        # todo: get the correct BIDS version
+        ds_desc.write(('{"Name": "cvrmap", "BIDSVersion": "x.x.x", '
+                       '"DatasetType": "derivative", "GeneratedBy": '
+                       '[{"Name": "cvrmap"}, {"Version": "%s"}]}')
+                      % version.rstrip('\n'))
+        ds_desc.close()
+
+    layout.add_derivatives(args.output_dir)  # add output dir as BIDS derivatives in layout
+
+    return layout
+
+
+def set_flags(args):
+    flags = dict()
+    # sloppiness
+    flags['sloppy'] = args.sloppy
+    flags['overwrite'] = args.overwrite
+    flags['ica_aroma'] = args.use_aroma
+    if flags['ica_aroma']:
+        from shellprints import msg_info
+        msg_info("All the noise regressors found by aroma will be used.")
+
+    return flags
+
+
+def setup_subject_output_paths(output_dir, subject_label, space, args, custom_label):
+    """
+    Setup various paths for subject output. Also creates subject output dir.
+    Args:
+        output_dir: str, cvrmap output dir
+        subject_label: str, subject label
+        space: str, space entity
+        args: output of arguments_manager
+        custom_label: str, custom label for outputs
+
+    Returns:
+        dict with various output paths (str)
+
+    """
+    from pathlib import Path  # to create dirs
+    import os
+    # create output_dir/sub-XXX directory
+    subject_output_dir = os.path.join(output_dir,
+                                      "sub-" + subject_label)
+    Path(subject_output_dir).mkdir(parents=True, exist_ok=True)
+    # set paths for various outputs
+    outputs = {}
+    if args.use_aroma:
+        denoise_label = "_denoising-AROMA"
+    else:
+        denoise_label = ''
+    subject_prefix = os.path.join(subject_output_dir,
+                                  "sub-" + subject_label)
+    prefix = subject_prefix + "_space-" + space + denoise_label + custom_label
+    nifti_extension = '.nii.gz'
+    report_extension = '.html'
+    outputs['denoised'] = prefix + '_denoised' + nifti_extension
+    outputs['cvr'] = prefix + '_cvr' + nifti_extension
+    outputs['delay'] = prefix + '_delay' + nifti_extension
+    outputs['report'] = prefix + '_report' + report_extension
+    outputs['etco2'] = subject_prefix + '_desc-etco2_timecourse'
+
+    return outputs
+
+
+def get_physio_data(bids_filter, layout):
+    """
+    Fetch raw physiological data
+    Args:
+        bids_filter: dict, basic BIDS filter
+        layout: BIDS layout
+
+    Returns:
+        DataObj for raw physiolocical data
+
+    """
+    from .processing import DataObj
+    # get physio data
+    physio_filter = bids_filter.copy()
+    physio_filter.update({'suffix': "physio"})
+    physio_filter.pop('space')
+    physio = DataObj(label=r'$\text{Raw CO}_2\text{ signal}$')
+    physio.bids_load(layout, physio_filter, 'timecourse', **{'col': 1})
+    return physio
+
+
+def get_aroma_noise_ic_list(bids_filter, layout):
+    """
+    Get the list of Independent Components that were classified as noise by ICA-AROMA, from fmriprep outputs
+    Args:
+        bids_filter: dict, BIDS filter
+        layout: BIDSlayout
+
+    Returns:
+        list, list of noise ICs
+    """
+    # find and remove IC's that correlates with probe regressor
+    bids_filter.pop('desc')
+    bids_filter.pop('space')
+    bids_filter.update({'suffix': 'AROMAnoiseICs', 'extension': '.csv'})
+    return open(layout.get(**bids_filter)[0]).read().split(sep=',')
+
+
+def get_melodic_mixing(bids_filter, layout):
+    """
+    Get all IC's as found by MELODIC
+    Args:
+        bids_filter: dict, BIDS filter
+        layout: BIDSlayout
+
+    Returns:
+        panda dataframe, all MELODIC mixing matrix from fmriprep outputs
+    """
+    import pandas as pd
+    bids_filter.update({'desc': 'MELODIC', 'suffix': 'mixing', 'extension': '.tsv'})
+    melodic_mixing = layout.get(**bids_filter)[0]
+
+    return pd.read_csv(melodic_mixing, sep='\t', header=None)
+
+
+def get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df, sf, noise_ic_pearson_r_threshold, aroma_flag):
+    """
+
+    Args:
+        probe: DataObj, the probe data
+        aroma_noise_ic_list: list, noise IC from AROMA
+        melodic_mixing_df: pandas dataframe, all MELODIC components
+        sf: float, BOLD sampling frequency
+        noise_ic_pearson_r_threshold: float, threshold for correlation to correct noise classification
+        aroma_flag: bool, flag to use orignal aroma classification or not
+
+    Returns:
+        list, refined classification of noise regressors
+    """
+    from .preprocessing import DataObj
+    corrected_noise = []
+    for noise_idx in aroma_noise_ic_list:
+        ic = DataObj(data=melodic_mixing_df.values[:, int(noise_idx) - 1],
+                     sampling_frequency=sf, data_type='timecourse', path=None)
+        if tccorr(ic, probe) < noise_ic_pearson_r_threshold or aroma_flag:
+            corrected_noise.append(int(noise_idx) - 1)
+    return corrected_noise
+
+
+def get_mask(basic_filter, layout):
+    """
+    Load brain mask for subject
+    Args:
+        basic_filter: dict, BIDS filter
+        layout: BIDS layout
+
+    Returns:
+        DataObj, brain mask
+    """
+    from .processing import DataObj
+    mask_filter = basic_filter.copy()
+    mask_filter.update({'suffix': 'mask', 'desc': 'brain'})
+    mask = DataObj(label='Brain mask from fMRIPrep', measurement_type='binary')
+    mask.bids_load(layout=layout, filters=mask_filter, data_type='map')
+    return mask
+
+
+def get_t1w(basic_filter, space, layout):
+    """
+    Load t1w image for subject
+    Args:
+        basic_filter: dict, BIDS filter
+        space: str
+        layout: BIDS layout
+
+    Returns:
+        DataObj, t1w image of the subject
+    """
+    from .preprocessing import DataObj
+    t1w_filter = basic_filter.copy()
+    t1w_filter.pop('task')
+    t1w_filter.update({'suffix': 'T1w', 'desc': 'preproc'})
+    if space == 'T1w':
+        t1w_filter.pop('space')
+    t1w = DataObj(label='Preprocessed T1w from fMRIPrep')
+    t1w.bids_load(layout=layout, filters=t1w_filter, data_type='map')
+    return t1w
+
+
+def get_preproc(basic_filter, layout):
+    """
+    Load preprocessed image for subject
+    Args:
+        basic_filter: dict, BIDS filter
+        layout: BIDS layout
+
+    Returns:
+        DataObj, BOLD preprocessed image of the subject
+    """
+    from .preprocessing import DataObj
+    basic_filter.update({'desc': 'preproc', 'suffix': 'bold'})
+    preproc = DataObj(label='Preprocessed BOLD images from fMRIPrep')
+    preproc.bids_load(layout, basic_filter, 'bold')
+    return preproc
+
+
+def read_config_file(flags):
+    """
+    Define all parameters in this function. In the future this will be done by reading a config file (if provided).
+    Args:
+        floags, dict with boolean values
+    Returns:
+        dict, with various values/np.arrays for the parameters used in main script
+    """
+    import numpy as np
+    params = {}
+    # todo: read these values from a config file
+    params['fwhm'] = 5  # in mm
+    params['ic_threshold'] = 0.6  # threshold for correlation coefficient (r) to classify ic as noise or not
+    params['absolute_shift_list'] = np.arange(-30, 30, 1)  # this is used only for the global delay shift
+    params['relative_shift_list'] = np.arange(-30, 30, 1)  # this is used for the voxel-by-voxel shifts
+    if flags['no-shift']:
+        params['relative_shift_list'] = np.array([0])
+    return params

@@ -92,29 +92,49 @@ class DataObj:
         self.data_type = d_type
         self.path = path
 
-    def nifti_save(self, path_to_ref, path_to_save):
+    def save(self, path_to_save, path_to_ref=None):
         """
-        Save data to path in nifti format using affine from ref
-        path_to_ref: path to nifti file to extract affine data
-        path_to_save: path where to save the nifti image
+        For self.data_type == 'map' or self.data_type == 'bold':
+            Save data to path in nifti format using affine from ref
+            path_to_ref: path to nifti file to extract affine data
+            path_to_save: path where to save the nifti image
+
+        For self.data_type == 'timecourse':
+            Save timecourse data to path in .tsv.gz format - path_to_save must be something live /my/file/is/here and this function will write /my/file/is/here.tsv.gz and /my/file/is/here.json for timecourses
+            path_to_save: path where to save the data
+            path_to_ref: not needed in that case
         """
-        import nibabel
+        import json
+
+        # add path to class to keep track of things
+        if self.path is None:
+            self.path = path_to_save
+
         if self.data_type == 'map' or self.data_type == 'bold':
+            import nibabel
             img = nibabel.Nifti1Image(self.data, nibabel.load(path_to_ref).affine)
             nibabel.save(img, path_to_save)
-            if self.path == None:
+            if self.path is None:
                 self.path = path_to_save
 
-    def timecourse_save(self, path_to_save):
-        """
-        Save timecourse data to path in .tsv.gz format - path_to_save must be something live /my/file/is/here and this function will write /my/file/is/here.tsv.gz and /my/file/is/here.json for timecourses
-        path_to_save: path where to save the data
-        """
-        import numpy
-        import gzip
-        import os
-        import json
+            json_path = []
+            # create json file with sampling freq
+            if path_to_save.split('.')[-1] == 'gz':
+                json_path = '.'.join(path_to_save.split('.')[:-2]) + '.json'
+            if path_to_save.split('.')[-1] == 'nii':
+                json_path = '.'.join(path_to_save.split('.')[:-1]) + '.json'
+
+            json_data = {
+                'MeasurementType': self.measurement_type,
+                'Units': self.units
+            }
+            with open(json_path, 'w') as outfile:
+                json.dump(json_data, outfile)
+
         if self.data_type == 'timecourse':
+            import numpy
+            import gzip
+            import os
             data_path = path_to_save + '.tsv'
 
             # save to temporary .tsv file
@@ -133,10 +153,6 @@ class DataObj:
             }
             with open(json_path, 'w') as outfile:
                 json.dump(json_data, outfile)
-
-            # add path to class to keep track of things
-            if self.path == None:
-                self.path = path_to_save
 
     def make_fig(self, fig_type, **kwargs):
         """

@@ -52,30 +52,32 @@ def endtidalextract(physio):
 
     baseline_data = peakutils.baseline(etco2)
 
-    probe = DataObj(data=etco2, sampling_frequency=sampling_freq, data_type='timecourse', label=r'$\text{etCO}_2\text{timecourse}$')
+    probe = DataObj(data=etco2, sampling_frequency=sampling_freq, data_type='timecourse', label=r'$\text{etCO}_2\text{timecourse}$', units=physio.units)
     baseline = DataObj(data=np.mean(baseline_data)*np.ones(len(baseline_data)), sampling_frequency=sampling_freq, data_type='timecourse', label=r'$\text{etCO}_2\text{ baseline}$')
 
     return probe, baseline
 
 
-def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes):
+def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, fwhm=None):
     """
-    Loops over all voxel not in mask for non_agg_denoise
+    Loops over all voxel not in mask for non_agg_denoise, which does what fsl_regfilt does.
     Args:
         bold_fn: path to 4D nii to denoise
         mask_fn: path to mask
         melodic_mixing_df: pandas df with IC's
         noise_indexes: list of int labelling the noise, 0-based
+        fwhm: smoothing parameter. If None, no smoothing is done.
 
     Returns:
-        denoised data
+        DataObj containing denoised data. Voxels outside mask as set to 0.
     """
+    from nilearn.image import smooth_img
     import nibabel as nb
     bold_img = nb.load(bold_fn)
     bold_data = bold_img.get_fdata()
     mask = nb.load(mask_fn).get_fdata()
 
-    denoised = bold_data.copy()
+    denoised_data = bold_data.copy()
 
     nx, ny, nz = bold_data.shape[:3]
     for x in np.arange(nx):
@@ -85,13 +87,20 @@ def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes):
                     # extract time series
                     Y = bold_data[x, y, z, :]
                     # denoise
-                    denoised[x, y, z, :] = non_agg_denoise(Y, melodic_mixing_df, noise_indexes)
-    return nb.Nifti1Image(denoised, bold_img.affine, bold_img.header)
+                    denoised_data[x, y, z, :] = non_agg_denoise(Y, melodic_mixing_df, noise_indexes)
+                else:
+                    denoised_data[x, y, z, :] = int(0)
+
+    denoised = DataObj(data_type='bold')
+    denoised.label = 'Non-aggressively denoised data'
+    denoised.data = smooth_img(nb.Nifti1Image(denoised_data, bold_img.affine, bold_img.header), fwhm).get_fdata()
+
+    return denoised
 
 
 def non_agg_denoise(signal, design_matrix_df, noise_indexes):
     """
-    This is the in-house implementation of non-aggressive denoising. It is basically doing the same thing as fsl_regfilt
+    This is the in-house implementation of non-aggressive denoising. It is doing the same thing as fsl_regfilt.
     """
     # define model with ALL regressors
     model = OLS(signal, design_matrix_df.values)
