@@ -443,6 +443,10 @@ def setup_subject_output_paths(output_dir, subject_label, space, args, custom_la
     figures_dir = os.path.join(subject_output_dir, 'figures')
     Path(figures_dir).mkdir(parents=True, exist_ok=True)
 
+    # directory for extras
+    extras_dir = os.path.join(subject_output_dir, 'extras')
+    Path(extras_dir).mkdir(parents=True, exist_ok=True)
+
     # set paths for various outputs
     outputs = {}
     if args.use_aroma:
@@ -455,16 +459,22 @@ def setup_subject_output_paths(output_dir, subject_label, space, args, custom_la
     nifti_extension = '.nii.gz'
     report_extension = '.html'
     figures_extension = '.svg'
-    outputs['denoised'] = prefix + '_denoised' + nifti_extension
-    outputs['cvr'] = prefix + '_cvr' + nifti_extension
-    outputs['delay'] = prefix + '_delay' + nifti_extension
-    outputs['etco2'] = subject_prefix + '_desc-etco2_timecourse'
 
+    # report
     # report is in root of derivatives (fmriprep-style), not in subject-specific directory
     outputs['report'] = os.path.join(output_dir,
-                 "sub-" + subject_label + '_report' + report_extension)
+                                     "sub-" + subject_label + '_report' + report_extension)
 
-    # figures
+    # principal outputs (CVR and Delay map)
+    outputs['cvr'] = prefix + '_cvr' + nifti_extension
+    outputs['delay'] = prefix + '_delay' + nifti_extension
+
+    # supplementary data (extras)
+    outputs['denoised'] = os.path.join(extras_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
+                 + custom_label + '_denoised' + nifti_extension)
+    outputs['etco2'] = os.path.join(extras_dir, 'sub-' + subject_label + '_desc-etco2_timecourse')
+
+    # figures (for the report)
     outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
                                          + custom_label + '_cvr' + figures_extension)
     outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
