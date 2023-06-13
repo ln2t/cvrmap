@@ -53,8 +53,8 @@ def main():
     layout = setup_output_dir(args, __version__, layout)
     output_dir = layout.derivatives['cvrmap'].root
     flags = set_flags(args)
-    flags['no-shift'] = True  # for testing
-    flags['no-denoising'] = True  # for testing
+    flags['no-shift'] = False  # for testing
+    flags['no-denoising'] = False  # for testing
     parameters = read_config_file(flags)
 
     # print some summary before running
@@ -147,6 +147,7 @@ def main():
                 results['cvr'].measurement_type = 'CVR'
 
 
+            save_figs(results, outputs, mask)
 
             msg_info("Building report...")
 

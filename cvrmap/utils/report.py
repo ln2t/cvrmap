@@ -91,9 +91,10 @@ class Report:
     def add_image(self, fig):
         """
         Add an image path to the report
-
-        The image is embedded in the hmtl report using base64
-        fig is a Figure object from plotly
+        if fig is a str, then it is interpreted as a path to the image to save.
+        If a plotly figure, uses the .to_html argument to embded the image
+        Args:
+            fig: str or Figure object from plotly
         """
         import base64
         # with open(self.path, "ab") as f:
@@ -104,8 +105,12 @@ class Report:
         #   f.write(b'<br>')
 
         with open(self.path, "a") as f:
-            f.write(fig.to_html(full_html=False))
+            if type(fig) is str:
+                f.write('<figure> <img src=' + fig + ' style="width:100%"> </figure>')
+            else:
+                f.write(fig.to_html(full_html=False))
             f.write('<br>')
+
 
 
     def finish(self):
@@ -178,18 +183,24 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
         report.add_sentence(sentence="Denoised data from the AROMA classification of noise regressors")
 
     report.add_section(title='Results')
+
     # Delay map
     report.add_subsection(title='Delay map')
-    results['delay'].make_fig(fig_type='lightbox', **{'background': t1w})
-    report.add_image(results['delay'].figs['lightbox'])
-    report.add_sentence(
-        sentence="Delay map histogram")
+    report.add_image(outputs['delay_figure'])
+    # results['delay'].make_fig(fig_type='lightbox', **{'background': t1w})
+    #report.add_image(results['delay'].figs['lightbox'])
+
+
+    # report.add_sentence(
+    #     sentence="Delay map histogram")
     # todo: add some stats (mean and std) of delay map
-    results['delay'].make_fig(fig_type='histogram')
-    report.add_image(results['delay'].figs['histogram'])
+    # results['delay'].make_fig(fig_type='histogram')
+    # report.add_image(results['delay'].figs['histogram'])
+
     # CVR
     report.add_subsection(title="CVR map")
-    response.make_fig(fig_type='lightbox')
-    report.add_image(response.figs['lightbox'])
+    report.add_image(outputs['cvr_figure'])
+    #response.make_fig(fig_type='lightbox')
+    #report.add_image(response.figs['lightbox'])
     # finish the report
     report.finish()

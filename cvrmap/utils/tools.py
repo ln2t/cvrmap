@@ -438,6 +438,11 @@ def setup_subject_output_paths(output_dir, subject_label, space, args, custom_la
     subject_output_dir = os.path.join(output_dir,
                                       "sub-" + subject_label)
     Path(subject_output_dir).mkdir(parents=True, exist_ok=True)
+
+    # directory for figures
+    figures_dir = os.path.join(subject_output_dir, 'figures')
+    Path(figures_dir).mkdir(parents=True, exist_ok=True)
+
     # set paths for various outputs
     outputs = {}
     if args.use_aroma:
@@ -449,14 +454,54 @@ def setup_subject_output_paths(output_dir, subject_label, space, args, custom_la
     prefix = subject_prefix + "_space-" + space + denoise_label + custom_label
     nifti_extension = '.nii.gz'
     report_extension = '.html'
+    figures_extension = '.svg'
     outputs['denoised'] = prefix + '_denoised' + nifti_extension
     outputs['cvr'] = prefix + '_cvr' + nifti_extension
     outputs['delay'] = prefix + '_delay' + nifti_extension
-    outputs['report'] = prefix + '_report' + report_extension
     outputs['etco2'] = subject_prefix + '_desc-etco2_timecourse'
+
+    # report is in root of derivatives (fmriprep-style), not in subject-specific directory
+    outputs['report'] = os.path.join(output_dir,
+                 "sub-" + subject_label + '_report' + report_extension)
+
+    # figures
+    outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
+                                         + custom_label + '_cvr' + figures_extension)
+    outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
+                                         + custom_label + '_delay' + figures_extension)
 
     return outputs
 
+
+def save_figs(results, outputs, mask):
+    """
+    Generate and saves cvr and delay figures.
+    Args:
+        results: dict, containing the results to save
+        outputs: dict, witht the paths where to save the figures
+        mask: DataObj, to mask the delaymap image
+    Returns:
+        0 if successful
+    """
+    import nilearn.plotting as plotting
+    import nilearn.image as image
+
+    cut_coords = int(image.load_img(results['cvr'].path).shape[-1]/10)
+
+
+    _ = plotting.plot_img(results['cvr'].path, cmap='hot', display_mode='z', black_bg=True, cbar_tick_format="%0.2g", annotate=False,
+                      colorbar=True, vmin=0, vmax=0.8, cut_coords=cut_coords).savefig(outputs['cvr_figure'])
+
+    vmax = 1
+    vmin = -2.5
+
+    _img = image.math_img('np.where(mask, img, %s)' % vmax,
+                          img=image.load_img(results['delay'].path), mask=image.load_img(mask.path))
+    _ = plotting.plot_img(_img, cmap='black_purple_r', display_mode='z', black_bg=True, cbar_tick_format="%0.2g",
+                          annotate=False, colorbar=True, vmin=vmin,
+                          vmax=vmax, cut_coords=cut_coords).savefig(outputs['delay_figure'])
+
+    return 0
 
 def get_physio_data(bids_filter, layout):
     """
