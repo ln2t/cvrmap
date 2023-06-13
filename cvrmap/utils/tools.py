@@ -475,6 +475,8 @@ def setup_subject_output_paths(output_dir, subject_label, space, args, custom_la
     outputs['etco2'] = os.path.join(extras_dir, 'sub-' + subject_label + '_desc-etco2_timecourse')
 
     # figures (for the report)
+    outputs['breathing_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_breathing' + '.png')
+    outputs['boldmean_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_boldmean' + '.png')
     outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
                                          + custom_label + '_cvr' + figures_extension)
     outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
@@ -493,6 +495,37 @@ def save_figs(results, outputs, mask):
     Returns:
         0 if successful
     """
+    # Breathing data
+
+    results['physio'].make_fig(fig_type='plot',
+                    **{'title': r'$\text{Raw CO}_2$',
+                       'xlabel': r'$\text{Time (s)}$',
+                       'ylabel': r'$\text{CO}_2\text{ '
+                                 r'concentration (%)}$'})
+    results['probe'].make_fig(fig_type='plot',
+                   **{'title': r'$\text{Raw CO}_2$',
+                      'xlabel': r'$\text{Time (s)}$',
+                      'ylabel': r'$\text{CO}_2\text{ '
+                                r'concentration (%)}$'})
+    results['baseline'].make_fig(fig_type='plot',
+                      **{'title': r'$\text{Raw CO}_2$',
+                         'xlabel': r'$\text{Time (s)}$',
+                         'ylabel': r'$\text{CO}_2\text{ concentration (%)}$'})
+
+    results['global_signal'].make_fig(fig_type='plot', **{
+        'title': r'Whole-brain mean BOLD signal',
+        'xlabel': r'$\text{Time (s)}$',
+        'ylabel': r'BOLD signal (arbitrary units)'})
+
+    from .viz import gather_figures
+    breathing_fig = gather_figures([results['probe'], results['baseline'], results['physio']])
+    breathing_fig.write_image(outputs['breathing_figure'])
+
+    # BOLD mean and etCO2
+    boldmean_fig = gather_figures([results['global_signal'], results['probe']])
+    boldmean_fig.write_image(outputs['boldmean_figure'])
+
+    # CVR and delay map
     import nilearn.plotting as plotting
     import nilearn.image as image
 

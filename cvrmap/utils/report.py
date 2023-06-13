@@ -137,36 +137,19 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
                 version=__version__, cmd=args.__dict__)
     # Physio data
     # create figures for report
-    physio.make_fig(fig_type='plot',
-                    **{'title': r'$\text{Raw CO}_2$',
-                       'xlabel': r'$\text{Time (s)}$',
-                       'ylabel': r'$\text{CO}_2\text{ '
-                                 r'concentration (%)}$'})
-    probe.make_fig(fig_type='plot',
-                   **{'title': r'$\text{Raw CO}_2$',
-                      'xlabel': r'$\text{Time (s)}$',
-                      'ylabel': r'$\text{CO}_2\text{ '
-                                r'concentration (%)}$'})
-    baseline.make_fig(fig_type='plot',
-                      **{'title': r'$\text{Raw CO}_2$',
-                         'xlabel': r'$\text{Time (s)}$',
-                         'ylabel': r'$\text{CO}_2\text{ concentration (%)}$'})
+
     report.add_subsection(title='Physiological data')
     report.add_sentence(
         sentence="Physiological data, with reconstructed "
                  "upper envelope and baseline:")
-    report.add_image(
-        gather_figures([probe, baseline, physio]))
+    report.add_image(outputs['breathing_figure'])
+
     # global signal and etco2
     report.add_section(title='Global Signal and etCO2')
     report.add_sentence(sentence="The computed shift is %s seconds" % global_signal_shift)
-    global_signal.make_fig(fig_type='plot', **{
-        'title': r'Whole-brain mean BOLD signal',
-        'xlabel': r'$\text{Time (s)}$',
-        'ylabel': r'BOLD signal (arbitrary units)'})
 
     # report.add_image(global_signal.figs['plot'])
-    report.add_image(gather_figures([global_signal, probe]))
+    report.add_image(outputs['boldmean_figure'])
 
     # info on denoising
     report.add_section(title='Info on denoising')
