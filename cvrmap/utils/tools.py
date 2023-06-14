@@ -546,6 +546,7 @@ def save_figs(results, outputs, mask):
 
     return 0
 
+
 def get_physio_data(bids_filter, layout):
     """
     Fetch raw physiological data
@@ -580,6 +581,8 @@ def get_aroma_noise_ic_list(bids_filter, layout):
     # find and remove IC's that correlates with probe regressor
     bids_filter.pop('desc')
     bids_filter.pop('space')
+    if 'res' in bids_filter.keys():
+        bids_filter.pop('res')
     bids_filter.update({'suffix': 'AROMAnoiseICs', 'extension': '.csv'})
     return open(layout.get(**bids_filter)[0]).read().split(sep=',')
 
@@ -676,7 +679,7 @@ def get_preproc(basic_filter, layout):
         DataObj, BOLD preprocessed image of the subject
     """
     from .preprocessing import DataObj
-    basic_filter.update({'desc': 'preproc', 'suffix': 'bold'})
+    basic_filter.update({'desc': 'preproc', 'suffix': 'bold', 'res': 2})
     preproc = DataObj(label='Preprocessed BOLD images from fMRIPrep')
     preproc.bids_load(layout, basic_filter, 'bold')
     return preproc

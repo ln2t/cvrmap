@@ -55,7 +55,9 @@ class DataObj:
                 units = lf['co2']['Units']
                 if units == '%':
                     # convert % of co2 partial pressure to mmHg
+                    msg_info('Converting CO2 units from percentage of partial pressure to mmHg (1 mmHg = 7.6%p.p.)')
                     data = data*7.6
+                    units = 'mmHg'
                 else:
                     if not units == 'mmHg':
                         msg_warning('The units read from json file, %s, are unknown. This affects the units of CVR.' % str(units))
@@ -416,7 +418,8 @@ def compute_delays(reference, probe, shifts_option):
 
         delay_data = absolute_delay_data.copy() - shift_origin
         # before we finish, we discard points in the delay map having correlation < 0.6, but we keep them for intercept and slope:
-        delay_data = np.where(correlation_data > 0.6, delay_data, float('nan'))
+        # delay_data = np.where(correlation_data > 0.6, delay_data, float('nan'))
+        delay_data = np.where(correlation_data > 0.6, delay_data, 0.)
         #slope_data = np.where(correlation_data > 0.6, slope_data, float('nan'))
         #intercept_data = np.where(correlation_data > 0.6, intercept_data, float('nan'))
 
@@ -472,26 +475,28 @@ def compute_response(intercept, slope, regressorbaseline, regressormean):
     n_x, n_y, n_z = intercept_data.shape
     response_data = np.zeros([n_x, n_y, n_z])
 
-    script_progress_sentence = "Computing response..."
+    # script_progress_sentence = "Computing response..."
 
     total_voxels = n_x*n_y*n_z
     loop_counter = 0
-    printProgressBar(0, total_voxels, prefix=script_progress_sentence)
+    # printProgressBar(0, total_voxels, prefix=script_progress_sentence)
 
     for i_z in range(n_z):
         for i_x in range(n_x):
             for i_y in range(n_y):
                 loop_counter += 1
                 if np.isnan(intercept_data[i_x, i_y, i_z]):
-                    response_data[i_x, i_y, i_z] = float('nan')
+                    #response_data[i_x, i_y, i_z] = float('nan')
+                    response_data[i_x, i_y, i_z] = 0.
                 else:
                     denominator = intercept_data[i_x, i_y, i_z] + regressorbaseline*slope_data[i_x, i_y, i_z]
                     if not denominator == 0:
                         response_data[i_x, i_y, i_z] = 100*slope_data[i_x, i_y, i_z]/denominator
                     else:
-                        response_data[i_x, i_y, i_z] = float('nan')
+                        # response_data[i_x, i_y, i_z] = float('nan')
+                        response_data[i_x, i_y, i_z] = 0.
 
-        printProgressBar(loop_counter, total_voxels, prefix=script_progress_sentence)
+        # printProgressBar(loop_counter, total_voxels, prefix=script_progress_sentence)
 
     response = DataObj(data=response_data, data_type='map')
 
