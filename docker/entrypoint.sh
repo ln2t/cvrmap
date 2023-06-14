@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # launch cvrmap with arguments
-/opt/cvrmap/src/cvrmap/cvrmap "$@"
+/opt/cvrmap/cvrmap/cvrmap "$@"
