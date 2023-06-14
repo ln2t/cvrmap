@@ -6,6 +6,8 @@ The software is compatible with the Brain Imagning Data Structure (BIDS) standar
 
 The paper describing the toolbox will be pulished (hopefully!) soon.
 
+A normative dataset can be downloaded from openneuro: https://openneuro.org/datasets/ds004604
+
 # Installation
 
 
