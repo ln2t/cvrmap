@@ -106,7 +106,11 @@ class Report:
 
         with open(self.path, "a") as f:
             if type(fig) is str:
-                f.write('<figure> <img src=' + fig + ' style="width:100%"> </figure>')
+                import os.path as path
+                # make the path relative to report location
+                _report_dir = path.dirname(self.path)
+                _fig = path.relpath(fig, _report_dir)
+                f.write('<figure> <img src=' + _fig + ' style="width:100%"> </figure>')
             else:
                 f.write(fig.to_html(full_html=False))
             f.write('<br>')
