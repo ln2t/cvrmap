@@ -168,7 +168,7 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
     report.add_section(title='Results')
 
     # Delay map
-    report.add_subsection(title='Delay map')
+    report.add_subsection(title='Delay map (units: s)')
     report.add_image(outputs['delay_figure'])
     # results['delay'].make_fig(fig_type='lightbox', **{'background': t1w})
     #report.add_image(results['delay'].figs['lightbox'])
@@ -181,7 +181,7 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
     # report.add_image(results['delay'].figs['histogram'])
 
     # CVR
-    report.add_subsection(title="CVR map")
+    report.add_subsection(title="CVR map (units: %BOLD/mmHg")
     report.add_image(outputs['cvr_figure'])
     #response.make_fig(fig_type='lightbox')
     #report.add_image(response.figs['lightbox'])
