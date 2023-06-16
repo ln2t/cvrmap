@@ -6,7 +6,6 @@ RUN apt-get -y upgrade
 RUN apt-get install -y git
 RUN apt-get install -y python3 pip
 
-RUN cd && cd && cd
 RUN cd /opt && git clone https://github.com/ln2t/cvrmap.git
 RUN cd /opt/cvrmap && git checkout v1.0.0.rc
 
