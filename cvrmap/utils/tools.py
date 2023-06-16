@@ -679,7 +679,7 @@ def get_preproc(basic_filter, layout):
         DataObj, BOLD preprocessed image of the subject
     """
     from .preprocessing import DataObj
-    basic_filter.update({'desc': 'preproc', 'suffix': 'bold', 'res': 2})
+    basic_filter.update({'desc': 'preproc', 'suffix': 'bold'})
     preproc = DataObj(label='Preprocessed BOLD images from fMRIPrep')
     preproc.bids_load(layout, basic_filter, 'bold')
     return preproc

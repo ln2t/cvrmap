@@ -38,18 +38,29 @@ for help.
 Finally, to pass some data to the docker image, you can use something like:
 
 ```
-docker run -v /path/to/your/bids/folder:/rawdata -v /path/to/your/derivatives:/derivatives arovai/cvrmap:VERSION /rawdata /derivatives participant
+docker run -v /path/to/your/bids/folder:/rawdata -v /path/to/your/derivatives:/derivatives arovai/cvrmap:VERSION /rawdata /derivatives/cvrmap participant
 ```
 
 For more information about the command line options, see the **Usage** section.
 
-# Option 2: Singularity (good for HPC) - work in progress
+# Option 2: Singularity (good for HPC)
 
 You can also build a Singularity image file using
 
 ```
 singularity build arovai.cvrmap.VERSION.sif docker://arovai/cvrmap:VERSION
 ```
+
+You can for instance run this command inside your home directory, and then you'll have a singularity image file named `arovai.cvrmap.VERSION.sif` in there. To run it, still in the folder where the image is located, run
+
+```
+singularity run -B /path/to/your/bids/folder:/rawdata -B /path/to/your/derivatives:/derivatives arovai.cvrmap.VERSION.sif /rawdata /derivatives/cvrmap participant
+```
+
+Make sure that the folder `/path/to/your/derivatives` exists before launching this command.
+
+Of course you are free to place the image where ever suits you; you'll simply have to adapt the path when calling `singularity`.
+
 
 # Option 3: python environment (using git)
 
