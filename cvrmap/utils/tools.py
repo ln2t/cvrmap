@@ -250,7 +250,7 @@ def arguments_manager(version):
                         help='Path of the fmriprep derivatives. If ommited, set to bids_dir/derivatives/fmriprep')
     parser.add_argument('--task', help='Name of the task to be used. If omitted, will search for \'gas\'.')
     parser.add_argument('--space',
-                        help='Name of the space to be used. Must be associated with fmriprep output. Default: \'MNI152NLin6Asym\'.')
+                        help='Name of the space to be used. Must be associated with fmriprep output. Default: \'MNI152NLin2009cAsym\'.')
     parser.add_argument('--work_dir', help='Work dir for temporary files. If omitted, set to \'output_dir/work\'')
     parser.add_argument('--sloppy',
                         help='Only for testing, computes a small part of the maps to save time. Off by default.',
@@ -372,7 +372,7 @@ def get_space(args, layout):
     if args.space:
         space = args.space
     else:
-        space = 'MNI152NLin6Asym'
+        space = 'MNI152NLin2009cAsym'
         msg_info('Defaulting to space %s' % space)
 
     # space in fmriprep output?
