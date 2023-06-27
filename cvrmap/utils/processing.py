@@ -468,7 +468,7 @@ def compute_delays(reference, probe, shifts_option):
 
 def compute_response(intercept, slope, regressorbaseline, regressormean):
     """
-    This function computes slope/(intercept + (regressorbaseline-regressormean)*slope)
+    This function computes slope/(intercept + (regressorbaseline)*slope)
     """
     intercept_data = intercept.data
     slope_data = slope.data
