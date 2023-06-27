@@ -91,7 +91,9 @@ Note that the docker image is essentially build using this procedure, as you can
 
 # Usage
 
-To run CVRmap, you must first have data to crunch. The data are supposed to a BIDS (https://bids-specification.readthedocs.io/en/stable/) dataset. For each subject, you must have a T1w image, a BOLD image and a physiological file containing the breathing data (CO2) recorded during the fMRI scan. For instance, for `sub-01`, the data should look like this:
+To run CVRmap, you must first have data to crunch. If you don't have data, and you want to test CVRmap, you can download the publicly available dataset on openneuro (https://openneuro.org/datasets/ds004604) which include compatible rawdata, fmriprep derivatives, as well as CVRmap outputs.
+If you have your own data that you want to analyze with CVRmap, make sure to observe the following:
+first of all, the data are supposed to a BIDS (https://bids-specification.readthedocs.io/en/stable/) dataset. For each subject, you must have a T1w image, a BOLD image and a physiological file containing the breathing data (CO2) recorded during the fMRI scan. For instance, for `sub-01`, the data should look like this:
 
 ```
 sub-01/anat/sub-01_T1w.nii.gz
@@ -143,23 +145,29 @@ Notes:
 - the exact `cvrmap` command might depend on the installation option you choose.
 - the `--fmriprep_dir` option can be ommitted if the fMRIPrep derivatives are located in `/path/to/bids_dir/derivatives/fmriprep`.
 - if the BOLD taskname is not `gas`, you must add `--taskname your_task_name`.
-- if you want the outputs in another space, and if this space was included in the fMRIPrep call, you must add `--space your_custom_space`. The default space is `MNI152NLin6Asym`.
-- if you want to use the ICA-AROMA classification for signal confounds, then add `--use-aroma` and CVRmap will fetch the non-aggressively denoised BOLD series as procuded by fMRIPrep. Otherwise, when the flag is omitted, CVRmap will perform non-aggressive denoising itself using a refinement of the ICA-AROMA classification of noise sources (see paper for more details).
+- if you want the outputs in another space, and if this space was included in the fMRIPrep call, you must add `--space your_custom_space`. The default space is `MNI152NLin2009cAsym`.
+- if you want to use the ICA-AROMA classification for signal confounds, then add `--use-aroma`. Otherwise, when the flag is omitted, CVRmap will perform non-aggressive denoising itself using a refinement of the ICA-AROMA classification of noise sources (see paper for more details).
 - more info and options can be found when asking politely for help with `cvrmap --help`.
 
 CVRmap will run for about 2 hours on recent computers. The results are stored in `/path/to/derivatives/cvrmap` following BIDS standard for derivatives. The outputs will typically look as follows:
 
 ```
-sub-01/sub-01_desc-etco2_timecourse.tsv.gz
-sub-01/sub-01_desc-etco2_timecourse.json
-sub-01/sub-01_space-MNI152NLin6Asym_delay.nii.gz
-sub-01/sub-01_space-MNI152NLin6Asym_delay.json
-sub-01/sub-01_space-MNI152NLin6Asym_cvr.nii.gz
-sub-01/sub-01_space-MNI152NLin6Asym_cvr.json
-sub-01/sub-01_space-MNI152NLin6Asym_report.html
+sub-01/extras/sub-01_desc-etco2_timecourse.tsv.gz
+sub-01/extras/sub-01_desc-etco2_timecourse.json
+sub-01/extras/sub-01_space-MNI152NLin2009cAsym_denoised.nii.gz
+sub-01/extras/sub-01_space-MNI152NLin2009cAsym_denoised.json
+sub-01/figures/sub-01_boldmean.png
+sub-01/figures/sub-01_breathing.png
+sub-01/figures/sub-01_space-MNI152NLin2009cAsym_cvr.svg
+sub-01/figures/sub-01_space-MNI152NLin2009cAsym_delay.svg
+sub-01/sub-01_space-MNI152NLin2009cAsym_delay.nii.gz
+sub-01/sub-01_space-MNI152NLin2009cAsym_delay.json
+sub-01/sub-01_space-MNI152NLin2009cAsym_cvr.nii.gz
+sub-01/sub-01_space-MNI152NLin2009cAsym_cvr.json
+sub-01_report.html
 ```
 
-The `etco2` file contains the end-tidal timecourse extracted from the original CO2 readings. The delay map contains the computed time delays (or time lags) in seconds, and normalized to the global signal delay. The main map of interest is of course the CVR map! For a quick analysis, an html report is also included.
+The `extras` folder containes the `etco2` file contains the end-tidal timecourse extracted from the original CO2 readings as well as the non-aggressively denoised BOLD series. Some pictures for the report are stored within `figures`. The delay map contains the computed time delays (or time lags) in seconds, and normalized to the global signal delay. The main map of interest is of course the CVR map! For a quick analysis, an html report is also included.
 
 # Bugs or questions
 
