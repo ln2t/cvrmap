@@ -49,7 +49,7 @@ def main():
     subjects_to_analyze = get_subjects_to_analyze(args, layout)
     task = get_task(args, layout)
     custom_label = get_custom_label(args)
-    space = get_space(args, layout)
+    space, res = get_space(args, layout)
     layout = setup_output_dir(args, __version__, layout)
     output_dir = layout.derivatives['cvrmap'].root
     flags = set_flags(args)
@@ -63,6 +63,8 @@ def main():
     msg_info("Subject(s) to analyse: %s" % subjects_to_analyze)
     msg_info("Task to analyse: %s" % task)
     msg_info("Selected space: %s" % space)
+    if not res is None:
+        msg_info("Selected resolution: %s" % res)
 
     if args.analysis_level == "participant":
 
@@ -70,9 +72,9 @@ def main():
             msg_info("Running for participant %s" % subject_label)
 
             # init a basic filter for layout.get()
-            basic_filter = dict(subject=subject_label, return_type='filename', space=space, task=task)
+            basic_filter = dict(subject=subject_label, return_type='filename', space=space, res=res, task=task)
 
-            outputs = setup_subject_output_paths(output_dir, subject_label, space, args, custom_label)
+            outputs = setup_subject_output_paths(output_dir, subject_label, space, res, args, custom_label)
 
             physio = get_physio_data(basic_filter, layout)
             probe, baseline = endtidalextract(physio)

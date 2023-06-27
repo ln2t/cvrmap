@@ -250,7 +250,8 @@ def arguments_manager(version):
                         help='Path of the fmriprep derivatives. If ommited, set to bids_dir/derivatives/fmriprep')
     parser.add_argument('--task', help='Name of the task to be used. If omitted, will search for \'gas\'.')
     parser.add_argument('--space',
-                        help='Name of the space to be used. Must be associated with fmriprep output. Default: \'MNI152NLin2009cAsym\'.')
+                        help='Name of the space to be used. Must be associated with fmriprep output. Default: \'MNI152NLin2009cAsym\'.'
+                             'Also accepts resolution modifier (e.g. \'MNI152NLin2009cAsym:res-2\') as in fmriprep options.')
     parser.add_argument('--work_dir', help='Work dir for temporary files. If omitted, set to \'output_dir/work\'')
     parser.add_argument('--sloppy',
                         help='Only for testing, computes a small part of the maps to save time. Off by default.',
@@ -359,7 +360,7 @@ def get_custom_label(args):
 
 def get_space(args, layout):
     """
-    Get space and checks if present in layout (rawdata and derivatives)
+    Get space (and res, if any) and checks if present in layout (rawdata and derivatives)
     Args:
         args: return from arguments_manager
         layout: BIDS layout
@@ -375,13 +376,21 @@ def get_space(args, layout):
         space = 'MNI152NLin2009cAsym'
         msg_info('Defaulting to space %s' % space)
 
+    # check if space arg has res modifier
+    res = None
+    if ":" in space:
+        res = space.split(":")[1].split('-')[1]
+        space = space.split(":")[0]
+
     # space in fmriprep output?
     spaces = layout.get_spaces(scope='derivatives')
     if space not in spaces:
         msg_error("Selected space %s is invalid. Valid spaces are %s" % (args.space, spaces))
         sys.exit(1)
 
-    return space
+    #todo: check if combination space+res is in fmriprep output
+
+    return space, res
 
 
 def setup_output_dir(args, version, layout):
@@ -418,13 +427,14 @@ def set_flags(args):
     return flags
 
 
-def setup_subject_output_paths(output_dir, subject_label, space, args, custom_label):
+def setup_subject_output_paths(output_dir, subject_label, space, res, args, custom_label):
     """
     Setup various paths for subject output. Also creates subject output dir.
     Args:
         output_dir: str, cvrmap output dir
         subject_label: str, subject label
         space: str, space entity
+        res: int, resolution entity
         args: output of arguments_manager
         custom_label: str, custom label for outputs
 
@@ -455,7 +465,10 @@ def setup_subject_output_paths(output_dir, subject_label, space, args, custom_la
         denoise_label = ''
     subject_prefix = os.path.join(subject_output_dir,
                                   "sub-" + subject_label)
-    prefix = subject_prefix + "_space-" + space + denoise_label + custom_label
+    if res is None:
+        prefix = subject_prefix + "_space-" + space + denoise_label + custom_label
+    else:
+        prefix = subject_prefix + "_space-" + space + '_res-' + res + denoise_label + custom_label
     nifti_extension = '.nii.gz'
     report_extension = '.html'
     figures_extension = '.svg'
@@ -470,17 +483,28 @@ def setup_subject_output_paths(output_dir, subject_label, space, args, custom_la
     outputs['delay'] = prefix + '_delay' + nifti_extension
 
     # supplementary data (extras)
-    outputs['denoised'] = os.path.join(extras_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
-                 + custom_label + '_denoised' + nifti_extension)
+    if res is None:
+        outputs['denoised'] = os.path.join(extras_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
+                                           + custom_label + '_denoised' + nifti_extension)
+    else:
+        outputs['denoised'] = os.path.join(extras_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res + denoise_label
+                                           + custom_label + '_denoised' + nifti_extension)
     outputs['etco2'] = os.path.join(extras_dir, 'sub-' + subject_label + '_desc-etco2_timecourse')
 
     # figures (for the report)
     outputs['breathing_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_breathing' + '.png')
     outputs['boldmean_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_boldmean' + '.png')
-    outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
-                                         + custom_label + '_cvr' + figures_extension)
-    outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
-                                         + custom_label + '_delay' + figures_extension)
+
+    if res is None:
+        outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
+                                             + custom_label + '_cvr' + figures_extension)
+        outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
+                                             + custom_label + '_delay' + figures_extension)
+    else:
+        outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res + denoise_label
+                                             + custom_label + '_cvr' + figures_extension)
+        outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res + denoise_label
+                                               + custom_label + '_delay' + figures_extension)
 
     return outputs
 
@@ -563,6 +587,8 @@ def get_physio_data(bids_filter, layout):
     physio_filter = bids_filter.copy()
     physio_filter.update({'suffix': "physio"})
     physio_filter.pop('space')
+    if 'res' in physio_filter.keys():
+        physio_filter.pop('res')
     physio = DataObj(label=r'$\text{Raw CO}_2\text{ signal}$')
     physio.bids_load(layout, physio_filter, 'timecourse', **{'col': 1})
     return physio
@@ -663,6 +689,8 @@ def get_t1w(basic_filter, space, layout):
     t1w_filter.update({'suffix': 'T1w', 'desc': 'preproc'})
     if space == 'T1w':
         t1w_filter.pop('space')
+        if 'res' in t1w_filter.keys():
+            t1w_filter.pop('res')
     t1w = DataObj(label='Preprocessed T1w from fMRIPrep')
     t1w.bids_load(layout=layout, filters=t1w_filter, data_type='map')
     return t1w
