@@ -689,7 +689,7 @@ def read_config_file(flags):
     """
     Define all parameters in this function. In the future this will be done by reading a config file (if provided).
     Args:
-        floags, dict with boolean values
+        flogs, dict with boolean values
     Returns:
         dict, with various values/np.arrays for the parameters used in main script
     """
