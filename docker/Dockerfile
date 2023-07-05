@@ -8,7 +8,7 @@ RUN apt-get install -y git
 RUN apt-get install -y python3 pip
 
 RUN cd /opt && git clone https://github.com/ln2t/cvrmap.git
-RUN cd /opt/cvrmap && git checkout spaceresoption
+RUN cd /opt/cvrmap && git checkout highpassfiltering
 
 RUN pip install -r /opt/cvrmap/requirements.txt
 

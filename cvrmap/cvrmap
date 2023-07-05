@@ -71,7 +71,6 @@ def main():
         for subject_label in subjects_to_analyze:
             msg_info("Running for participant %s" % subject_label)
 
-            # init a basic filter for layout.get()
             basic_filter = dict(subject=subject_label, return_type='filename', space=space, res=res, task=task)
 
             outputs = setup_subject_output_paths(output_dir, subject_label, space, res, args, custom_label)
@@ -87,10 +86,8 @@ def main():
             melodic_mixing_df = get_melodic_mixing(basic_filter, layout)
 
             corrected_noise = get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df,
-                                                      preproc.sampling_frequency, parameters['ic_threshold'], args.use_aroma)
-
-
-
+                                                      preproc.sampling_frequency,
+                                                      parameters['ic_threshold'], args.use_aroma)
 
             if flags['sloppy'] or flags['no-denoising']:
                 msg_warning('Working in sloppy mode, only for quick testing!')
