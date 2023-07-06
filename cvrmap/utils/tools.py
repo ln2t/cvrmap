@@ -579,7 +579,7 @@ def get_physio_data(bids_filter, layout):
         layout: BIDS layout
 
     Returns:
-        DataObj for raw physiolocical data
+        DataObj for raw physiological data
 
     """
     from .processing import DataObj
