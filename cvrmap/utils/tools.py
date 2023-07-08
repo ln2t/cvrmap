@@ -622,12 +622,13 @@ def get_melodic_mixing(bids_filter, layout):
 
     Returns:
         panda dataframe, all MELODIC mixing matrix from fmriprep outputs
+        str, path to melodic mixing matrix file
     """
     import pandas as pd
     bids_filter.update({'desc': 'MELODIC', 'suffix': 'mixing', 'extension': '.tsv'})
     melodic_mixing = layout.get(**bids_filter)[0]
 
-    return pd.read_csv(melodic_mixing, sep='\t', header=None)
+    return pd.read_csv(melodic_mixing, sep='\t', header=None), melodic_mixing
 
 
 def get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df, sf, noise_ic_pearson_r_threshold, aroma_flag):

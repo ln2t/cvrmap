@@ -57,7 +57,29 @@ def endtidalextract(physio):
 
     return probe, baseline
 
+def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise):
+    from .tools import run
+    import uuid
+    import nibabel as nb
+    _corrected_noise = [str(i) for i in list(np.array(corrected_noise) + 1)]  # corrected_noise is zero-based
+    regfilt_output = '/tmp/tm_fsl_regfilt_output_' + str(uuid.uuid4()) + '.nii.gz'
+    tmp_output_mean = '/tmp/tm_fsl_regfilt_output_' + str(uuid.uuid4()) + '.nii.gz'
+    tmp_highpassfilter_output = '/tmp/tm_fsl_regfilt_output_' + str(uuid.uuid4()) + '.nii.gz'
+    fsl_regfilt_cmd = "fsl_regfilt --in=%s --filter=%s --design=%s --out=%s" % (fmri_input, ','.join(_corrected_noise), melodic_mixing, regfilt_output)
+    compute_mean_cmd = "fslmaths %s -Tmean %s" % (regfilt_output, tmp_output_mean)
+    t_r = nb.load(fmri_input).header.get_zooms()[-1]
+    hpsigma = 128/2/t_r # 128/TR/2
+    highpass_cmd = "fslmaths %s -bptf %s -1 -add %s %s" % (regfilt_output, hpsigma, tmp_output_mean, tmp_highpassfilter_output)
+    run(fsl_regfilt_cmd)
+    run(compute_mean_cmd)
+    run(highpass_cmd)
+    _output = tmp_highpassfilter_output
+    _img = nb.load(_output)
 
+    denoised = DataObj(data_type='bold')
+    denoised.label = 'Non-aggressively denoised data'
+    denoised.data = _img.get_fdata()
+    return denoised
 def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, fwhm=None):
     """
     Loops over all voxel not in mask for non_agg_denoise, which does what fsl_regfilt does.
