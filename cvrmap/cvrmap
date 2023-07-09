@@ -10,23 +10,8 @@ Author: Antonin Rovai
 Created: May 2022
 """
 
-# todo: loop over all spaces automatically
-# todo: option to override or keep existing stuff
-# todo: run from spm preproc bold series (requires the inclusion of motion parameters in the analysis...)
-# todo: smooth delaymaps
-# todo: group analysis
-# todo: check if fmriprep as run for each subject, with appropriate spaces, and with aroma
-# todo: read from config file:
-#  - sloppy flag
-#  - threshold for vessel density
-#  - time span for delay map computation
-# todo: register results to patient space; include PET image in report
-# todo: make histogram of delays
+# todo: read from config file
 # todo: normalize delay shift by computing delay of ROI of reference
-# todo: ROI delay analysis
-# todo: signal of grey matter compared to etCO2, recording of delay, include this in the report
-# todo: write sidecar json files
-# todo: read CO2 col header in tsv
 
 # imports
 import os  # to interact with dirs
@@ -86,9 +71,6 @@ def main():
 
             corrected_noise = get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df,
                                                       preproc.sampling_frequency, parameters['ic_threshold'], args.use_aroma)
-
-
-
 
             if flags['sloppy'] or flags['no-denoising']:
                 msg_warning('Working in sloppy mode, only for quick testing!')
