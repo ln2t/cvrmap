@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "coucou"
 
 # FSL Setup
 FSLDIR=/opt/fsl
