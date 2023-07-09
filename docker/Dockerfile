@@ -9,8 +9,12 @@ RUN apt-get install -y python3 pip
 
 RUN cd /opt && git clone https://github.com/ln2t/cvrmap.git
 RUN cd /opt/cvrmap && git checkout spaceresoption
-
 RUN pip install -r /opt/cvrmap/requirements.txt
+
+COPY fsl_config.txt /root/fsl_config.py
+COPY fslinstaller.py /root/fslinstaller.py
+
+RUN /root/fslinstaller.py < /root/fsl_config.txt
 
 # Set entrypoint to entrypoint script
 ENTRYPOINT ["/opt/cvrmap/docker/entrypoint.sh"]
