@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # FSL Setup
-FSLDIR=/root/fsl
+FSLDIR=/opt/fsl
 PATH=${FSLDIR}/share/fsl/bin:${PATH}
 export FSLDIR PATH
 . ${FSLDIR}/etc/fslconf/fsl.sh
