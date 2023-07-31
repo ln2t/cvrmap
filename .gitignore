@@ -3,5 +3,5 @@ test_data/*
 .idea/*
 jupyter/*
 .DS_Store
-cvrmap/utils/__pycache__
+cvrmap/utils/__pycache__/*
 venv/*
