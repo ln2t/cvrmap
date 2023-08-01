@@ -18,13 +18,12 @@ COPY fslinstaller.py /root/fslinstaller.py
 RUN apt-get install -y python2
 RUN python2 /root/fslinstaller.py < /root/fsl_config.txt
 
-RUN cd
-RUN cd
+RUN cd /opt
 
 # Re-install cvrmap
 RUN rm -rf /opt/cvrmap
 RUN cd /opt && git clone https://github.com/ln2t/cvrmap.git
-RUN cd /opt/cvrmap && git checkout fslregfilt
+RUN cd /opt/cvrmap && git checkout fslregfilt_nan
 
 # Set entrypoint to entrypoint script
 ENTRYPOINT ["/opt/cvrmap/docker/entrypoint.sh"]
