@@ -409,6 +409,10 @@ def setup_output_dir(args, version, layout):
                       % version.rstrip('\n'))
         ds_desc.close()
 
+    # warning: adding cvrmap derivatives while running cvrmap can lead to inconsistencies when running jobs in
+    # parallel. If error occur, simply re-launch interrupted jobs.
+    # todo to solve this:
+    #  don't add derivatives for cvrmap, simply build absolute output path (only thing that is needed!)
     layout.add_derivatives(args.output_dir)  # add output dir as BIDS derivatives in layout
 
     return layout

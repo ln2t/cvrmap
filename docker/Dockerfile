@@ -19,6 +19,7 @@ RUN apt-get install -y python2
 RUN python2 /root/fslinstaller.py < /root/fsl_config.txt
 
 RUN cd
+RUN cd
 
 # Re-install cvrmap
 RUN rm -rf /opt/cvrmap
