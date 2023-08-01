@@ -11,7 +11,7 @@ Visualization utilities
 def gather_figures(objs):
     """
     Create fig from several DataObj of 'timecourse' type by superimposing their individual plots
-    If two objects are given, the first one will have it's y-axis on the left and the second on the right.
+    If two objects are given, the first one will have its y-axis on the left and the second on the right.
     """
 
     if len(objs) == 2:

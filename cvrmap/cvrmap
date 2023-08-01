@@ -53,8 +53,8 @@ def main():
     layout = setup_output_dir(args, __version__, layout)
     output_dir = layout.derivatives['cvrmap'].root
     flags = set_flags(args)
-    flags['no-shift'] = False  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
-    flags['no-denoising'] = False  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
+    flags['no-shift'] = True  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
+    flags['no-denoising'] = True  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
     parameters = read_config_file(flags)
 
     # print some summary before running

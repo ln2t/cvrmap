@@ -417,11 +417,11 @@ def compute_delays(reference, probe, shifts_option):
             printProgressBar(loop_counter, total_voxels, prefix=script_progress_sentence)
 
         delay_data = absolute_delay_data.copy() - shift_origin
-        # before we finish, we discard points in the delay map having correlation < 0.6, but we keep them for intercept and slope:
-        # delay_data = np.where(correlation_data > 0.6, delay_data, float('nan'))
-        delay_data = np.where(correlation_data > 0.6, delay_data, 0.)
-        #slope_data = np.where(correlation_data > 0.6, slope_data, float('nan'))
-        #intercept_data = np.where(correlation_data > 0.6, intercept_data, float('nan'))
+
+        delay_data = np.where(correlation_data > 0.6, delay_data, float('nan'))
+        # delay_data = np.where(correlation_data > 0.6, delay_data, 0.)
+        # slope_data = np.where(correlation_data > 0.6, slope_data, float('nan'))
+        # intercept_data = np.where(correlation_data > 0.6, intercept_data, float('nan'))
 
         delay = DataObj(data=delay_data, data_type='map', measurement_type='delay')
         slope = DataObj(data=slope_data, data_type='map')
@@ -486,15 +486,15 @@ def compute_response(intercept, slope, regressorbaseline, regressormean):
             for i_y in range(n_y):
                 loop_counter += 1
                 if np.isnan(intercept_data[i_x, i_y, i_z]):
-                    #response_data[i_x, i_y, i_z] = float('nan')
-                    response_data[i_x, i_y, i_z] = 0.
+                    response_data[i_x, i_y, i_z] = float('nan')
+                    # response_data[i_x, i_y, i_z] = 0.
                 else:
                     denominator = intercept_data[i_x, i_y, i_z] + regressorbaseline*slope_data[i_x, i_y, i_z]
                     if not denominator == 0:
                         response_data[i_x, i_y, i_z] = 100*slope_data[i_x, i_y, i_z]/denominator
                     else:
-                        # response_data[i_x, i_y, i_z] = float('nan')
-                        response_data[i_x, i_y, i_z] = 0.
+                        response_data[i_x, i_y, i_z] = float('nan')
+                        # response_data[i_x, i_y, i_z] = 0.
 
         # printProgressBar(loop_counter, total_voxels, prefix=script_progress_sentence)
 
