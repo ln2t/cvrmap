@@ -560,14 +560,16 @@ def save_figs(results, outputs, mask):
     cut_coords = int(image.load_img(results['cvr'].path).shape[-1]/10)
 
 
-    _ = plotting.plot_img(results['cvr'].path, cmap='hot', display_mode='z', black_bg=True, cbar_tick_format="%0.2g", annotate=False,
+    _cvr_img = image.math_img('np.nan_to_num(img)', img = results['cvr'].path)  # set nans to 0 for viz
+    _ = plotting.plot_img(_cvr_img, cmap='hot', display_mode='z', black_bg=True, cbar_tick_format="%0.2g", annotate=False,
                       colorbar=True, vmin=0, vmax=0.8, cut_coords=cut_coords).savefig(outputs['cvr_figure'])
 
     vmax = 1
     vmin = -2.5
 
+    _delay_img = image.math_img('np.nan_to_num(img)', img=results['delay'].path)  # set nans to 0 for viz
     _img = image.math_img('np.where(mask, img, %s)' % vmax,
-                          img=image.load_img(results['delay'].path), mask=image.load_img(mask.path))
+                          img=_delay_img, mask=image.load_img(mask.path))
     _ = plotting.plot_img(_img, cmap='black_purple_r', display_mode='z', black_bg=True, cbar_tick_format="%0.2g",
                           annotate=False, colorbar=True, vmin=vmin,
                           vmax=vmax, cut_coords=cut_coords).savefig(outputs['delay_figure'])
