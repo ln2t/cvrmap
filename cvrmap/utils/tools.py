@@ -409,6 +409,10 @@ def setup_output_dir(args, version, layout):
                       % version.rstrip('\n'))
         ds_desc.close()
 
+    # warning: adding cvrmap derivatives while running cvrmap can lead to inconsistencies when running jobs in
+    # parallel. If error occur, simply re-launch interrupted jobs.
+    # todo to solve this:
+    #  don't add derivatives for cvrmap, simply build absolute output path (only thing that is needed!)
     layout.add_derivatives(args.output_dir)  # add output dir as BIDS derivatives in layout
 
     return layout
@@ -579,7 +583,7 @@ def get_physio_data(bids_filter, layout):
         layout: BIDS layout
 
     Returns:
-        DataObj for raw physiolocical data
+        DataObj for raw physiological data
 
     """
     from .processing import DataObj
@@ -622,12 +626,13 @@ def get_melodic_mixing(bids_filter, layout):
 
     Returns:
         panda dataframe, all MELODIC mixing matrix from fmriprep outputs
+        str, path to melodic mixing matrix file
     """
     import pandas as pd
     bids_filter.update({'desc': 'MELODIC', 'suffix': 'mixing', 'extension': '.tsv'})
     melodic_mixing = layout.get(**bids_filter)[0]
 
-    return pd.read_csv(melodic_mixing, sep='\t', header=None)
+    return pd.read_csv(melodic_mixing, sep='\t', header=None), melodic_mixing
 
 
 def get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df, sf, noise_ic_pearson_r_threshold, aroma_flag):

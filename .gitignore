@@ -1,6 +1,5 @@
 data/*
 test_data/*
-cvrmap/core/__pycache__/*
 .idea/*
 jupyter/*
 .DS_Store
