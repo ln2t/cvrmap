@@ -5,3 +5,4 @@ cvrmap/core/__pycache__/*
 jupyter/*
 .DS_Store
 cvrmap/utils/__pycache__/*
+venv/*
