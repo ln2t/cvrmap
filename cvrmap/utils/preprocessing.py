@@ -77,7 +77,7 @@ def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, fwhm=None):
     bold_data = bold_img.get_fdata()
     mask = nb.load(mask_fn).get_fdata()
 
-    denoised_data = bold_data.copy()
+    _img_data = bold_data.copy()
 
     nx, ny, nz = bold_data.shape[:3]
     for x in np.arange(nx):
@@ -87,15 +87,63 @@ def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, fwhm=None):
                     # extract time series
                     Y = bold_data[x, y, z, :]
                     # denoise
-                    denoised_data[x, y, z, :] = non_agg_denoise(Y, melodic_mixing_df, noise_indexes)
+                    _img_data[x, y, z, :] = non_agg_denoise(Y, melodic_mixing_df, noise_indexes)
                 else:
-                    denoised_data[x, y, z, :] = int(0)
+                    _img_data[x, y, z, :] = int(0)
+
+    _img = nb.Nifti1Image(_img_data, bold_img.affine, bold_img.header)
+    _img = smooth_img(_img, fwhm)
+    _img = high_pass_filter(_img)
 
     denoised = DataObj(data_type='bold')
     denoised.label = 'Non-aggressively denoised data'
-    denoised.data = smooth_img(nb.Nifti1Image(denoised_data, bold_img.affine, bold_img.header), fwhm).get_fdata()
+    denoised.data = _img.get_fdata()
 
     return denoised
+
+
+def high_pass_filter(img):
+    """
+    Basically a wrapper for nilearn.image.clean_img tuned to remove non-zero frequencies lower than 1/(2*60) Hz.
+    The function first computes the mean, then apply the filter, then re-add the mean. Signal is also
+    detrended but no standardized.
+    The value 1/(2*60) Hz corresponds to the duration of the breathing challenge.
+    Args:
+        img: nilearn img to filter
+    Returns:
+        img with non-zero frequencies lower than 1/(2*60)Hz filtered out
+    """
+    from nilearn.image import mean_img, clean_img, math_img
+    _mean_img = mean_img(img)
+    t_r = img.header.get_zooms()[-1]
+    high_pass_frequency = 1/(2*60)  # in Hz
+    _img = clean_img(imgs=img, standardize=False, detrend=True, high_pass=high_pass_frequency, t_r=t_r)
+
+    return add_cst_img_to_series(_img, _mean_img)
+
+def add_cst_img_to_series(img, cst_img):
+    """
+    Take a 4D niimg and a 3D niimg and voxel-wise adds the value of the 3D img to the timeseries of the 4D img.
+    Args:
+        img: niimg, representing a 4D nifti
+        cst_img: niimg, representing a 3D nifti
+
+    Returns:
+        niimg, sum of the 3D and the 4D img as described above.
+
+    """
+    import nibabel as nb
+    _img_data = img.get_fdata().copy()
+    _cst_data = cst_img.get_fdata()
+
+    nx, ny, nz, nt = _img_data.shape
+    for x in np.arange(nx):
+        for y in np.arange(ny):
+            for z in np.arange(nz):
+                for t in np.arange(nt):
+                    _img_data[x, y, z, t] = _cst_data[x, y, z] + _img_data[x, y, z, t]
+
+    return nb.Nifti1Image(_img_data, img.affine, img.header)
 
 
 def non_agg_denoise(signal, design_matrix_df, noise_indexes):
