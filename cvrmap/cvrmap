@@ -11,7 +11,6 @@ Created: May 2022
 """
 
 # todo: read from config file
-# todo: normalize delay shift by computing delay of ROI of reference
 
 # imports
 import os  # to interact with dirs
@@ -96,7 +95,7 @@ def main():
             global_signal_shift = compute_delays(global_signal, probe, parameters['absolute_shift_list'])[0]
 
             if not os.path.exists(outputs['delay']) or flags['overwrite']:
-                # compute delays and fit parameters (this is the most time-consuming step)
+
                 if flags['sloppy']:
                     msg_warning('Working in sloppy mode, only for quick testing!')
                     zmask = mask.data
@@ -116,8 +115,10 @@ def main():
                 results = compute_delays(denoised, probe, shift_options)
                 results['delay'].units = 'seconds'
                 results['delay'].measurement_type = 'delay'
+
                 # save the obtained map
                 results['delay'].save(outputs['delay'], denoised.path)
+
                 # compute and save response maps
                 results['cvr'] = compute_response(results['intercept'], results['slope'], probe.baseline, np.mean(probe.data))
                 results['cvr'].units = "Percentage of BOLD variation/%s" % probe.units
