@@ -11,7 +11,7 @@ We use the `--no-cache` option to ensure it fetches the last version of the git 
 Note that in principle the image has been pushed to docker hub and can be installed directely using
 
 ```
-docker pull arovai/cvrmap:TAG
+docker pull arovai/cvrmap:VERSION
 ```
 
-where `TAG` must be replaced by the version tag you wish to install (e.g. `dev`).
+where `VERSION` must be replaced by the version you wish to install (e.g. `v1.0`).
