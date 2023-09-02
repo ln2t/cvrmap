@@ -426,6 +426,7 @@ def set_flags(args):
     flags['sloppy'] = args.sloppy
     flags['overwrite'] = args.overwrite
     flags['ica_aroma'] = args.use_aroma
+    flags['vesselsignal'] = args.vesselsignal
     if flags['ica_aroma']:
         from shellprints import msg_info
         msg_info("All the noise regressors found by aroma will be used.")
@@ -496,6 +497,7 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
         outputs['denoised'] = os.path.join(extras_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res + denoise_label
                                            + custom_label + '_denoised' + nifti_extension)
     outputs['etco2'] = os.path.join(extras_dir, 'sub-' + subject_label + '_desc-etco2_timecourse')
+    outputs['vesselsignal'] = os.path.join(extras_dir, 'sub-' + subject_label + '_desc-vesselsignal_timecourse')
 
     # figures (for the report)
     outputs['breathing_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_breathing' + '.png')
@@ -706,6 +708,9 @@ def get_t1w(basic_filter, space, layout):
     t1w.bids_load(layout=layout, filters=t1w_filter, data_type='map')
     return t1w
 
+def get_vesselmask():
+    vesselmask =
+    return vesselmask
 
 def get_preproc(basic_filter, layout):
     """

@@ -47,7 +47,7 @@ def main():
     msg_info("Subject(s) to analyse: %s" % subjects_to_analyze)
     msg_info("Task to analyse: %s" % task)
     msg_info("Selected space: %s" % space)
-    if not res is None:
+    if res is not None:
         msg_info("Selected resolution: %s" % res)
 
     if args.analysis_level == "participant":
@@ -59,15 +59,20 @@ def main():
 
             outputs = setup_subject_output_paths(output_dir, subject_label, space, res, args, custom_label)
 
-            physio = get_physio_data(basic_filter, layout)
-            probe, baseline = endtidalextract(physio)
-            probe.save(outputs['etco2'])
-
             preproc = get_preproc(basic_filter, layout)
             mask = get_mask(basic_filter, layout)
             t1w = get_t1w(basic_filter, space, layout)
             aroma_noise_ic_list = get_aroma_noise_ic_list(basic_filter, layout)
             melodic_mixing_df, melodic_mixing_path = get_melodic_mixing(basic_filter, layout)
+
+            if flags['vesselsignal']:
+                vessel_mask = get_vesselmask()
+                probe, baseline = vesselsignalextract(preproc, vessel_mask)
+                probe.save(outputs['vesselsignal'])
+            else:
+                physio = get_physio_data(basic_filter, layout)
+                probe, baseline = endtidalextract(physio)
+                probe.save(outputs['etco2'])
 
             corrected_noise = get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df,
                                                       preproc.sampling_frequency,
