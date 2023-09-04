@@ -57,12 +57,10 @@ def endtidalextract(physio):
 
     return probe, baseline
 
-def vesselsignalextract(preproc, vesselatlas, threshold):
+def vesselsignalextract(preproc, vessel_mask):
     from nilearn.masking import apply_mask
     from nilearn.image import binarize_img, resample_to_img
     sampling_freq = preproc.sampling_frequency
-    _vesselatlas = resample_to_img(source_img=vesselatlas, target_img=preproc.path)
-    vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
     data = apply_mask(imgs=preproc.path, mask_img=vessel_mask)
     vesselsignal = np.mean(data, axis=-1)
     baseline_data = peakutils.baseline(vesselsignal)

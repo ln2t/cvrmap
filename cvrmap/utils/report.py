@@ -139,21 +139,24 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
     report.init(subject=subject_label,
                 date_and_time=datetime.now(),
                 version=__version__, cmd=args.__dict__)
-    # Physio data
-    # create figures for report
 
-    report.add_subsection(title='Physiological data')
-    report.add_sentence(
-        sentence="Physiological data, with reconstructed "
-                 "upper envelope and baseline:")
-    report.add_image(outputs['breathing_figure'])
 
-    # global signal and etco2
-    report.add_section(title='Global Signal and etCO2')
-    report.add_sentence(sentence="The computed shift is %s seconds" % global_signal_shift)
+    if not args.vesselsignal:
+        # Physio data
+        # create figures for report
 
-    # report.add_image(global_signal.figs['plot'])
-    report.add_image(outputs['boldmean_figure'])
+        report.add_subsection(title='Physiological data')
+        report.add_sentence(
+            sentence="Physiological data, with reconstructed "
+                     "upper envelope and baseline:")
+        report.add_image(outputs['breathing_figure'])
+
+        # global signal and etco2
+        report.add_section(title='Global Signal and etCO2')
+        report.add_sentence(sentence="The computed shift is %s seconds" % global_signal_shift)
+
+        # report.add_image(global_signal.figs['plot'])
+        report.add_image(outputs['boldmean_figure'])
 
     # info on denoising
     report.add_section(title='Info on denoising')

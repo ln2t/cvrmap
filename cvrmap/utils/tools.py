@@ -512,11 +512,17 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
                                              + custom_label + '_cvr' + figures_extension)
         outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
                                              + custom_label + '_delay' + figures_extension)
+        outputs['vesselmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space
+                                             + custom_label + '_vesselmask' + figures_extension)
     else:
         outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res + denoise_label
                                              + custom_label + '_cvr' + figures_extension)
         outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res + denoise_label
                                                + custom_label + '_delay' + figures_extension)
+        outputs['vesselmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res
+                                                    + custom_label + '_vesselmask' + figures_extension)
+
+
 
     return outputs
 
@@ -533,11 +539,12 @@ def save_figs(results, outputs, mask):
     """
     # Breathing data
 
-    results['physio'].make_fig(fig_type='plot',
-                    **{'title': r'$\text{Raw CO}_2$',
-                       'xlabel': r'$\text{Time (s)}$',
-                       'ylabel': r'$\text{CO}_2\text{ '
-                                 r'concentration (%)}$'})
+    if results['physio'] is not None:
+        results['physio'].make_fig(fig_type='plot',
+                        **{'title': r'$\text{Raw CO}_2$',
+                           'xlabel': r'$\text{Time (s)}$',
+                           'ylabel': r'$\text{CO}_2\text{ '
+                                     r'concentration (%)}$'})
     results['probe'].make_fig(fig_type='plot',
                    **{'title': r'$\text{Raw CO}_2$',
                       'xlabel': r'$\text{Time (s)}$',
@@ -554,8 +561,9 @@ def save_figs(results, outputs, mask):
         'ylabel': r'BOLD signal (arbitrary units)'})
 
     from .viz import gather_figures
-    breathing_fig = gather_figures([results['probe'], results['baseline'], results['physio']])
-    breathing_fig.write_image(outputs['breathing_figure'])
+    if results['physio'] is not None:
+        breathing_fig = gather_figures([results['probe'], results['baseline'], results['physio']])
+        breathing_fig.write_image(outputs['breathing_figure'])
 
     # BOLD mean and etCO2
     boldmean_fig = gather_figures([results['global_signal'], results['probe']])
@@ -581,8 +589,16 @@ def save_figs(results, outputs, mask):
     _ = plotting.plot_img(_img, cmap='black_purple_r', display_mode='z', black_bg=True, cbar_tick_format="%0.2g",
                           annotate=False, colorbar=True, vmin=vmin,
                           vmax=vmax, cut_coords=cut_coords).savefig(outputs['delay_figure'])
+    # binarize_img(img=_vesselatlas, threshold="99%")
+    if results['vesselsignal']:
+        _ = plotting.plot_roi(results['vesselmask'], bg_img=results['meanepi'], cmap='cool', vmin=0,
+                          vmax=1, draw_cross=False).savefig(outputs['vesselmask_figure'])
 
     return 0
+
+def get_meanepi(img):
+    from nilearn.image import mean_img
+    return mean_img(img.path)
 
 
 def get_physio_data(bids_filter, layout):
@@ -710,16 +726,14 @@ def get_t1w(basic_filter, space, layout):
     t1w.bids_load(layout=layout, filters=t1w_filter, data_type='map')
     return t1w
 
-def get_vesselatlas():
-    """
-    Get the path to the vessel density atlas
-    Returns:
-    path
-    """
+def get_vesselmask(preproc, threshold):
     from os import getcwd
     from os.path import join
+    from nilearn.image import binarize_img, resample_to_img
     vesselatlas = join(getcwd(), 'cvrmap', 'data', 'VesselDensityLR.nii.gz')
-    return vesselatlas
+    _vesselatlas = resample_to_img(source_img=vesselatlas, target_img=preproc.path)
+    vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
+    return vessel_mask
 
 def get_preproc(basic_filter, layout):
     """
@@ -753,7 +767,7 @@ def read_config_file(flags):
     params['ic_threshold'] = 0.6  # threshold for correlation coefficient (r) to classify ic as noise or not
     params['absolute_shift_list'] = np.arange(-30, 30, 1)  # this is used only for the global delay shift
     params['relative_shift_list'] = np.arange(-30, 30, 1)  # this is used for the voxel-by-voxel shifts
-    params['vesseldensity_threshold'] = "80%"  # threshold to binarize the vessel density atlas
+    params['vesseldensity_threshold'] = "99%"  # threshold to binarize the vessel density atlas
     if flags['no-shift']:
         params['relative_shift_list'] = np.array([0])
     return params
