@@ -47,6 +47,7 @@ def main():
     msg_info("Subject(s) to analyse: %s" % subjects_to_analyze)
     msg_info("Task to analyse: %s" % task)
     msg_info("Selected space: %s" % space)
+
     if res is not None:
         msg_info("Selected resolution: %s" % res)
 
@@ -66,8 +67,8 @@ def main():
             melodic_mixing_df, melodic_mixing_path = get_melodic_mixing(basic_filter, layout)
 
             if flags['vesselsignal']:
-                vessel_mask = get_vesselmask()
-                probe, baseline = vesselsignalextract(preproc, vessel_mask)
+                vesselatlas = get_vesselatlas()
+                probe, baseline = vesselsignalextract(preproc, vesselatlas, parameters['vesseldensity_threshold'])
                 probe.save(outputs['vesselsignal'])
             else:
                 physio = get_physio_data(basic_filter, layout)
