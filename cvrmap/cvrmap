@@ -67,9 +67,10 @@ def main():
             melodic_mixing_df, melodic_mixing_path = get_melodic_mixing(basic_filter, layout)
 
             if flags['vesselsignal']:
-                vesselatlas = get_vesselatlas()
-                probe, baseline = vesselsignalextract(preproc, vesselatlas, parameters['vesseldensity_threshold'])
+                vesselmask = get_vesselmask(preproc, parameters['vesseldensity_threshold'])
+                probe, baseline = vesselsignalextract(preproc, vesselmask)
                 probe.save(outputs['vesselsignal'])
+                physio = None
             else:
                 physio = get_physio_data(basic_filter, layout)
                 probe, baseline = endtidalextract(physio)
@@ -140,6 +141,13 @@ def main():
                 results['cvr'].measurement_type = 'CVR'
 
             results['physio'] = physio
+            if flags['vesselsignal']:
+                results['vesselmask'] = vesselmask
+                results['meanepi'] = get_meanepi(preproc)
+                results['vesselsignal'] = True
+            else:
+                results['vesselsignal'] = False
+
             results['probe'] = probe
             results['baseline'] = baseline
             results['global_signal'] = global_signal
