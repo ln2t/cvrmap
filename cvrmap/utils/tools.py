@@ -390,6 +390,10 @@ def get_space(args, layout):
         msg_error("Selected space %s is invalid. Valid spaces are %s" % (args.space, spaces))
         sys.exit(1)
 
+    if args.vesselsignal and space == 'T1w':
+        msg_error("The vesselsignal option is not supported in T1w space (yet)")
+        sys.exit(1)
+
     #todo: check if combination space+res is in fmriprep output
 
     return space, res
@@ -706,9 +710,16 @@ def get_t1w(basic_filter, space, layout):
     t1w.bids_load(layout=layout, filters=t1w_filter, data_type='map')
     return t1w
 
-def get_vesselmask():
-    vesselmask =
-    return vesselmask
+def get_vesselatlas():
+    """
+    Get the path to the vessel density atlas
+    Returns:
+    path
+    """
+    from os import getcwd
+    from os.path import join
+    vesselatlas = join(getcwd(), 'cvrmap', 'data', 'VesselDensityLR.nii.gz')
+    return vesselatlas
 
 def get_preproc(basic_filter, layout):
     """
@@ -742,6 +753,7 @@ def read_config_file(flags):
     params['ic_threshold'] = 0.6  # threshold for correlation coefficient (r) to classify ic as noise or not
     params['absolute_shift_list'] = np.arange(-30, 30, 1)  # this is used only for the global delay shift
     params['relative_shift_list'] = np.arange(-30, 30, 1)  # this is used for the voxel-by-voxel shifts
+    params['vesseldensity_threshold'] = "80%"  # threshold to binarize the vessel density atlas
     if flags['no-shift']:
         params['relative_shift_list'] = np.array([0])
     return params
