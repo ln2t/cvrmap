@@ -611,12 +611,13 @@ def get_aroma_noise_ic_list(bids_filter, layout):
         list, list of noise ICs
     """
     # find and remove IC's that correlates with probe regressor
-    bids_filter.pop('desc')
-    bids_filter.pop('space')
-    if 'res' in bids_filter.keys():
-        bids_filter.pop('res')
-    bids_filter.update({'suffix': 'AROMAnoiseICs', 'extension': '.csv'})
-    return open(layout.get(**bids_filter)[0]).read().split(sep=',')
+    _bids_filter = bids_filter.copy()
+    _bids_filter.pop('desc')
+    _bids_filter.pop('space')
+    if 'res' in _bids_filter.keys():
+        _bids_filter.pop('res')
+    _bids_filter.update({'suffix': 'AROMAnoiseICs', 'extension': '.csv'})
+    return open(layout.get(**_bids_filter)[0]).read().split(sep=',')
 
 
 def get_melodic_mixing(bids_filter, layout):
@@ -715,9 +716,10 @@ def get_preproc(basic_filter, layout):
         DataObj, BOLD preprocessed image of the subject
     """
     from .preprocessing import DataObj
-    basic_filter.update({'desc': 'preproc', 'suffix': 'bold'})
+    _basic_filter = basic_filter.copy()
+    _basic_filter.update({'desc': 'preproc', 'suffix': 'bold'})
     preproc = DataObj(label='Preprocessed BOLD images from fMRIPrep')
-    preproc.bids_load(layout, basic_filter, 'bold')
+    preproc.bids_load(layout, _basic_filter, 'bold')
     return preproc
 
 
