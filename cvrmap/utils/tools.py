@@ -631,8 +631,9 @@ def get_melodic_mixing(bids_filter, layout):
         str, path to melodic mixing matrix file
     """
     import pandas as pd
-    bids_filter.update({'desc': 'MELODIC', 'suffix': 'mixing', 'extension': '.tsv'})
-    melodic_mixing = layout.get(**bids_filter)[0]
+    _bids_filter = bids_filter.copy()
+    _bids_filter.update({'desc': 'MELODIC', 'suffix': 'mixing', 'extension': '.tsv'})
+    melodic_mixing = layout.get(**_bids_filter)[0]
 
     return pd.read_csv(melodic_mixing, sep='\t', header=None), melodic_mixing
 
