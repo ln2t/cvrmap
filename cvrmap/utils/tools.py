@@ -506,6 +506,7 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
     # figures (for the report)
     outputs['breathing_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_breathing' + '.png')
     outputs['boldmean_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_boldmean' + '.png')
+    outputs['vesselsignal_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_vesselsignal' + '.png')
 
     if res is None:
         outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
@@ -545,11 +546,18 @@ def save_figs(results, outputs, mask):
                            'xlabel': r'$\text{Time (s)}$',
                            'ylabel': r'$\text{CO}_2\text{ '
                                      r'concentration (%)}$'})
+    if results['vesselsignal']:
+        _probe_title = 'Vessel signal'
+        _probe_yaxis = 'Arbitrary units'
+    else:
+        _probe_title = r'$\text{Raw CO}_2$'
+        _probe_yaxis = r'$\text{CO}_2\text{ 'r'concentration (%)}$'
+
     results['probe'].make_fig(fig_type='plot',
-                   **{'title': r'$\text{Raw CO}_2$',
-                      'xlabel': r'$\text{Time (s)}$',
-                      'ylabel': r'$\text{CO}_2\text{ '
-                                r'concentration (%)}$'})
+                              **{'title': _probe_title,
+                                 'xlabel': r'$\text{Time (s)}$',
+                                 'ylabel': _probe_yaxis})
+
     results['baseline'].make_fig(fig_type='plot',
                       **{'title': r'$\text{Raw CO}_2$',
                          'xlabel': r'$\text{Time (s)}$',
@@ -593,7 +601,7 @@ def save_figs(results, outputs, mask):
     if results['vesselsignal']:
         _ = plotting.plot_roi(results['vesselmask'], bg_img=results['meanepi'], cmap='cool', vmin=0,
                           vmax=1, draw_cross=False).savefig(outputs['vesselmask_figure'])
-
+        results['probe'].figs['plot'].write_image(outputs['vesselsignal_figure'])
     return 0
 
 def get_meanepi(img):

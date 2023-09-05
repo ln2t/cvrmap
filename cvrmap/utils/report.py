@@ -141,7 +141,15 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
                 version=__version__, cmd=args.__dict__)
 
 
-    if not args.vesselsignal:
+    if args.vesselsignal:
+        report.add_subsection(title='Vessel signal')
+        report.add_sentence(
+            sentence="Vessel mask on mean epi:")
+        report.add_image(outputs['vesselmask_figure'])
+        report.add_sentence(
+            sentence="Corresponding BOLD timecourse:")
+        report.add_image(outputs['vesselsignal_figure'])
+    else:
         # Physio data
         # create figures for report
 
