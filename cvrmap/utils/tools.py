@@ -612,7 +612,6 @@ def get_aroma_noise_ic_list(bids_filter, layout):
     """
     # find and remove IC's that correlates with probe regressor
     _bids_filter = bids_filter.copy()
-    _bids_filter.pop('desc')
     _bids_filter.pop('space')
     if 'res' in _bids_filter.keys():
         _bids_filter.pop('res')
@@ -634,6 +633,7 @@ def get_melodic_mixing(bids_filter, layout):
     import pandas as pd
     _bids_filter = bids_filter.copy()
     _bids_filter.update({'desc': 'MELODIC', 'suffix': 'mixing', 'extension': '.tsv'})
+    _bids_filter.pop('space')
     melodic_mixing = layout.get(**_bids_filter)[0]
 
     return pd.read_csv(melodic_mixing, sep='\t', header=None), melodic_mixing
