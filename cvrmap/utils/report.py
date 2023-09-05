@@ -196,7 +196,7 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
     # report.add_image(results['delay'].figs['histogram'])
 
     # CVR
-    report.add_subsection(title="CVR map (units: %BOLD/mmHg)")
+    report.add_subsection(title="CVR map %s" % results['cvr'].units)
     report.add_image(outputs['cvr_figure'])
     #response.make_fig(fig_type='lightbox')
     #report.add_image(response.figs['lightbox'])

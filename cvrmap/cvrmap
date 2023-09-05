@@ -37,7 +37,7 @@ def main():
     layout = setup_output_dir(args, __version__, layout)
     output_dir = layout.derivatives['cvrmap'].root
     flags = set_flags(args)
-    flags['no-shift'] = True  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
+    flags['no-shift'] = False  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
     flags['no-denoising'] = False  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
     parameters = read_config_file(flags)
 
@@ -129,8 +129,12 @@ def main():
 
                 # compute and save response maps
                 results['cvr'] = compute_response(results['intercept'], results['slope'], probe.baseline, np.mean(probe.data))
-                results['cvr'].units = "Percentage of BOLD variation/%s" % probe.units
-                results['cvr'].measurement_type = 'CVR'
+                if flags['vesselsignal']:
+                    results['cvr'].units = "Arbitrary units"
+                    results['cvr'].measurement_type = 'relative-CVR'
+                else:
+                    results['cvr'].units = "Percentage of BOLD variation/%s" % probe.units
+                    results['cvr'].measurement_type = 'CVR'
                 results['cvr'].save(outputs['cvr'], denoised.path)
             else:
                 results = dict()
