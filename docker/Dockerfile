@@ -9,7 +9,7 @@ RUN apt-get install -y python3 pip
 
 # Install cvrmap from github
 RUN cd /opt && git clone https://github.com/ln2t/cvrmap.git
-RUN cd /opt/cvrmap && git checkout v1.0
+RUN cd /opt/cvrmap && git checkout v1.1
 RUN pip install -r /opt/cvrmap/requirements.txt
 
 # Install FSL
