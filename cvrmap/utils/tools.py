@@ -738,9 +738,9 @@ def get_t1w(basic_filter, space, layout):
 
 def get_vesselmask(preproc, threshold):
     from os import getcwd
-    from os.path import join
+    from os.path import join, dirname
     from nilearn.image import binarize_img, resample_to_img
-    vesselatlas = join(getcwd(), 'cvrmap', 'data', 'VesselDensityLR.nii.gz')
+    vesselatlas = join(dirname(__file__), '..', 'data', 'VesselDensityLR.nii.gz')
     _vesselatlas = resample_to_img(source_img=vesselatlas, target_img=preproc.path)
     vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
     return vessel_mask
