@@ -778,7 +778,7 @@ def read_config_file(flags):
     params['ic_threshold'] = 0.6  # threshold for correlation coefficient (r) to classify ic as noise or not
     params['absolute_shift_list'] = np.arange(-30, 30, 1)  # this is used only for the global delay shift
     params['relative_shift_list'] = np.arange(-30, 30, 1)  # this is used for the voxel-by-voxel shifts
-    params['vesseldensity_threshold'] = "99%"  # threshold to binarize the vessel density atlas
+    params['vesseldensity_threshold'] = "99.5%"  # threshold to binarize the vessel density atlas
     if flags['no-shift']:
         params['relative_shift_list'] = np.array([0])
     return params
