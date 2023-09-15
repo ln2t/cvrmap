@@ -744,6 +744,15 @@ def get_vesselmask(preproc, threshold):
     vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
     return vessel_mask
 
+def get_vesseldensity(preproc)
+    from os import getcwd
+    from os.path import join, dirname
+    from nilearn.image import binarize_img, resample_to_img
+    vesselatlas = join(dirname(__file__), '..', 'data', 'VesselDensityLR.nii.gz')
+    _vesselatlas = resample_to_img(source_img=vesselatlas, target_img=preproc.path)
+    vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
+    return vessel_mask
+
 def get_preproc(basic_filter, layout):
     """
     Load preprocessed image for subject

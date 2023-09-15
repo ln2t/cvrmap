@@ -68,7 +68,8 @@ def main():
 
             if flags['vesselsignal']:
                 vesselmask = get_vesselmask(preproc, parameters['vesseldensity_threshold'])
-                probe, baseline = vesselsignalextract(preproc, vesselmask)
+                vesseldensity = get_vesseldensity(preproc)
+                probe, baseline = vesselsignalextract(preproc, vesseldensity)
                 probe.save(outputs['vesselsignal'])
                 physio = None
             else:
