@@ -57,12 +57,32 @@ def endtidalextract(physio):
 
     return probe, baseline
 
+def apply_probability_map(input, probability_map):
+    """
+
+    Args:
+        input: path to a a 4D niimg
+        probability_map: a 3D niimg having the same shape and affine at the 3D slices of input
+    Returns:
+        4D niimg with each spatial slices multiplied by probability_map
+    """
+    import numpy as np
+    from nilearn.image import load_img
+    img = load_img(input)
+    _data = img.get_fdata()
+    _probability = probability_map.get_fdata()
+    _output = _data.copy()
+    nx, ny, nz, _ = _data.shape
+    for x in np.arange(nx):
+        for y in np.arange(ny):
+            for z in np.arange(nz):
+                _output[x, y, z, :] = _data[x, y, z, :]*_probability[x, y, z]
+
+    return _output
 def vesselsignalextract(preproc, vessel_density):
-    from nilearn.image import math_img
     sampling_freq = preproc.sampling_frequency
-    _img = math_img('img1*img2', img1=preproc.path, img2=vessel_density)
-    data = _img.get_fdata()
-    vesselsignal = np.mean(data, axis=-1)
+    data = apply_probability_map(preproc.path, vessel_density)
+    vesselsignal = np.mean(data, axis=(0, 1, 2))
     vesselsignal = vesselsignal/np.std(vesselsignal)
     baseline_data = peakutils.baseline(vesselsignal)
     probe = DataObj(data=vesselsignal, sampling_frequency=sampling_freq, data_type='timecourse', label=r'$vesselsignal timecourse$', units='BOLD')
