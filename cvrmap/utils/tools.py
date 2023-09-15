@@ -744,14 +744,11 @@ def get_vesselmask(preproc, threshold):
     vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
     return vessel_mask
 
-def get_vesseldensity(preproc)
-    from os import getcwd
+def get_vesseldensity(preproc):
     from os.path import join, dirname
     from nilearn.image import binarize_img, resample_to_img
     vesselatlas = join(dirname(__file__), '..', 'data', 'VesselDensityLR.nii.gz')
-    _vesselatlas = resample_to_img(source_img=vesselatlas, target_img=preproc.path)
-    vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
-    return vessel_mask
+    return resample_to_img(source_img=vesselatlas, target_img=preproc.path)
 
 def get_preproc(basic_filter, layout):
     """
@@ -786,7 +783,6 @@ def read_config_file(flags):
     params['ic_threshold'] = 0.6  # threshold for correlation coefficient (r) to classify ic as noise or not
     params['absolute_shift_list'] = np.arange(-30, 30, 1)  # this is used only for the global delay shift
     params['relative_shift_list'] = np.arange(-30, 30, 1)  # this is used for the voxel-by-voxel shifts
-    params['vesseldensity_threshold'] = "99.5%"  # threshold to binarize the vessel density atlas
     if flags['no-shift']:
         params['relative_shift_list'] = np.array([0])
     return params

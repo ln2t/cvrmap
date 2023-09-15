@@ -67,7 +67,6 @@ def main():
             melodic_mixing_df, melodic_mixing_path = get_melodic_mixing(basic_filter, layout)
 
             if flags['vesselsignal']:
-                vesselmask = get_vesselmask(preproc, parameters['vesseldensity_threshold'])
                 vesseldensity = get_vesseldensity(preproc)
                 probe, baseline = vesselsignalextract(preproc, vesseldensity)
                 probe.save(outputs['vesselsignal'])
@@ -148,7 +147,7 @@ def main():
 
             results['physio'] = physio
             if flags['vesselsignal']:
-                results['vesselmask'] = vesselmask
+                results['vesselmask'] = vesseldensity
                 results['meanepi'] = get_meanepi(preproc)
                 results['vesselsignal'] = True
             else:
