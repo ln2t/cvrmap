@@ -37,8 +37,8 @@ def main():
     layout = setup_output_dir(args, __version__, layout)
     output_dir = layout.derivatives['cvrmap'].root
     flags = set_flags(args)
-    flags['no-shift'] = False  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
-    flags['no-denoising'] = False  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
+    flags['no-shift'] = True  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
+    flags['no-denoising'] = True  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
     parameters = read_config_file(flags)
 
     # print some summary before running
@@ -132,6 +132,7 @@ def main():
                 if flags['vesselsignal']:
                     results['cvr'].units = "Arbitrary units"
                     results['cvr'].measurement_type = 'relative-CVR'
+                    results['cvr'].data = 10*results['cvr'].data/np.nanstd(results['cvr'].data)  # this rescaling is mostly for visual purposes
                 else:
                     results['cvr'].units = "Percentage of BOLD variation/%s" % probe.units
                     results['cvr'].measurement_type = 'CVR'
