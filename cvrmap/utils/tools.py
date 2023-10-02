@@ -262,7 +262,7 @@ def arguments_manager(version):
                         action='store_true')
     parser.add_argument('--label', help='If set, labels the output with custom label.')
     parser.add_argument('-v', '--version', action='version', version='BIDS-App example version {}'.format(version))
-    parser.add_argument('--vesselsignal', help='If set, will extract BOLD signal as a surrogate for CO2 partial pressure. Results in measures of relative CVR.',
+    parser.add_argument('--vesselsignal', help='If set, will extract BOLD signal from vessels as a surrogate for CO2 partial pressure. Results in measures of relative CVR.',
                         action='store_true')
     return parser.parse_args()
 
