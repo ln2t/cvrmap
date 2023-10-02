@@ -66,10 +66,18 @@ def main():
             aroma_noise_ic_list = get_aroma_noise_ic_list(basic_filter, layout)
             melodic_mixing_df, melodic_mixing_path = get_melodic_mixing(basic_filter, layout)
 
-            if flags['vesselsignal']:
-                vesselmask = get_vesselmask(preproc, parameters['vesseldensity_threshold'])
-                probe, baseline = vesselsignalextract(preproc, vesselmask)
-                probe.save(outputs['vesselsignal'])
+            if flags['vesselsignal'] or flags['globalsignal']:
+                if flags['vesselsignal']:
+                    mask = get_vesselmask(preproc, parameters['vesseldensity_threshold'])
+                    mask_output = outputs['vesselsignal']
+                    signal_label = r'$vesselsignal timecourse$'
+                if flags['globalsignal']:
+                    mask_output = outputs['globalsignal']
+                    signal_label = r'$globalsignal timecourse$'
+                probe, baseline = masksignalextract(preproc, mask)
+                probe.label = signal_label
+                baseline.label = signal_label
+                probe.save(mask_output)
                 physio = None
             else:
                 physio = get_physio_data(basic_filter, layout)

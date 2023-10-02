@@ -434,6 +434,7 @@ def set_flags(args):
     flags['overwrite'] = args.overwrite
     flags['ica_aroma'] = args.use_aroma
     flags['vesselsignal'] = args.vesselsignal
+    flags['globalsignal'] = args.globalsignal
     if flags['ica_aroma']:
         from shellprints import msg_info
         msg_info("All the noise regressors found by aroma will be used.")
@@ -487,7 +488,6 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
     report_extension = '.html'
     figures_extension = '.svg'
 
-    # report
     # report is in root of derivatives (fmriprep-style), not in subject-specific directory
     outputs['report'] = os.path.join(output_dir,
                                      "sub-" + subject_label + '_report' + report_extension)
@@ -505,11 +505,13 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
                                            + custom_label + '_denoised' + nifti_extension)
     outputs['etco2'] = os.path.join(extras_dir, 'sub-' + subject_label + '_desc-etco2_timecourse')
     outputs['vesselsignal'] = os.path.join(extras_dir, 'sub-' + subject_label + '_desc-vesselsignal_timecourse')
+    outputs['globalsignal'] = os.path.join(extras_dir, 'sub-' + subject_label + '_desc-globalsignal_timecourse')
 
     # figures (for the report)
     outputs['breathing_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_breathing' + '.png')
     outputs['boldmean_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_boldmean' + '.png')
     outputs['vesselsignal_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_vesselsignal' + '.png')
+    outputs['globalsignal_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_globalsignal' + '.png')
 
     if res is None:
         outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
@@ -518,6 +520,8 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
                                              + custom_label + '_delay' + figures_extension)
         outputs['vesselmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space
                                              + custom_label + '_vesselmask' + figures_extension)
+        outputs['globalmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space
+                                             + custom_label + '_globalmask' + figures_extension)
     else:
         outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res + denoise_label
                                              + custom_label + '_cvr' + figures_extension)
@@ -525,6 +529,8 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
                                                + custom_label + '_delay' + figures_extension)
         outputs['vesselmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res
                                                     + custom_label + '_vesselmask' + figures_extension)
+        outputs['globalmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res
+                                                    + custom_label + '_globalmask' + figures_extension)
 
 
 
