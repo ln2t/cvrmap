@@ -140,7 +140,6 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
                 date_and_time=datetime.now(),
                 version=__version__, cmd=args.__dict__)
 
-
     if args.vesselsignal:
         report.add_subsection(title='Vessel signal')
         report.add_sentence(
@@ -150,21 +149,30 @@ def build_report(subject_label, args, __version__, physio, probe, baseline, glob
             sentence="Corresponding BOLD timecourse:")
         report.add_image(outputs['vesselsignal_figure'])
     else:
-        # Physio data
-        # create figures for report
+        if args.globalsignal:
+            report.add_subsection(title='Global signal')
+            report.add_sentence(
+                sentence="Global mask on mean epi:")
+            report.add_image(outputs['globalmask_figure'])
+            report.add_sentence(
+                sentence="Corresponding BOLD timecourse:")
+            report.add_image(outputs['globalsignal_figure'])
+        else:
+            # Physio data
+            # create figures for report
 
-        report.add_subsection(title='Physiological data')
-        report.add_sentence(
-            sentence="Physiological data, with reconstructed "
-                     "upper envelope and baseline:")
-        report.add_image(outputs['breathing_figure'])
+            report.add_subsection(title='Physiological data')
+            report.add_sentence(
+                sentence="Physiological data, with reconstructed "
+                         "upper envelope and baseline:")
+            report.add_image(outputs['breathing_figure'])
 
-        # global signal and etco2
-        report.add_section(title='Global Signal and etCO2')
-        report.add_sentence(sentence="The computed shift is %s seconds" % global_signal_shift)
+            # global signal and etco2
+            report.add_section(title='Global Signal and etCO2')
+            report.add_sentence(sentence="The computed shift is %s seconds" % global_signal_shift)
 
-        # report.add_image(global_signal.figs['plot'])
-        report.add_image(outputs['boldmean_figure'])
+            # report.add_image(global_signal.figs['plot'])
+            report.add_image(outputs['boldmean_figure'])
 
     # info on denoising
     report.add_section(title='Info on denoising')

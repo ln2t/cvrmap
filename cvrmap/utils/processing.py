@@ -23,7 +23,7 @@ class DataObj:
     measurement_type is the type of the actual values, like 'CVR' or 'delay', or 'concentration'.
     mask is a binary map, can be used to mask data in the case of 'map' or 'bold'data_type.
     """
-    def __init__(self, data=None, sampling_frequency=None, data_type=None, path=None, label=None, figs=None, measurement_type=None, mask=None, baseline=None, units=None):
+    def __init__(self, data=None, sampling_frequency=None, data_type=None, path=None, label=None, figs=None, measurement_type=None, mask=None, baseline=None, units=None, img=None):
         self.sampling_frequency = sampling_frequency
         self.data = data
         self.data_type = data_type
@@ -34,6 +34,7 @@ class DataObj:
         self.mask = mask
         self.baseline = baseline
         self.units = units
+        self.img = img
 
     def bids_load(self, layout, filters, data_type, **kwargs):
         """Load DataObj from a BIDS layout and filters
@@ -64,7 +65,8 @@ class DataObj:
                 self.units = units
             else:
                 data_path = layout.get(**filters, extension='nii.gz')[0]
-                data = nibabel.load(data_path).get_fdata()
+                self.img = nibabel.load(data_path)
+                data = self.img.get_fdata()
                 if data_type == 'map':
                     sampling_frequency = 0
                 elif data_type == 'bold':

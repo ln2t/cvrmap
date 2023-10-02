@@ -68,13 +68,14 @@ def main():
 
             if flags['vesselsignal'] or flags['globalsignal']:
                 if flags['vesselsignal']:
-                    mask = get_vesselmask(preproc, parameters['vesseldensity_threshold'])
+                    mask_img = get_vesselmask(preproc, parameters['vesseldensity_threshold'])
                     mask_output = outputs['vesselsignal']
                     signal_label = r'$vesselsignal timecourse$'
                 if flags['globalsignal']:
+                    mask_img = mask.img
                     mask_output = outputs['globalsignal']
                     signal_label = r'$globalsignal timecourse$'
-                probe, baseline = masksignalextract(preproc, mask)
+                probe, baseline = masksignalextract(preproc, mask_img)
                 probe.label = signal_label
                 baseline.label = signal_label
                 probe.save(mask_output)
@@ -155,11 +156,18 @@ def main():
 
             results['physio'] = physio
             if flags['vesselsignal']:
-                results['vesselmask'] = vesselmask
+                results['vesselmask'] = mask_img
                 results['meanepi'] = get_meanepi(preproc)
                 results['vesselsignal'] = True
             else:
                 results['vesselsignal'] = False
+
+            if flags['globalsignal']:
+                results['globalmask'] = mask_img
+                results['meanepi'] = get_meanepi(preproc)
+                results['globalsignal'] = True
+            else:
+                results['globalsignal'] = False
 
             results['probe'] = probe
             results['baseline'] = baseline

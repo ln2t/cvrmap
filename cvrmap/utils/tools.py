@@ -562,6 +562,13 @@ def save_figs(results, outputs, mask):
         _probe_title = r'$\text{Raw CO}_2$'
         _probe_yaxis = r'$\text{CO}_2\text{ 'r'concentration (%)}$'
 
+    if results['globalsignal']:
+        _probe_title = 'Global signal'
+        _probe_yaxis = 'Arbitrary units'
+    else:
+        _probe_title = r'$\text{Raw CO}_2$'
+        _probe_yaxis = r'$\text{CO}_2\text{ 'r'concentration (%)}$'
+
     results['probe'].make_fig(fig_type='plot',
                               **{'title': _probe_title,
                                  'xlabel': r'$\text{Time (s)}$',
@@ -611,6 +618,11 @@ def save_figs(results, outputs, mask):
         _ = plotting.plot_roi(results['vesselmask'], bg_img=results['meanepi'], cmap='cool', vmin=0,
                           vmax=1, draw_cross=False).savefig(outputs['vesselmask_figure'])
         results['probe'].figs['plot'].write_image(outputs['vesselsignal_figure'])
+
+    if results['globalsignal']:
+        _ = plotting.plot_roi(results['globalmask'], bg_img=results['meanepi'], cmap='cool', vmin=0,
+                          vmax=1, draw_cross=False).savefig(outputs['globalmask_figure'])
+        results['probe'].figs['plot'].write_image(outputs['globalsignal_figure'])
     return 0
 
 def get_meanepi(img):
