@@ -14,8 +14,9 @@ RUN apt-get install -y python2
 RUN python2 /root/fslinstaller.py < /root/fsl_config.txt
 
 # Install cvrmap from github
+RUN cd /opt
 RUN cd /opt && git clone https://github.com/ln2t/cvrmap.git
-RUN cd /opt/cvrmap && git checkout dev
+RUN cd /opt/cvrmap && git checkout v1.1.3
 RUN pip install -r /opt/cvrmap/requirements.txt
 
 # Set entrypoint to entrypoint script
