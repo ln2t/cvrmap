@@ -7,8 +7,8 @@ Classes and Functions for actual data processing.
 import numpy as np
 import scipy.stats
 
-from .tools import *
-from .shellprints import *
+from .math_tools import *
+from .shell_tools import *
 
 # classes
 

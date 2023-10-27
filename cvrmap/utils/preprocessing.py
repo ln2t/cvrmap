@@ -69,7 +69,7 @@ def masksignalextract(preproc, mask):
     return probe, baseline
 
 def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
-    from .tools import run
+    from .shell_tools import run
     import uuid
     import nibabel as nb
     from os.path import join
