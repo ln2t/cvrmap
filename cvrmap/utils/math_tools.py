@@ -8,6 +8,16 @@ from scipy.signal import resample
 from scipy.stats import pearsonr
 
 def match_timecourses(y1, y2, delay):
+    """
+        The goal of this function is to take two time courses and apply a time shift between the two.
+        This is done carefully, in particular ensuring that the returned time courses are of equal length.
+    Args:
+        y1: np array of length n1
+        y2: np array of length n2
+        delay: int
+    Returns:
+        y1_matched, y2_matched: arrays of same length
+    """
     delay = int(delay)
     if delay >= 0:
         y1_matched = y1[:len(y2) - 2*delay]
@@ -24,7 +34,19 @@ def match_timecourses(y1, y2, delay):
 
 
 def tccorr(data_object1, data_object2):
+    """
+    Computes cross-correlation between two time courses, by exploring variour time shifts. The inputs are DataObj
+    of type "timecourse", and come with their own sampling frequency. If the sampling frequencies are different
+    (typical in the case of BOLD signal compared to capnograph data), then the signal with higher sf is
+    downsampled to the lower one. Delays are explored to find maximum correlation, and r-coefficient at maximum
+    returned.
+    Args:
+        data_object1: DataObj of type "timecourse"
+        data_object2: DataObj of type "timecourse"
 
+    Returns:
+        float, the maximum r-correlation over the explored delays
+    """
     tc1 = data_object1.data
     sf1 = data_object1.sampling_frequency
     tc2 = data_object2.data
@@ -177,6 +199,18 @@ def compute_global_signal(data):
     global_signal.sampling_frequency = data.sampling_frequency
     global_signal.data_type = 'timecourse'
     return global_signal
+
+
+def get_meanepi(img):
+    """
+    Compute temporal mean for fMRI data (calls nilearn.image.mean_img)
+    Args:
+        img: DataObj for the input fMRI data
+    Returns:
+        niimg, the mean of fMRI data
+    """
+    from nilearn.image import mean_img
+    return mean_img(img.path)
 
 
 def get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df, sf, noise_ic_pearson_r_threshold, aroma_flag):

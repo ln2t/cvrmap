@@ -205,6 +205,17 @@ def get_space(args, layout):
 
 
 def setup_output_dir(args, version, layout):
+    """
+        Create output dir if it does not exist, together with dataset_description.json file in it with CVRmap version.
+        Update BIDS layout to contain this folder as BIDS derivatives.
+    Args:
+        args: dict, arguments of the script
+        version: str, version of the software
+        layout: BIDS layout
+
+    Returns:
+        layout: BIDS layout, updated with output dir
+    """
     import os
     from pathlib import Path  # to create dirs
     # create output dir
@@ -213,8 +224,7 @@ def setup_output_dir(args, version, layout):
     dataset_description = os.path.join(args.output_dir,
                                        'dataset_description.json')
     with open(dataset_description, 'w') as ds_desc:
-        # todo: get the correct BIDS version
-        ds_desc.write(('{"Name": "cvrmap", "BIDSVersion": "x.x.x", '
+        ds_desc.write(('{"Name": "cvrmap", "BIDSVersion": "v1.8.0", '
                        '"DatasetType": "derivative", "GeneratedBy": '
                        '[{"Name": "cvrmap"}, {"Version": "%s"}]}')
                       % version.rstrip('\n'))
@@ -230,6 +240,13 @@ def setup_output_dir(args, version, layout):
 
 
 def set_flags(args):
+    """
+    Set various flags for options in the main script
+    Args:
+        args: dict, argument of the script
+    Returns:
+        dict, with values for the flags as set by the options
+    """
     flags = dict()
     # sloppiness
     flags['sloppy'] = args.sloppy
@@ -334,14 +351,7 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
         outputs['globalmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res
                                                     + custom_label + '_globalmask' + figures_extension)
 
-
-
     return outputs
-
-
-def get_meanepi(img):
-    from nilearn.image import mean_img
-    return mean_img(img.path)
 
 
 def get_physio_data(bids_filter, layout):
@@ -449,6 +459,15 @@ def get_t1w(basic_filter, space, layout):
 
 
 def get_vesselmask(preproc, threshold):
+    """
+    Get the vessel density atlas and binarize it to build the vessel mask
+    Args:
+        preproc: DataObj, used only to get the properties of the fMRI data to have the mask on same grid
+        threshold: str, threshold value such as "95%", passed to nilearn.image.binarize_img
+
+    Returns:
+        niimg, mask for vessels in MNI space
+    """
     from os.path import join, dirname
     from nilearn.image import binarize_img, resample_to_img
     vesselatlas = join(dirname(__file__), '..', 'data', 'VesselDensityLR.nii.gz')

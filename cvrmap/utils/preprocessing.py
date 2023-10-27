@@ -58,6 +58,17 @@ def endtidalextract(physio):
     return probe, baseline
 
 def masksignalextract(preproc, mask):
+    """
+    Return time series from masked fMRI data
+    Args:
+        preproc: DataObj, fMRI data
+        mask: str, path to mask
+
+    Returns:
+        probe: DataObj, containing the extracted time course
+        baseline: DataObj, baseline of probe
+
+    """
     from nilearn.masking import apply_mask
     sampling_freq = preproc.sampling_frequency
     data = apply_mask(imgs=preproc.path, mask_img=mask)
@@ -69,6 +80,26 @@ def masksignalextract(preproc, mask):
     return probe, baseline
 
 def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
+    """
+    Wrapper for the fsl preprocessing, including non-agressive denoising.
+
+    The steps are as follows:
+    - non-aggressive denoising (using fsl_regfilt command)
+    - highpass filtering (using fslmaths)
+    - spatial smoothing (if fwhm is not none)
+
+    highpass filtering is done using the -bptf option of fsl_math with argument hpsigma = 128/2/TR
+
+    Args:
+        fmri_input: str, path to fMRI data to preprocess
+        melodic_mixing: str, path to melodic mixing matrix saved as a .tsv (as in fMRIPrep)
+        corrected_noise: np array containing the labels (integers) of the ICA components to consider as noise
+        fwhm: int, FWHM for extrat smoothing (optional)
+
+    Returns:
+        DataObj for cleaned (denoised) fMRI data
+
+    """
     from .shell_tools import run
     import uuid
     import nibabel as nb
@@ -82,11 +113,15 @@ def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
     fsl_regfilt_cmd = join(fsl_bin_folder, 'fsl_regfilt') + " --in=%s --filter=%s --design=%s --out=%s" % (fmri_input, ','.join(_corrected_noise), melodic_mixing, regfilt_output)
     compute_mean_cmd = join(fsl_bin_folder, 'fslmaths') + " %s -Tmean %s" % (regfilt_output, tmp_output_mean)
     t_r = nb.load(fmri_input).header.get_zooms()[-1]
-    hpsigma = 128/2/t_r # 128/TR/2
+    hpsigma = 128/2/t_r
     highpass_cmd = join(fsl_bin_folder, 'fslmaths') + " %s -bptf %s -1 -add %s %s" % (regfilt_output, hpsigma, tmp_output_mean, tmp_highpassfilter_output)
+
+    # run external commands
+
     run(fsl_regfilt_cmd)
     run(compute_mean_cmd)
     run(highpass_cmd)
+
     _output = tmp_highpassfilter_output
     _img = nb.load(_output)
 
@@ -187,6 +222,7 @@ def add_cst_img_to_series(img, cst_img):
 def non_agg_denoise(signal, design_matrix_df, noise_indexes):
     """
     This is the in-house implementation of non-aggressive denoising. It is doing the same thing as fsl_regfilt.
+    This is work in progress and is not used in the main script.
     """
     # define model with ALL regressors
     model = OLS(signal, design_matrix_df.values)

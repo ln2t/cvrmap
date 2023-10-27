@@ -9,6 +9,9 @@ from datetime import datetime
 # classes
 
 class bcolors:
+    """
+    Convenient colors for terminal prints
+    """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
@@ -27,6 +30,14 @@ class bcolors:
 # functions
 
 def msg_info(msg):
+    """
+    Custom print to shell (information)
+    Args:
+        msg: str
+
+    Returns:
+        None
+    """
     now = datetime.now()
     time_stamp = now.strftime("(%Y-%m-%d-%H-%M-%S) ")
     # print('(py) ' + f"{bcolors.INFO}INFO{bcolors.ENDC} " + time_stamp + msg, flush=True)
@@ -34,6 +45,14 @@ def msg_info(msg):
 
 
 def msg_error(msg):
+    """
+        Custom print to shell (error)
+        Args:
+            msg: str
+
+        Returns:
+            None
+        """
     now = datetime.now()
     time_stamp = now.strftime("(%Y-%m-%d-%H-%M-%S) ")
     # print('(py) ' + f"{bcolors.ERROR}ERROR{bcolors.ENDC} " + time_stamp + msg, flush=True)
@@ -41,6 +60,14 @@ def msg_error(msg):
 
 
 def msg_warning(msg):
+    """
+        Custom print to shell (warning)
+        Args:
+            msg: str
+
+        Returns:
+            None
+        """
     now = datetime.now()
     time_stamp = now.strftime("(%Y-%m-%d-%H-%M-%S) ")
     # print('(py) ' + f"{bcolors.WARNING}WARNING{bcolors.ENDC} " + time_stamp + msg, flush=True)
@@ -111,7 +138,7 @@ def get_version ():
     """
     Print version from git info
     Returns:
-    __version__
+        __version__
     """
     from os.path import join, dirname, realpath
     # version = open(join(dirname(realpath(__file__)), '..', '..', '..', '.git',
