@@ -1,0 +1,5 @@
+{
+  "fwhm": 5,
+  "ic_threshold": 0.6,
+  "vesseldensity_threshold": "95%"
+}

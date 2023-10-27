@@ -242,7 +242,10 @@ def arguments_manager(version):
                                                'output_dir.',
                         choices=['participant', 'group'])
     parser.add_argument('--participant_label',
-                        help='The label(s) of the participant(s) that should be analyzed. The label corresponds to sub-<participant_label> from the BIDS spec (so it does not include "sub-"). If this parameter is not provided all subjects should be analyzed. Multiple participants can be specified with a space separated list.',
+                        help='The label(s) of the participant(s) that should be analyzed. '
+                             'The label corresponds to sub-<participant_label> from the BIDS spec '
+                             '(so it does not include "sub-"). If this parameter is not provided all subjects '
+                             'should be analyzed. Multiple participants can be specified with a space separated list.',
                         nargs="+")
     parser.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
                         action='store_true')
@@ -250,8 +253,10 @@ def arguments_manager(version):
                         help='Path of the fmriprep derivatives. If ommited, set to bids_dir/derivatives/fmriprep')
     parser.add_argument('--task', help='Name of the task to be used. If omitted, will search for \'gas\'.')
     parser.add_argument('--space',
-                        help='Name of the space to be used. Must be associated with fmriprep output. Default: \'MNI152NLin2009cAsym\'.'
-                             'Also accepts resolution modifier (e.g. \'MNI152NLin2009cAsym:res-2\') as in fmriprep options.')
+                        help='Name of the space to be used. Must be associated with fmriprep output. '
+                             'Default: \'MNI152NLin2009cAsym\'.'
+                             'Also accepts resolution modifier '
+                             '(e.g. \'MNI152NLin2009cAsym:res-2\') as in fmriprep options.')
     parser.add_argument('--work_dir', help='Work dir for temporary files. If omitted, set to \'output_dir/work\'')
     parser.add_argument('--sloppy',
                         help='Only for testing, computes a small part of the maps to save time. Off by default.',
@@ -262,11 +267,17 @@ def arguments_manager(version):
                         action='store_true')
     parser.add_argument('--label', help='If set, labels the output with custom label.')
     parser.add_argument('-v', '--version', action='version', version='BIDS-App example version {}'.format(version))
-    parser.add_argument('--vesselsignal', help='If set, will extract BOLD signal from vessels as a surrogate for CO2 partial pressure. Results in measures of relative CVR.',
+    parser.add_argument('--vesselsignal', help='If set, will extract BOLD signal from vessels as a '
+                                               'surrogate for CO2 partial pressure. '
+                                               'Results in measures of relative CVR.',
                         action='store_true')
     parser.add_argument('--globalsignal',
-                        help='If set, will extract global BOLD signal as a surrogate for CO2 partial pressure. Results in measures of relative CVR.',
+                        help='If set, will extract global BOLD signal as a surrogate for CO2 partial pressure. '
+                             'Results in measures of relative CVR.',
                         action='store_true')
+    parser.add_argument('--config',
+                        help='Path to json file fixing the pipeline parameters. '
+                             'If omitted, default values will be used.')
     return parser.parse_args()
 
 
@@ -783,22 +794,39 @@ def get_preproc(basic_filter, layout):
     return preproc
 
 
-def read_config_file(flags):
+def read_config_file(file=None):
     """
-    Define all parameters in this function. In the future this will be done by reading a config file (if provided).
+    All processing parameters are set here to their default values.
+    If file is provided, then the parameters 'fwhm', 'ic_threshold' and 'vesseldensity_threshold' are read from the file (if unspecified, the default value will be kept).
     Args:
-        flogs, dict with boolean values
+        file, path to json file
     Returns:
         dict, with various values/np.arrays for the parameters used in main script
     """
     import numpy as np
     params = {}
-    # todo: read these values from a config file
+
+    # Default values
+
     params['fwhm'] = 5  # in mm
     params['ic_threshold'] = 0.6  # threshold for correlation coefficient (r) to classify ic as noise or not
     params['absolute_shift_list'] = np.arange(-30, 30, 1)  # this is used only for the global delay shift
     params['relative_shift_list'] = np.arange(-30, 30, 1)  # this is used for the voxel-by-voxel shifts
     params['vesseldensity_threshold'] = "99.5%"  # threshold to binarize the vessel density atlas
-    if flags['no-shift']:
-        params['relative_shift_list'] = np.array([0])
+
+    if file:
+        import json
+        from .shellprints import msg_info
+
+        msg_info('Reading parameters from user-provided configuration file %s' % file)
+
+        with open(file, 'r') as f:
+            config = json.load(f)
+
+        keys = ['fwhm', 'ic_threshold', 'vesseldensity_threshold']
+
+        for key in keys:
+            if key in config.keys():
+                params[key] = config[key]
+
     return params

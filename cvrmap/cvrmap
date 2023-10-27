@@ -39,7 +39,10 @@ def main():
     flags = set_flags(args)
     flags['no-shift'] = False  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
     flags['no-denoising'] = False  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
-    parameters = read_config_file(flags)
+    parameters = read_config_file(args.config)
+
+    if flags['no-shift']:
+        parameters['relative_shift_list'] = np.array([0])
 
     # print some summary before running
     msg_info("Bids directory: %s" % layout.root)
