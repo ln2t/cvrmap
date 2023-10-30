@@ -26,7 +26,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-html_baseurl = 'docs'
+html_baseurl = 'docs/build'
 
 import os
 import sys
