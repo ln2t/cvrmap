@@ -2,14 +2,13 @@
 Preprocessing tools for physiological and fMRI data
 """
 
-# IMPORTS
-
 from .processing import DataObj
 import numpy as np
 from scipy.ndimage import gaussian_filter
 import peakutils
 from scipy.interpolate import interp1d
 from statsmodels.regression.linear_model import OLS
+
 
 def endtidalextract(physio):
     """
@@ -58,6 +57,7 @@ def endtidalextract(physio):
 
     return probe, baseline
 
+
 def masksignalextract(preproc, mask):
     """
         Return time series from masked fMRI data
@@ -80,6 +80,7 @@ def masksignalextract(preproc, mask):
     probe = DataObj(data=masksignal, sampling_frequency=sampling_freq, data_type='timecourse', units='BOLD')
     baseline = DataObj(data=np.mean(baseline_data)*np.ones(len(baseline_data)), sampling_frequency=sampling_freq, data_type='timecourse', units='BOLD')
     return probe, baseline
+
 
 def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
     """
@@ -133,6 +134,8 @@ def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
     denoised.label = 'Non-aggressively denoised data'
     denoised.data = _img.get_fdata()
     return denoised
+
+
 def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, fwhm=None):
     """
         Loops over all voxel not in mask for non_agg_denoise, which does what fsl_regfilt does.
@@ -197,6 +200,7 @@ def high_pass_filter(img):
     _img = clean_img(imgs=img, standardize=False, detrend=True, high_pass=high_pass_frequency, t_r=t_r)
 
     return add_cst_img_to_series(_img, _mean_img)
+
 
 def add_cst_img_to_series(img, cst_img):
     """

@@ -12,6 +12,7 @@ from .shell_tools import *
 
 # classes
 
+
 class DataObj:
     """
         Class to keep together data with sampling freq and other useful information on the data
@@ -287,6 +288,7 @@ class DataObj:
             self.baseline = round(np.mean(peakutils.baseline(self.data)), 6)
 
 # functions
+
 
 def compute_delays(reference, probe, shifts_option):
     """
