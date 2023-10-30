@@ -9,7 +9,8 @@ from scipy.stats import pearsonr
 
 def arguments_manager(version):
     """
-    Wrapper to define and read arguments for main function call
+        Wrapper to define and read arguments for main function call
+
     Args:
         version: version to output when calling with -h
 
@@ -74,7 +75,8 @@ def arguments_manager(version):
 
 def get_subjects_to_analyze(args, layout):
     """
-    Generate list of subjects to analyze given the options and available subjects
+        Generate list of subjects to analyze given the options and available subjects
+
     Args:
         args: return from arguments_manager
         layout: BIDS layout
@@ -98,7 +100,8 @@ def get_subjects_to_analyze(args, layout):
 
 def get_fmriprep_dir(args):
     """
-    Get and check existence of fmriprep dir from options or default
+        Get and check existence of fmriprep dir from options or default
+
     Args:
         args: return from arguments_manager
 
@@ -121,7 +124,8 @@ def get_fmriprep_dir(args):
 
 def get_task(args, layout):
     """
-    Get and check task option or set to default
+        Get and check task option or set to default
+
     Args:
         args: return from arguments_manager
         layout: BIDS layout
@@ -148,7 +152,8 @@ def get_task(args, layout):
 
 def get_custom_label(args):
     """
-    Create custom label if specified
+        Create custom label if specified
+
     Args:
         args: return from arguments_manager
 
@@ -167,7 +172,8 @@ def get_custom_label(args):
 
 def get_space(args, layout):
     """
-    Get space (and res, if any) and checks if present in layout (rawdata and derivatives)
+        Get space (and res, if any) and checks if present in layout (rawdata and derivatives)
+
     Args:
         args: return from arguments_manager
         layout: BIDS layout
@@ -208,6 +214,7 @@ def setup_output_dir(args, version, layout):
     """
         Create output dir if it does not exist, together with dataset_description.json file in it with CVRmap version.
         Update BIDS layout to contain this folder as BIDS derivatives.
+
     Args:
         args: dict, arguments of the script
         version: str, version of the software
@@ -241,7 +248,8 @@ def setup_output_dir(args, version, layout):
 
 def set_flags(args):
     """
-    Set various flags for options in the main script
+        Set various flags for options in the main script
+
     Args:
         args: dict, argument of the script
     Returns:
@@ -263,7 +271,8 @@ def set_flags(args):
 
 def setup_subject_output_paths(output_dir, subject_label, space, res, args, custom_label):
     """
-    Setup various paths for subject output. Also creates subject output dir.
+        Setup various paths for subject output. Also creates subject output dir.
+
     Args:
         output_dir: str, cvrmap output dir
         subject_label: str, subject label
@@ -356,7 +365,8 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
 
 def get_physio_data(bids_filter, layout):
     """
-    Fetch raw physiological data
+        Fetch raw physiological data
+
     Args:
         bids_filter: dict, basic BIDS filter
         layout: BIDS layout
@@ -379,7 +389,8 @@ def get_physio_data(bids_filter, layout):
 
 def get_aroma_noise_ic_list(bids_filter, layout):
     """
-    Get the list of Independent Components that were classified as noise by ICA-AROMA, from fmriprep outputs
+        Get the list of Independent Components that were classified as noise by ICA-AROMA, from fmriprep outputs
+
     Args:
         bids_filter: dict, BIDS filter
         layout: BIDSlayout
@@ -398,7 +409,8 @@ def get_aroma_noise_ic_list(bids_filter, layout):
 
 def get_melodic_mixing(bids_filter, layout):
     """
-    Get all IC's as found by MELODIC
+        Get all IC's as found by MELODIC
+
     Args:
         bids_filter: dict, BIDS filter
         layout: BIDSlayout
@@ -418,7 +430,8 @@ def get_melodic_mixing(bids_filter, layout):
 
 def get_mask(basic_filter, layout):
     """
-    Load brain mask for subject
+        Load brain mask for subject
+
     Args:
         basic_filter: dict, BIDS filter
         layout: BIDS layout
@@ -436,7 +449,8 @@ def get_mask(basic_filter, layout):
 
 def get_t1w(basic_filter, space, layout):
     """
-    Load t1w image for subject
+        Load t1w image for subject
+
     Args:
         basic_filter: dict, BIDS filter
         space: str
@@ -460,7 +474,8 @@ def get_t1w(basic_filter, space, layout):
 
 def get_vesselmask(preproc, threshold):
     """
-    Get the vessel density atlas and binarize it to build the vessel mask
+        Get the vessel density atlas and binarize it to build the vessel mask
+
     Args:
         preproc: DataObj, used only to get the properties of the fMRI data to have the mask on same grid
         threshold: str, threshold value such as "95%", passed to nilearn.image.binarize_img
@@ -478,7 +493,8 @@ def get_vesselmask(preproc, threshold):
 
 def get_preproc(basic_filter, layout):
     """
-    Load preprocessed image for subject
+        Load preprocessed image for subject
+
     Args:
         basic_filter: dict, BIDS filter
         layout: BIDS layout
@@ -496,8 +512,9 @@ def get_preproc(basic_filter, layout):
 
 def read_config_file(file=None):
     """
-    All processing parameters are set here to their default values.
-    If file is provided, then the parameters 'fwhm', 'ic_threshold' and 'vesseldensity_threshold' are read from the file (if unspecified, the default value will be kept).
+        All processing parameters are set here to their default values.
+        If file is provided, then the parameters 'fwhm', 'ic_threshold' and 'vesseldensity_threshold' are read from the file (if unspecified, the default value will be kept).
+
     Args:
         file, path to json file
     Returns:
@@ -534,7 +551,8 @@ def read_config_file(file=None):
 
 def save_figs(results, outputs, mask):
     """
-    Generate and saves cvr and delay figures.
+        Generate and saves cvr and delay figures.
+
     Args:
         results: dict, containing the results to save
         outputs: dict, witht the paths where to save the figures

@@ -10,7 +10,8 @@ from datetime import datetime
 
 class bcolors:
     """
-    Convenient colors for terminal prints
+        Convenient colors for terminal prints
+
     """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -31,7 +32,8 @@ class bcolors:
 
 def msg_info(msg):
     """
-    Custom print to shell (information)
+        Custom print to shell (information)
+
     Args:
         msg: str
 
@@ -47,11 +49,12 @@ def msg_info(msg):
 def msg_error(msg):
     """
         Custom print to shell (error)
-        Args:
-            msg: str
 
-        Returns:
-            None
+    Args:
+        msg: str
+
+    Returns:
+        None
         """
     now = datetime.now()
     time_stamp = now.strftime("(%Y-%m-%d-%H-%M-%S) ")
@@ -62,11 +65,12 @@ def msg_error(msg):
 def msg_warning(msg):
     """
         Custom print to shell (warning)
-        Args:
-            msg: str
 
-        Returns:
-            None
+    Args:
+        msg: str
+
+    Returns:
+        None
         """
     now = datetime.now()
     time_stamp = now.strftime("(%Y-%m-%d-%H-%M-%S) ")
@@ -75,12 +79,12 @@ def msg_warning(msg):
 
 
 def run(command, env={}):
-    """Execute command as in a terminal
+    """
+        Execute command as in a terminal
+        Also prints any output of the command into the python shell
 
-    Also prints any output of the command into the python shell
-    Inputs:
-        command: string
-            the command (including arguments and options) to be executed
+    Args:
+        command: string the command (including arguments and options) to be executed
         env: to add stuff in the environment before running the command
 
     Returns:
@@ -113,8 +117,9 @@ def run(command, env={}):
 
 def printProgressBar (iteration, total, prefix='', suffix='Complete', decimals=4, length=100, fill='█', print_end="\r"):
     """
-    Call in a loop to create terminal progress bar
-    @params:
+        Call in a loop to create terminal progress bar
+
+    Args:
         iteration   - Required  : current iteration (Int)
         total       - Required  : total iterations (Int)
         prefix      - Optional  : prefix string (Str)
@@ -124,6 +129,7 @@ def printProgressBar (iteration, total, prefix='', suffix='Complete', decimals=4
         fill        - Optional  : bar fill character (Str)
         printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
     """
+
     complete_prefix = f"{bcolors.OKCYAN}Progress {bcolors.ENDC}" + prefix
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
@@ -136,7 +142,8 @@ def printProgressBar (iteration, total, prefix='', suffix='Complete', decimals=4
 
 def get_version ():
     """
-    Print version from git info
+        Print version from git info
+
     Returns:
         __version__
     """

@@ -11,6 +11,7 @@ def match_timecourses(y1, y2, delay):
     """
         The goal of this function is to take two time courses and apply a time shift between the two.
         This is done carefully, in particular ensuring that the returned time courses are of equal length.
+
     Args:
         y1: np array of length n1
         y2: np array of length n2
@@ -35,11 +36,12 @@ def match_timecourses(y1, y2, delay):
 
 def tccorr(data_object1, data_object2):
     """
-    Computes cross-correlation between two time courses, by exploring variour time shifts. The inputs are DataObj
-    of type "timecourse", and come with their own sampling frequency. If the sampling frequencies are different
-    (typical in the case of BOLD signal compared to capnograph data), then the signal with higher sf is
-    downsampled to the lower one. Delays are explored to find maximum correlation, and r-coefficient at maximum
-    returned.
+        Computes cross-correlation between two time courses, by exploring variour time shifts. The inputs are DataObj
+        of type "timecourse", and come with their own sampling frequency. If the sampling frequencies are different
+        (typical in the case of BOLD signal compared to capnograph data), then the signal with higher sf is
+        downsampled to the lower one. Delays are explored to find maximum correlation, and r-coefficient at maximum
+        returned.
+
     Args:
         data_object1: DataObj of type "timecourse"
         data_object2: DataObj of type "timecourse"
@@ -118,9 +120,9 @@ def tccorr(data_object1, data_object2):
 
 def build_shifted_signal(probe, target, delta_t):
     """
-    Shifts the probe signal by the amount delta_t, putting baseline values when extrapolation is needed.
-    The baseline is read from probe.baseline; if undefined, the function first calls probe.build_baseline() to ensure it exists.
-    Target is a signal used as a reference for the length and sampling frequency of the output.
+        Shifts the probe signal by the amount delta_t, putting baseline values when extrapolation is needed.
+        The baseline is read from probe.baseline; if undefined, the function first calls probe.build_baseline() to ensure it exists.
+        Target is a signal used as a reference for the length and sampling frequency of the output.
 
     Arguments:
     __________
@@ -184,11 +186,13 @@ def build_shifted_signal(probe, target, delta_t):
 
 def compute_global_signal(data):
     """
-    Inputs: data, a DataObj for some fMRI data
+        Computes whole-brain signal
+
+    Args:
+        data, a DataObj for some fMRI data
 
     Returns:
-
-    DataObj of timecourse type with computed global signal
+        DataObj of timecourse type with computed global signal
     """
 
     from .processing import DataObj
@@ -203,7 +207,8 @@ def compute_global_signal(data):
 
 def get_meanepi(img):
     """
-    Compute temporal mean for fMRI data (calls nilearn.image.mean_img)
+        Compute temporal mean for fMRI data (calls nilearn.image.mean_img)
+
     Args:
         img: DataObj for the input fMRI data
     Returns:
@@ -215,6 +220,7 @@ def get_meanepi(img):
 
 def get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df, sf, noise_ic_pearson_r_threshold, aroma_flag):
     """
+        Finds the noise independent components that do not correlate with the probe signal
 
     Args:
         probe: DataObj, the probe data

@@ -13,15 +13,17 @@ from .shell_tools import *
 # classes
 
 class DataObj:
-    """Class to keep together data with sampling freq and other useful information on the data
+    """
+        Class to keep together data with sampling freq and other useful information on the data
 
-    For most applications, we need the probe or fMRI data together with
-    the corresponding sampling frequency. data_type must be "timecourse" or
-    or "map" or "bold". Sampling frequency in Hz.
-    label is a field used to put some human-readable struff to describe what the object is containing, e.g. 'this is the denoised data'
-    fig is a figure object from plotly
-    measurement_type is the type of the actual values, like 'CVR' or 'delay', or 'concentration'.
-    mask is a binary map, can be used to mask data in the case of 'map' or 'bold'data_type.
+        For most applications, we need the probe or fMRI data together with
+        the corresponding sampling frequency. data_type must be "timecourse"
+        or "map" or "bold". Sampling frequency in Hz.
+        label is a field used to put some human-readable struff to describe what the object is containing, e.g. 'this is the denoised data'
+        fig is a figure object from plotly
+        measurement_type is the type of the actual values, like 'CVR' or 'delay', or 'concentration'.
+        mask is a binary map, can be used to mask data in the case of 'map' or 'bold'data_type.
+
     """
     def __init__(self, data=None, sampling_frequency=None, data_type=None, path=None, label=None, figs=None, measurement_type=None, mask=None, baseline=None, units=None, img=None):
         self.sampling_frequency = sampling_frequency
@@ -37,11 +39,13 @@ class DataObj:
         self.img = img
 
     def bids_load(self, layout, filters, data_type, **kwargs):
-        """Load DataObj from a BIDS layout and filters
+        """
+            Load DataObj from a BIDS layout and filters
 
-        data_type must be 'timecourse' or "map" or "bold". The filter is used to extract both json and the actual data.
-        kwargs is used to specify some options for the 'timecourse' type:
+            data_type must be 'timecourse' or "map" or "bold". The filter is used to extract both json and the actual data.
+            kwargs is used to specify some options for the 'timecourse' type:
             if kwargs = {'col': 0}, then the first column of the .tsv file is extracted.
+
         """
         import nibabel
         import numpy
@@ -79,7 +83,8 @@ class DataObj:
 
     def nifti_load(self, path):
         """
-        Load a nifti image from path and stores it in a DataObj
+            Load a nifti image from path and stores it in a DataObj
+
         """
         import nibabel
         img = nibabel.load(path)
@@ -98,15 +103,16 @@ class DataObj:
 
     def save(self, path_to_save, path_to_ref=None):
         """
-        For self.data_type == 'map' or self.data_type == 'bold':
-            Save data to path in nifti format using affine from ref
-            path_to_ref: path to nifti file to extract affine data
-            path_to_save: path where to save the nifti image
+            For self.data_type == 'map' or self.data_type == 'bold':
+                Save data to path in nifti format using affine from ref
+                path_to_ref: path to nifti file to extract affine data
+                path_to_save: path where to save the nifti image
 
-        For self.data_type == 'timecourse':
-            Save timecourse data to path in .tsv.gz format - path_to_save must be something live /my/file/is/here and this function will write /my/file/is/here.tsv.gz and /my/file/is/here.json for timecourses
-            path_to_save: path where to save the data
-            path_to_ref: not needed in that case
+            For self.data_type == 'timecourse':
+                Save timecourse data to path in .tsv.gz format - path_to_save must be something live /my/file/is/here and this function will write /my/file/is/here.tsv.gz and /my/file/is/here.json for timecourses
+                path_to_save: path where to save the data
+                path_to_ref: not needed in that case
+
         """
         import json
 
@@ -160,21 +166,22 @@ class DataObj:
 
     def make_fig(self, fig_type, **kwargs):
         """
-        Create figure object from the data in self
+            Create figure object from the data in self
 
-        The figure is save in self.figs[fig_type].
-        fig_type: 'plot', 'histogram' or 'lightbox'
+            The figure is save in self.figs[fig_type].
+            fig_type: 'plot', 'histogram' or 'lightbox'
 
-         If self.data_type is "timecourse": fig_type must be 'plot' and plot the timecourse
-            kwargs in that case must have values for 'title', 'xlabel' and 'ylabel'
-         If self.data_type is "map":
-            If fig_type is histogram:
-                create a histogram. kwargs can be empty
-            If fig_type is lightbox:
-                create a lightbox. kwargs can be empty, but if not, it must have a single field called 'background'.
-                The corresponding value must be a DataObj of data_type = 'map' and will be used as a background image.
-                Dimensions must match those of self.data.
-                NB: the color scales are build automatically with hardcoded values, different for CVR and delays.
+             If self.data_type is "timecourse": fig_type must be 'plot' and plot the timecourse
+                kwargs in that case must have values for 'title', 'xlabel' and 'ylabel'
+             If self.data_type is "map":
+                If fig_type is histogram:
+                    create a histogram. kwargs can be empty
+                If fig_type is lightbox:
+                    create a lightbox. kwargs can be empty, but if not, it must have a single field called 'background'.
+                    The corresponding value must be a DataObj of data_type = 'map' and will be used as a background image.
+                    Dimensions must match those of self.data.
+                    NB: the color scales are build automatically with hardcoded values, different for CVR and delays.
+
         """
         import numpy as np
         import plotly.graph_objects as go
@@ -270,7 +277,8 @@ class DataObj:
 
     def build_baseline(self):
         """
-        Compute baseline of data and stores it in self.baseline. Only for self.data_type='timecourse'
+            Compute baseline of data and stores it in self.baseline. Only for self.data_type='timecourse'
+
         """
 
         import peakutils
@@ -282,9 +290,8 @@ class DataObj:
 
 def compute_delays(reference, probe, shifts_option):
     """
-    This function optimize linear correlation between the reference signal and shifted versions of the probe signal.
-
-    This script involve potentially many recursion. It has several levels of usage, each with its own inputs/outputs.
+        This function optimize linear correlation between the reference signal and shifted versions of the probe signal.
+        This script involve potentially many recursion. It has several levels of usage, each with its own inputs/outputs.
 
     ----------------
         Level 1:
@@ -470,7 +477,8 @@ def compute_delays(reference, probe, shifts_option):
 
 def compute_response(intercept, slope, regressorbaseline, regressormean):
     """
-    This function computes slope/(intercept + (regressorbaseline)*slope)
+        This function computes slope/(intercept + (regressorbaseline)*slope)
+
     """
     intercept_data = intercept.data
     slope_data = slope.data

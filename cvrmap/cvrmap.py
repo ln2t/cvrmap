@@ -17,7 +17,8 @@ from utils import *  # custom utilities
 
 def main():
     """
-    This is the main function to run cvrmap and is called at the end of this script.
+        This is the main function to run cvrmap and is called at the end of this script.
+
     Returns:
         None
     """

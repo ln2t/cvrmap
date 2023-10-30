@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to cvrmap’s documentation! &mdash; cvrmap  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="canonical" href="docs/index.html" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            cvrmap
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Welcome to cvrmap’s documentation!</a><ul>
+<li><a class="reference internal" href="#cvrmap.DataObj"><code class="docutils literal notranslate"><span class="pre">DataObj</span></code></a><ul>
+<li><a class="reference internal" href="#cvrmap.DataObj.bids_load"><code class="docutils literal notranslate"><span class="pre">DataObj.bids_load()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.DataObj.build_baseline"><code class="docutils literal notranslate"><span class="pre">DataObj.build_baseline()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.DataObj.make_fig"><code class="docutils literal notranslate"><span class="pre">DataObj.make_fig()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.DataObj.nifti_load"><code class="docutils literal notranslate"><span class="pre">DataObj.nifti_load()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.DataObj.save"><code class="docutils literal notranslate"><span class="pre">DataObj.save()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cvrmap.Report"><code class="docutils literal notranslate"><span class="pre">Report</span></code></a><ul>
+<li><a class="reference internal" href="#cvrmap.Report.add_image"><code class="docutils literal notranslate"><span class="pre">Report.add_image()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.Report.add_section"><code class="docutils literal notranslate"><span class="pre">Report.add_section()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.Report.add_sentence"><code class="docutils literal notranslate"><span class="pre">Report.add_sentence()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.Report.add_subsection"><code class="docutils literal notranslate"><span class="pre">Report.add_subsection()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.Report.finish"><code class="docutils literal notranslate"><span class="pre">Report.finish()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.Report.init"><code class="docutils literal notranslate"><span class="pre">Report.init()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cvrmap.add_cst_img_to_series"><code class="docutils literal notranslate"><span class="pre">add_cst_img_to_series()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.arguments_manager"><code class="docutils literal notranslate"><span class="pre">arguments_manager()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.bcolors"><code class="docutils literal notranslate"><span class="pre">bcolors</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.build_shifted_signal"><code class="docutils literal notranslate"><span class="pre">build_shifted_signal()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.compute_delays"><code class="docutils literal notranslate"><span class="pre">compute_delays()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.compute_global_signal"><code class="docutils literal notranslate"><span class="pre">compute_global_signal()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.compute_response"><code class="docutils literal notranslate"><span class="pre">compute_response()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime"><code class="docutils literal notranslate"><span class="pre">datetime</span></code></a><ul>
+<li><a class="reference internal" href="#cvrmap.datetime.astimezone"><code class="docutils literal notranslate"><span class="pre">datetime.astimezone()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.combine"><code class="docutils literal notranslate"><span class="pre">datetime.combine()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.ctime"><code class="docutils literal notranslate"><span class="pre">datetime.ctime()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.date"><code class="docutils literal notranslate"><span class="pre">datetime.date()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.dst"><code class="docutils literal notranslate"><span class="pre">datetime.dst()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.fromisoformat"><code class="docutils literal notranslate"><span class="pre">datetime.fromisoformat()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.fromtimestamp"><code class="docutils literal notranslate"><span class="pre">datetime.fromtimestamp()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.isoformat"><code class="docutils literal notranslate"><span class="pre">datetime.isoformat()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.now"><code class="docutils literal notranslate"><span class="pre">datetime.now()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.replace"><code class="docutils literal notranslate"><span class="pre">datetime.replace()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.strptime"><code class="docutils literal notranslate"><span class="pre">datetime.strptime()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.time"><code class="docutils literal notranslate"><span class="pre">datetime.time()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.timestamp"><code class="docutils literal notranslate"><span class="pre">datetime.timestamp()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.timetuple"><code class="docutils literal notranslate"><span class="pre">datetime.timetuple()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.timetz"><code class="docutils literal notranslate"><span class="pre">datetime.timetz()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.tzname"><code class="docutils literal notranslate"><span class="pre">datetime.tzname()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.utcfromtimestamp"><code class="docutils literal notranslate"><span class="pre">datetime.utcfromtimestamp()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.utcnow"><code class="docutils literal notranslate"><span class="pre">datetime.utcnow()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.utcoffset"><code class="docutils literal notranslate"><span class="pre">datetime.utcoffset()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.datetime.utctimetuple"><code class="docutils literal notranslate"><span class="pre">datetime.utctimetuple()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cvrmap.denoise"><code class="docutils literal notranslate"><span class="pre">denoise()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.endtidalextract"><code class="docutils literal notranslate"><span class="pre">endtidalextract()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.fsl_preprocessing"><code class="docutils literal notranslate"><span class="pre">fsl_preprocessing()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.gather_figures"><code class="docutils literal notranslate"><span class="pre">gather_figures()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_aroma_noise_ic_list"><code class="docutils literal notranslate"><span class="pre">get_aroma_noise_ic_list()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_corrected_noiselist"><code class="docutils literal notranslate"><span class="pre">get_corrected_noiselist()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_custom_label"><code class="docutils literal notranslate"><span class="pre">get_custom_label()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_fmriprep_dir"><code class="docutils literal notranslate"><span class="pre">get_fmriprep_dir()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_mask"><code class="docutils literal notranslate"><span class="pre">get_mask()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_meanepi"><code class="docutils literal notranslate"><span class="pre">get_meanepi()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_melodic_mixing"><code class="docutils literal notranslate"><span class="pre">get_melodic_mixing()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_physio_data"><code class="docutils literal notranslate"><span class="pre">get_physio_data()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_preproc"><code class="docutils literal notranslate"><span class="pre">get_preproc()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_space"><code class="docutils literal notranslate"><span class="pre">get_space()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_subjects_to_analyze"><code class="docutils literal notranslate"><span class="pre">get_subjects_to_analyze()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_t1w"><code class="docutils literal notranslate"><span class="pre">get_t1w()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_task"><code class="docutils literal notranslate"><span class="pre">get_task()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_version"><code class="docutils literal notranslate"><span class="pre">get_version()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.get_vesselmask"><code class="docutils literal notranslate"><span class="pre">get_vesselmask()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.high_pass_filter"><code class="docutils literal notranslate"><span class="pre">high_pass_filter()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.masksignalextract"><code class="docutils literal notranslate"><span class="pre">masksignalextract()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.match_timecourses"><code class="docutils literal notranslate"><span class="pre">match_timecourses()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.msg_error"><code class="docutils literal notranslate"><span class="pre">msg_error()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.msg_info"><code class="docutils literal notranslate"><span class="pre">msg_info()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.msg_warning"><code class="docutils literal notranslate"><span class="pre">msg_warning()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.non_agg_denoise"><code class="docutils literal notranslate"><span class="pre">non_agg_denoise()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.printProgressBar"><code class="docutils literal notranslate"><span class="pre">printProgressBar()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.read_config_file"><code class="docutils literal notranslate"><span class="pre">read_config_file()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.save_figs"><code class="docutils literal notranslate"><span class="pre">save_figs()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.set_flags"><code class="docutils literal notranslate"><span class="pre">set_flags()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.setup_output_dir"><code class="docutils literal notranslate"><span class="pre">setup_output_dir()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.setup_subject_output_paths"><code class="docutils literal notranslate"><span class="pre">setup_subject_output_paths()</span></code></a></li>
+<li><a class="reference internal" href="#cvrmap.tccorr"><code class="docutils literal notranslate"><span class="pre">tccorr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">cvrmap</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Welcome to cvrmap’s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-cvrmap-s-documentation">
+<h1>Welcome to cvrmap’s documentation!<a class="headerlink" href="#welcome-to-cvrmap-s-documentation" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<dl class="py class" id="module-cvrmap">
+<dt class="sig sig-object py" id="cvrmap.DataObj">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">DataObj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measurement_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.DataObj" title="Link to this definition"></a></dt>
+<dd><p>Class to keep together data with sampling freq and other useful information on the data</p>
+<p>For most applications, we need the probe or fMRI data together with
+the corresponding sampling frequency. data_type must be “timecourse”
+or “map” or “bold”. Sampling frequency in Hz.
+label is a field used to put some human-readable struff to describe what the object is containing, e.g. ‘this is the denoised data’
+fig is a figure object from plotly
+measurement_type is the type of the actual values, like ‘CVR’ or ‘delay’, or ‘concentration’.
+mask is a binary map, can be used to mask data in the case of ‘map’ or ‘bold’data_type.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.DataObj.bids_load">
+<span class="sig-name descname"><span class="pre">bids_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.DataObj.bids_load" title="Link to this definition"></a></dt>
+<dd><p>Load DataObj from a BIDS layout and filters</p>
+<p>data_type must be ‘timecourse’ or “map” or “bold”. The filter is used to extract both json and the actual data.
+kwargs is used to specify some options for the ‘timecourse’ type:
+if kwargs = {‘col’: 0}, then the first column of the .tsv file is extracted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.DataObj.build_baseline">
+<span class="sig-name descname"><span class="pre">build_baseline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.DataObj.build_baseline" title="Link to this definition"></a></dt>
+<dd><p>Compute baseline of data and stores it in self.baseline. Only for self.data_type=’timecourse’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.DataObj.make_fig">
+<span class="sig-name descname"><span class="pre">make_fig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig_type</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.DataObj.make_fig" title="Link to this definition"></a></dt>
+<dd><p>Create figure object from the data in self</p>
+<p>The figure is save in self.figs[fig_type].
+fig_type: ‘plot’, ‘histogram’ or ‘lightbox’</p>
+<blockquote>
+<div><dl class="simple">
+<dt>If self.data_type is “timecourse”: fig_type must be ‘plot’ and plot the timecourse</dt><dd><p>kwargs in that case must have values for ‘title’, ‘xlabel’ and ‘ylabel’</p>
+</dd>
+<dt>If self.data_type is “map”:</dt><dd><dl class="simple">
+<dt>If fig_type is histogram:</dt><dd><p>create a histogram. kwargs can be empty</p>
+</dd>
+<dt>If fig_type is lightbox:</dt><dd><p>create a lightbox. kwargs can be empty, but if not, it must have a single field called ‘background’.
+The corresponding value must be a DataObj of data_type = ‘map’ and will be used as a background image.
+Dimensions must match those of self.data.
+NB: the color scales are build automatically with hardcoded values, different for CVR and delays.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.DataObj.nifti_load">
+<span class="sig-name descname"><span class="pre">nifti_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.DataObj.nifti_load" title="Link to this definition"></a></dt>
+<dd><p>Load a nifti image from path and stores it in a DataObj</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.DataObj.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_save</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.DataObj.save" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>For self.data_type == ‘map’ or self.data_type == ‘bold’:</dt><dd><p>Save data to path in nifti format using affine from ref
+path_to_ref: path to nifti file to extract affine data
+path_to_save: path where to save the nifti image</p>
+</dd>
+<dt>For self.data_type == ‘timecourse’:</dt><dd><p>Save timecourse data to path in .tsv.gz format - path_to_save must be something live /my/file/is/here and this function will write /my/file/is/here.tsv.gz and /my/file/is/here.json for timecourses
+path_to_save: path where to save the data
+path_to_ref: not needed in that case</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cvrmap.Report">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">Report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.Report" title="Link to this definition"></a></dt>
+<dd><p>A class to create, update, modify and save reports with pretty stuff</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.Report.add_image">
+<span class="sig-name descname"><span class="pre">add_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.Report.add_image" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Add an image path to the report
+if fig is a str, then it is interpreted as a path to the image to save.
+If a plotly figure, uses the .to_html argument to embded the image</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>fig: str or Figure object from plotly</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.Report.add_section">
+<span class="sig-name descname"><span class="pre">add_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.Report.add_section" title="Link to this definition"></a></dt>
+<dd><p>Add a section to the report</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.Report.add_sentence">
+<span class="sig-name descname"><span class="pre">add_sentence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sentence</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.Report.add_sentence" title="Link to this definition"></a></dt>
+<dd><p>Add a sentence to the report</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.Report.add_subsection">
+<span class="sig-name descname"><span class="pre">add_subsection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.Report.add_subsection" title="Link to this definition"></a></dt>
+<dd><p>Add a subsection to the report</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.Report.finish">
+<span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.Report.finish" title="Link to this definition"></a></dt>
+<dd><p>Writes the last lines of the report to finish it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.Report.init">
+<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_and_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.Report.init" title="Link to this definition"></a></dt>
+<dd><p>Init the report with html headers and various information on the report</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.add_cst_img_to_series">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">add_cst_img_to_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cst_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.add_cst_img_to_series" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Take a 4D niimg and a 3D niimg and voxel-wise adds the value of the 3D img to the timeseries of the 4D img.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>img: niimg, representing a 4D nifti
+cst_img: niimg, representing a 3D nifti</p>
+</dd>
+<dt>Returns:</dt><dd><p>niimg, sum of the 3D and the 4D img as described above.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.arguments_manager">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">arguments_manager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.arguments_manager" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Wrapper to define and read arguments for main function call</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>version: version to output when calling with -h</p>
+</dd>
+<dt>Returns:</dt><dd><p>args as read from command line call</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cvrmap.bcolors">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">bcolors</span></span><a class="headerlink" href="#cvrmap.bcolors" title="Link to this definition"></a></dt>
+<dd><p>Convenient colors for terminal prints</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.build_shifted_signal">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">build_shifted_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">probe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.build_shifted_signal" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Shifts the probe signal by the amount delta_t, putting baseline values when extrapolation is needed.
+The baseline is read from probe.baseline; if undefined, the function first calls probe.build_baseline() to ensure it exists.
+Target is a signal used as a reference for the length and sampling frequency of the output.</p>
+</div></blockquote>
+<section id="arguments">
+<h2>Arguments:<a class="headerlink" href="#arguments" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>probe: a DataObj with probe.data_type = ‘timecourse’
+target: a DataObj with probe.data_type = ‘timecourse’.
+delta_t: an integer (positive, negative or zero)</p>
+</div></blockquote>
+</section>
+<section id="return">
+<h2>Return:<a class="headerlink" href="#return" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p>DataObj with self.data with shifted points according to the given delta_t. Moreover, it is resampled to the sampling frequency in target, and it’s length is also adjusted to the one of the target.</p>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.compute_delays">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">compute_delays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shifts_option</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.compute_delays" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>This function optimize linear correlation between the reference signal and shifted versions of the probe signal.
+This script involve potentially many recursion. It has several levels of usage, each with its own inputs/outputs.</p>
+</div></blockquote>
+<section id="level-1">
+<h2>Level 1:<a class="headerlink" href="#level-1" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul>
+<li><p>Arguments:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>reference: a DataObj with data_type=’timecourse’ and data of length N</p></li>
+<li><p>probe: a DataObj with data_type=’timecourse’ and data of length N</p></li>
+<li><p>shifts_option: must be set to None</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Outputs:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>slope, intercept, r, p, std: as in scipy.stats.linregress</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Description:</p>
+<blockquote>
+<div><p>At this level the function simply calls scipy.stats.linregress(probe.data, reference.data)</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="level-2">
+<h2>Level 2:<a class="headerlink" href="#level-2" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul>
+<li><p>Arguments:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>reference: a DataObj with data_type=’timecourse’</p></li>
+<li><p>probe: a DataObj with data_type=’timecourse’</p></li>
+<li><p>shifts_option: an integer</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Outputs:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>slope, intercept, r, p, std: as in scipy.signal.linregress</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Description:</p>
+<blockquote>
+<div><p>At this level the function first computes the shifted version of the probe timecourse, using shifts_option as the shift value.
+Note that reference.data and probe.data must not be of same lengths or sampling frequencies: the script takes care of harmonzing the sampling frequencies and array length.</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="level-3">
+<h2>Level 3:<a class="headerlink" href="#level-3" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul>
+<li><p>Arguments:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>reference: a DataObj with data_type=’timecourse’ and data of length N</p></li>
+<li><p>probe: a DataObj with data_type=’timecourse’</p></li>
+<li><p>shifts_option: a numpy array of any length</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Outputs: delay, slope, intercept, correlation with:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>delay: the time-shift that gave the best correlation coefficient for the shifted probe signal versus reference.data</p></li>
+<li><p>slope, intercept, correlation: results of the corresponding fit (thus at optimal delay)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Description:</p>
+<blockquote>
+<div><p>Iterates over elements of shifts_option and calls each time itself at level 2 to extract all data from the fits at various shifts
+Then the shift giving the highest r-correlation score is selected and is returned, alongside the corresponding fit results (slope, intercept, r-score)</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="level-4">
+<h2>Level 4:<a class="headerlink" href="#level-4" title="Link to this heading"></a></h2>
+<blockquote>
+<div><ul>
+<li><p>Arguments:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>reference: a DataObj with data_type=’bold’. reference.mask must be set to some mask on which the computation will be done. reference.mask must have the same shape as reference.data[:,:,:,t]</p></li>
+<li><p>probe: a DataObj with data_type=’timecourse’</p></li>
+<li><dl class="simple">
+<dt>shifts_option: dict with two keys:</dt><dd><p>** shifts_option[‘origin’]: an integer, used as the origin of times for the delay maps
+** shifts_option[‘relative_values’]: a numpy array of any length, used to compute the delays</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Outputs: a dict() with the following keys/values:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>key: delay, value: a DataObj with data_type=’map’, measurement_type=’delay’, and delay.data[x,y,z] = delay optimizing the correlation between probe[‘signal].data and reference.data[x,y,z,:]</p></li>
+<li><p>keys: intercept, slope, correlation, values: DataObjs with data_type=’map’, with data corresponding to the fit at optimum shift.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Description:</p>
+<blockquote>
+<div><p>This is the top-level usage of this function. It takes a bold series specified in reference.data, and loop over all it’s voxels provided reference.mask &gt; 0.
+For each voxel, say (x,y,z), the corresponding time series reference.data[x,y,z,:] is then extracted and compute_delay is called at level 3 to find optimum time delay bewteen reference.data[x,y,z,:] and probe.data.
+The  array shifts_option[‘relative_values’] gives the values on which the optimum search must be run over. The origin of time, given by shifts_option[‘origin’], will appear as 0 in the delay map.</p>
+<dl class="simple">
+<dt>Helper on delay and origin of time:</dt><dd><p>Say the probe signal has a delay of 8s with the global brain bold signal and we set shifts_option[‘origin’] = 0.
+Then if shifts_option[‘relative_values’] = [-10 -5 0 5 10], a voxel having a delay of 0s
+is to be thought as synced with the probe signal.
+So in that case, it might be more relevant to set shifts_option[‘origin’] to 8, so that a voxel with delay = 0
+is now synced with the global signal instead.</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.compute_global_signal">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">compute_global_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.compute_global_signal" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Computes whole-brain signal</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>data, a DataObj for some fMRI data</p>
+</dd>
+<dt>Returns:</dt><dd><p>DataObj of timecourse type with computed global signal</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.compute_response">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">compute_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">intercept</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regressorbaseline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regressormean</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.compute_response" title="Link to this definition"></a></dt>
+<dd><p>This function computes slope/(intercept + (regressorbaseline)*slope)</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cvrmap.datetime">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">hour</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">minute</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">microsecond</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">tzinfo</span></span></em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime" title="Link to this definition"></a></dt>
+<dd><p>The year, month and day arguments are required. tzinfo may be None, or an
+instance of a tzinfo subclass. The remaining arguments may be ints.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.astimezone">
+<span class="sig-name descname"><span class="pre">astimezone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.astimezone" title="Link to this definition"></a></dt>
+<dd><p>tz -&gt; convert to local time in new timezone tz</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.combine">
+<span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.combine" title="Link to this definition"></a></dt>
+<dd><p>date, time -&gt; datetime with same date and time fields</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.ctime">
+<span class="sig-name descname"><span class="pre">ctime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.ctime" title="Link to this definition"></a></dt>
+<dd><p>Return ctime() style string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.date">
+<span class="sig-name descname"><span class="pre">date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.date" title="Link to this definition"></a></dt>
+<dd><p>Return date object with same year, month and day.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.dst">
+<span class="sig-name descname"><span class="pre">dst</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.dst" title="Link to this definition"></a></dt>
+<dd><p>Return self.tzinfo.dst(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.fromisoformat">
+<span class="sig-name descname"><span class="pre">fromisoformat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.fromisoformat" title="Link to this definition"></a></dt>
+<dd><p>string -&gt; datetime from datetime.isoformat() output</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.fromtimestamp">
+<span class="sig-name descname"><span class="pre">fromtimestamp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.fromtimestamp" title="Link to this definition"></a></dt>
+<dd><p>timestamp[, tz] -&gt; tz’s local time from POSIX timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.isoformat">
+<span class="sig-name descname"><span class="pre">isoformat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.isoformat" title="Link to this definition"></a></dt>
+<dd><p>[sep] -&gt; string in ISO 8601 format, YYYY-MM-DDT[HH[:MM[:SS[.mmm[uuu]]]]][+HH:MM].
+sep is used to separate the year from the time, and defaults to ‘T’.
+The optional argument timespec specifies the number of additional terms
+of the time to include. Valid options are ‘auto’, ‘hours’, ‘minutes’,
+‘seconds’, ‘milliseconds’ and ‘microseconds’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.now">
+<span class="sig-name descname"><span class="pre">now</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.now" title="Link to this definition"></a></dt>
+<dd><p>Returns new datetime object representing current time local to tz.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>tz</dt><dd><p>Timezone object.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>If no tz is specified, uses local timezone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.replace">
+<span class="sig-name descname"><span class="pre">replace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.replace" title="Link to this definition"></a></dt>
+<dd><p>Return datetime with new specified fields.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.strptime">
+<span class="sig-name descname"><span class="pre">strptime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.strptime" title="Link to this definition"></a></dt>
+<dd><p>string, format -&gt; new datetime parsed from a string (like time.strptime()).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.time">
+<span class="sig-name descname"><span class="pre">time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.time" title="Link to this definition"></a></dt>
+<dd><p>Return time object with same time but with tzinfo=None.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.timestamp" title="Link to this definition"></a></dt>
+<dd><p>Return POSIX timestamp as float.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.timetuple">
+<span class="sig-name descname"><span class="pre">timetuple</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.timetuple" title="Link to this definition"></a></dt>
+<dd><p>Return time tuple, compatible with time.localtime().</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.timetz">
+<span class="sig-name descname"><span class="pre">timetz</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.timetz" title="Link to this definition"></a></dt>
+<dd><p>Return time object with same time and tzinfo.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.tzname">
+<span class="sig-name descname"><span class="pre">tzname</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.tzname" title="Link to this definition"></a></dt>
+<dd><p>Return self.tzinfo.tzname(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.utcfromtimestamp">
+<span class="sig-name descname"><span class="pre">utcfromtimestamp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.utcfromtimestamp" title="Link to this definition"></a></dt>
+<dd><p>Construct a naive UTC datetime from a POSIX timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.utcnow">
+<span class="sig-name descname"><span class="pre">utcnow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.utcnow" title="Link to this definition"></a></dt>
+<dd><p>Return a new datetime representing UTC day and time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.utcoffset">
+<span class="sig-name descname"><span class="pre">utcoffset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.utcoffset" title="Link to this definition"></a></dt>
+<dd><p>Return self.tzinfo.utcoffset(self).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cvrmap.datetime.utctimetuple">
+<span class="sig-name descname"><span class="pre">utctimetuple</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.datetime.utctimetuple" title="Link to this definition"></a></dt>
+<dd><p>Return UTC time tuple, compatible with time.localtime().</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.denoise">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">denoise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bold_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">melodic_mixing_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_indexes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.denoise" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Loops over all voxel not in mask for non_agg_denoise, which does what fsl_regfilt does.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>bold_fn: path to 4D nii to denoise
+mask_fn: path to mask
+melodic_mixing_df: pandas df with IC’s
+noise_indexes: list of int labelling the noise, 0-based
+fwhm: smoothing parameter. If None, no smoothing is done.</p>
+</dd>
+<dt>Returns:</dt><dd><p>DataObj containing denoised data. Voxels outside mask as set to 0.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.endtidalextract">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">endtidalextract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">physio</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.endtidalextract" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Analyse physiological breathing data to extract etco2 curve</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Inputs:</dt><dd><p>physio is DataObj</p>
+</dd>
+<dt>Returns:</dt><dd><p>etco2: DataObj with basically the upper enveloppe of physio.data
+baseline: DataObj with the baseline of the etco2 curve</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.fsl_preprocessing">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">fsl_preprocessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmri_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">melodic_mixing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrected_noise</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.fsl_preprocessing" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Wrapper for the fsl preprocessing, including non-agressive denoising.</p>
+</div></blockquote>
+<p>The steps are as follows:
+- non-aggressive denoising (using fsl_regfilt command)
+- highpass filtering (using fslmaths)
+- spatial smoothing (if fwhm is not none)</p>
+<p>highpass filtering is done using the -bptf option of fsl_math with argument hpsigma = 128/2/TR</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>fmri_input: str, path to fMRI data to preprocess
+melodic_mixing: str, path to melodic mixing matrix saved as a .tsv (as in fMRIPrep)
+corrected_noise: np array containing the labels (integers) of the ICA components to consider as noise
+fwhm: int, FWHM for extrat smoothing (optional)</p>
+</dd>
+<dt>Returns:</dt><dd><p>DataObj for cleaned (denoised) fMRI data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.gather_figures">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">gather_figures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.gather_figures" title="Link to this definition"></a></dt>
+<dd><p>Create fig from several DataObj of ‘timecourse’ type by superimposing their individual plots
+If two objects are given, the first one will have its y-axis on the left and the second on the right.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_aroma_noise_ic_list">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_aroma_noise_ic_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_filter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_aroma_noise_ic_list" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Get the list of Independent Components that were classified as noise by ICA-AROMA, from fmriprep outputs</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>bids_filter: dict, BIDS filter
+layout: BIDSlayout</p>
+</dd>
+<dt>Returns:</dt><dd><p>list, list of noise ICs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_corrected_noiselist">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_corrected_noiselist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">probe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aroma_noise_ic_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">melodic_mixing_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_ic_pearson_r_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aroma_flag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_corrected_noiselist" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Finds the noise independent components that do not correlate with the probe signal</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>probe: DataObj, the probe data
+aroma_noise_ic_list: list, noise IC from AROMA
+melodic_mixing_df: pandas dataframe, all MELODIC components
+sf: float, BOLD sampling frequency
+noise_ic_pearson_r_threshold: float, threshold for correlation to correct noise classification
+aroma_flag: bool, flag to use orignal aroma classification or not</p>
+</dd>
+<dt>Returns:</dt><dd><p>list, refined classification of noise regressors</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_custom_label">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_custom_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_custom_label" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Create custom label if specified</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>args: return from arguments_manager</p>
+</dd>
+<dt>Returns:</dt><dd><p>string for task entity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_fmriprep_dir">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_fmriprep_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_fmriprep_dir" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Get and check existence of fmriprep dir from options or default</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>args: return from arguments_manager</p>
+</dd>
+<dt>Returns:</dt><dd><p>path to fmriprep dir</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_mask">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basic_filter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_mask" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Load brain mask for subject</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>basic_filter: dict, BIDS filter
+layout: BIDS layout</p>
+</dd>
+<dt>Returns:</dt><dd><p>DataObj, brain mask</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_meanepi">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_meanepi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_meanepi" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Compute temporal mean for fMRI data (calls nilearn.image.mean_img)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>img: DataObj for the input fMRI data</p>
+</dd>
+<dt>Returns:</dt><dd><p>niimg, the mean of fMRI data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_melodic_mixing">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_melodic_mixing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_filter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_melodic_mixing" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Get all IC’s as found by MELODIC</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>bids_filter: dict, BIDS filter
+layout: BIDSlayout</p>
+</dd>
+<dt>Returns:</dt><dd><p>panda dataframe, all MELODIC mixing matrix from fmriprep outputs
+str, path to melodic mixing matrix file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_physio_data">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_physio_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bids_filter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_physio_data" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Fetch raw physiological data</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>bids_filter: dict, basic BIDS filter
+layout: BIDS layout</p>
+</dd>
+<dt>Returns:</dt><dd><p>DataObj for raw physiological data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_preproc">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_preproc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basic_filter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_preproc" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Load preprocessed image for subject</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>basic_filter: dict, BIDS filter
+layout: BIDS layout</p>
+</dd>
+<dt>Returns:</dt><dd><p>DataObj, BOLD preprocessed image of the subject</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_space">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_space" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Get space (and res, if any) and checks if present in layout (rawdata and derivatives)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>args: return from arguments_manager
+layout: BIDS layout</p>
+</dd>
+<dt>Returns:</dt><dd><p>string for space entity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_subjects_to_analyze">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_subjects_to_analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_subjects_to_analyze" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Generate list of subjects to analyze given the options and available subjects</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>args: return from arguments_manager
+layout: BIDS layout</p>
+</dd>
+<dt>Returns:</dt><dd><p>list of subjects to loop over</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_t1w">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_t1w</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basic_filter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_t1w" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Load t1w image for subject</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>basic_filter: dict, BIDS filter
+space: str
+layout: BIDS layout</p>
+</dd>
+<dt>Returns:</dt><dd><p>DataObj, t1w image of the subject</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_task">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_task" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Get and check task option or set to default</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>args: return from arguments_manager
+layout: BIDS layout</p>
+</dd>
+<dt>Returns:</dt><dd><p>string for task entity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_version">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_version" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Print version from git info</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>__version__</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.get_vesselmask">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">get_vesselmask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preproc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.get_vesselmask" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Get the vessel density atlas and binarize it to build the vessel mask</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>preproc: DataObj, used only to get the properties of the fMRI data to have the mask on same grid
+threshold: str, threshold value such as “95%”, passed to nilearn.image.binarize_img</p>
+</dd>
+<dt>Returns:</dt><dd><p>niimg, mask for vessels in MNI space</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.high_pass_filter">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">high_pass_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.high_pass_filter" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Basically a wrapper for nilearn.image.clean_img tuned to remove non-zero frequencies lower than 1/(2*60) Hz.
+The function first computes the mean, then apply the filter, then re-add the mean. Signal is also
+detrended but no standardized.
+The value 1/(2*60) Hz corresponds to the duration of the breathing challenge.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>img: nilearn img to filter</p>
+</dd>
+<dt>Returns:</dt><dd><p>img with non-zero frequencies lower than 1/(2*60)Hz filtered out</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.masksignalextract">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">masksignalextract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preproc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.masksignalextract" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Return time series from masked fMRI data</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>preproc: DataObj, fMRI data
+mask: str, path to mask</p>
+</dd>
+<dt>Returns:</dt><dd><p>probe: DataObj, containing the extracted time course
+baseline: DataObj, baseline of probe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.match_timecourses">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">match_timecourses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.match_timecourses" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>The goal of this function is to take two time courses and apply a time shift between the two.
+This is done carefully, in particular ensuring that the returned time courses are of equal length.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>y1: np array of length n1
+y2: np array of length n2
+delay: int</p>
+</dd>
+<dt>Returns:</dt><dd><p>y1_matched, y2_matched: arrays of same length</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.msg_error">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">msg_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.msg_error" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Custom print to shell (error)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>msg: str</p>
+</dd>
+<dt>Returns:</dt><dd><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.msg_info">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">msg_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.msg_info" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Custom print to shell (information)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>msg: str</p>
+</dd>
+<dt>Returns:</dt><dd><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.msg_warning">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">msg_warning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.msg_warning" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Custom print to shell (warning)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>msg: str</p>
+</dd>
+<dt>Returns:</dt><dd><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.non_agg_denoise">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">non_agg_denoise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">design_matrix_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_indexes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.non_agg_denoise" title="Link to this definition"></a></dt>
+<dd><p>This is the in-house implementation of non-aggressive denoising. It is doing the same thing as fsl_regfilt.
+This is work in progress and is not used in the main script.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.printProgressBar">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">printProgressBar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iteration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Complete'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'█'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'\r'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.printProgressBar" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><blockquote>
+<div><p>Call in a loop to create terminal progress bar</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>iteration   - Required  : current iteration (Int)
+total       - Required  : total iterations (Int)
+prefix      - Optional  : prefix string (Str)
+suffix      - Optional  : suffix string (Str)
+decimals    - Optional  : positive number of decimals in percent complete (Int)
+length      - Optional  : character length of bar (Int)
+fill        - Optional  : bar fill character (Str)
+printEnd    - Optional  : end character (e.g. “</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>“, ”
+“) (Str)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.read_config_file">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">read_config_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.read_config_file" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>All processing parameters are set here to their default values.
+If file is provided, then the parameters ‘fwhm’, ‘ic_threshold’ and ‘vesseldensity_threshold’ are read from the file (if unspecified, the default value will be kept).</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>file, path to json file</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict, with various values/np.arrays for the parameters used in main script</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.run">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.run" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Execute command as in a terminal
+Also prints any output of the command into the python shell</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>command: string the command (including arguments and options) to be executed
+env: to add stuff in the environment before running the command</p>
+</dd>
+<dt>Returns:</dt><dd><p>nothing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.save_figs">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">save_figs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.save_figs" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Generate and saves cvr and delay figures.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>results: dict, containing the results to save
+outputs: dict, witht the paths where to save the figures
+mask: DataObj, to mask the delaymap image</p>
+</dd>
+<dt>Returns:</dt><dd><p>0 if successful</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.set_flags">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">set_flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.set_flags" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Set various flags for options in the main script</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>args: dict, argument of the script</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict, with values for the flags as set by the options</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.setup_output_dir">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">setup_output_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.setup_output_dir" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Create output dir if it does not exist, together with dataset_description.json file in it with CVRmap version.
+Update BIDS layout to contain this folder as BIDS derivatives.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>args: dict, arguments of the script
+version: str, version of the software
+layout: BIDS layout</p>
+</dd>
+<dt>Returns:</dt><dd><p>layout: BIDS layout, updated with output dir</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.setup_subject_output_paths">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">setup_subject_output_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.setup_subject_output_paths" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Setup various paths for subject output. Also creates subject output dir.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>output_dir: str, cvrmap output dir
+subject_label: str, subject label
+space: str, space entity
+res: int, resolution entity
+args: output of arguments_manager
+custom_label: str, custom label for outputs</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict with various output paths (str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cvrmap.tccorr">
+<span class="sig-prename descclassname"><span class="pre">cvrmap.</span></span><span class="sig-name descname"><span class="pre">tccorr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_object1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_object2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cvrmap.tccorr" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Computes cross-correlation between two time courses, by exploring variour time shifts. The inputs are DataObj
+of type “timecourse”, and come with their own sampling frequency. If the sampling frequencies are different
+(typical in the case of BOLD signal compared to capnograph data), then the signal with higher sf is
+downsampled to the lower one. Delays are explored to find maximum correlation, and r-coefficient at maximum
+returned.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>data_object1: DataObj of type “timecourse”
+data_object2: DataObj of type “timecourse”</p>
+</dd>
+<dt>Returns:</dt><dd><p>float, the maximum r-correlation over the explored delays</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Antonin Rovai.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

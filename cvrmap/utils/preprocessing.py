@@ -12,7 +12,8 @@ from scipy.interpolate import interp1d
 from statsmodels.regression.linear_model import OLS
 
 def endtidalextract(physio):
-    """Analyse physiological breathing data to extract etco2 curve
+    """
+        Analyse physiological breathing data to extract etco2 curve
 
     Inputs:
         physio is DataObj
@@ -59,7 +60,8 @@ def endtidalextract(physio):
 
 def masksignalextract(preproc, mask):
     """
-    Return time series from masked fMRI data
+        Return time series from masked fMRI data
+
     Args:
         preproc: DataObj, fMRI data
         mask: str, path to mask
@@ -81,7 +83,7 @@ def masksignalextract(preproc, mask):
 
 def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
     """
-    Wrapper for the fsl preprocessing, including non-agressive denoising.
+        Wrapper for the fsl preprocessing, including non-agressive denoising.
 
     The steps are as follows:
     - non-aggressive denoising (using fsl_regfilt command)
@@ -133,7 +135,8 @@ def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
     return denoised
 def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, fwhm=None):
     """
-    Loops over all voxel not in mask for non_agg_denoise, which does what fsl_regfilt does.
+        Loops over all voxel not in mask for non_agg_denoise, which does what fsl_regfilt does.
+
     Args:
         bold_fn: path to 4D nii to denoise
         mask_fn: path to mask
@@ -177,10 +180,11 @@ def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, fwhm=None):
 
 def high_pass_filter(img):
     """
-    Basically a wrapper for nilearn.image.clean_img tuned to remove non-zero frequencies lower than 1/(2*60) Hz.
-    The function first computes the mean, then apply the filter, then re-add the mean. Signal is also
-    detrended but no standardized.
-    The value 1/(2*60) Hz corresponds to the duration of the breathing challenge.
+        Basically a wrapper for nilearn.image.clean_img tuned to remove non-zero frequencies lower than 1/(2*60) Hz.
+        The function first computes the mean, then apply the filter, then re-add the mean. Signal is also
+        detrended but no standardized.
+        The value 1/(2*60) Hz corresponds to the duration of the breathing challenge.
+
     Args:
         img: nilearn img to filter
     Returns:
@@ -196,7 +200,8 @@ def high_pass_filter(img):
 
 def add_cst_img_to_series(img, cst_img):
     """
-    Take a 4D niimg and a 3D niimg and voxel-wise adds the value of the 3D img to the timeseries of the 4D img.
+        Take a 4D niimg and a 3D niimg and voxel-wise adds the value of the 3D img to the timeseries of the 4D img.
+
     Args:
         img: niimg, representing a 4D nifti
         cst_img: niimg, representing a 3D nifti
@@ -221,8 +226,9 @@ def add_cst_img_to_series(img, cst_img):
 
 def non_agg_denoise(signal, design_matrix_df, noise_indexes):
     """
-    This is the in-house implementation of non-aggressive denoising. It is doing the same thing as fsl_regfilt.
-    This is work in progress and is not used in the main script.
+        This is the in-house implementation of non-aggressive denoising. It is doing the same thing as fsl_regfilt.
+        This is work in progress and is not used in the main script.
+
     """
     # define model with ALL regressors
     model = OLS(signal, design_matrix_df.values)

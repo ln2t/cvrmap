@@ -9,11 +9,13 @@ Define Report Class to handle html reports
 
 class Report:
     """
-    A class to create, update, modify and save reports with pretty stuff
+        A class to create, update, modify and save reports with pretty stuff
+
     """
     def __init__(self, path=None, string=""):
         """
-        path is the place where the report is written/updated
+            path is the place where the report is written/updated
+
         """
         self.path = path
         self.string = string
@@ -21,7 +23,8 @@ class Report:
     def init(self, subject, date_and_time, version,
              cmd):
         """
-        Init the report with html headers and various information on the report
+            Init the report with html headers and various information on the report
+
         """
         intro_part1 = """<!DOCTYPE html>
             <html>
@@ -69,30 +72,34 @@ class Report:
 
     def add_section(self, title):
         """
-        Add a section to the report
+            Add a section to the report
+
         """
         with open(self.path, "a") as f:
             f.write('<h2>%s</h2>\n' % title)
 
     def add_subsection(self, title):
         """
-        Add a subsection to the report
+            Add a subsection to the report
+
         """
         with open(self.path, "a") as f:
             f.write('<h3>%s</h3>\n' % title)
 
     def add_sentence(self, sentence):
         """
-        Add a sentence to the report
+            Add a sentence to the report
+
         """
         with open(self.path, "a") as f:
             f.write('%s<br>\n' % sentence)
 
     def add_image(self, fig):
         """
-        Add an image path to the report
-        if fig is a str, then it is interpreted as a path to the image to save.
-        If a plotly figure, uses the .to_html argument to embded the image
+            Add an image path to the report
+            if fig is a str, then it is interpreted as a path to the image to save.
+            If a plotly figure, uses the .to_html argument to embded the image
+
         Args:
             fig: str or Figure object from plotly
         """
@@ -119,7 +126,7 @@ class Report:
 
     def finish(self):
         """
-        Writes the last lines of the report to finish it.
+            Writes the last lines of the report to finish it.
         """
         with open(self.path, "a") as f:
             f.write('</body>\n')
