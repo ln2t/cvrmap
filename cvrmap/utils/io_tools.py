@@ -530,6 +530,7 @@ def read_config_file(file=None):
     params['absolute_shift_list'] = np.arange(-30, 30, 1)  # this is used only for the global delay shift
     params['relative_shift_list'] = np.arange(-30, 30, 1)  # this is used for the voxel-by-voxel shifts
     params['vesseldensity_threshold'] = "99.5%"  # threshold to binarize the vessel density atlas
+    params['highpass_frequency'] = 1/120  # in Hz
 
     if file:
         import json
@@ -540,7 +541,7 @@ def read_config_file(file=None):
         with open(file, 'r') as f:
             config = json.load(f)
 
-        keys = ['fwhm', 'ic_threshold', 'vesseldensity_threshold']
+        keys = ['fwhm', 'ic_threshold', 'vesseldensity_threshold', 'highpass_frequency']
 
         for key in keys:
             if key in config.keys():

@@ -82,7 +82,7 @@ def masksignalextract(preproc, mask):
     return probe, baseline
 
 
-def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
+def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, parameters):
     """
         Wrapper for the fsl preprocessing, including non-agressive denoising.
 
@@ -116,7 +116,8 @@ def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
     fsl_regfilt_cmd = join(fsl_bin_folder, 'fsl_regfilt') + " --in=%s --filter=%s --design=%s --out=%s" % (fmri_input, ','.join(_corrected_noise), melodic_mixing, regfilt_output)
     compute_mean_cmd = join(fsl_bin_folder, 'fslmaths') + " %s -Tmean %s" % (regfilt_output, tmp_output_mean)
     t_r = nb.load(fmri_input).header.get_zooms()[-1]
-    hpsigma = 128/2/t_r
+    alpha = 2.35  # this is sqrt(8*log(2)), see fsl doc/mailing list
+    hpsigma = 1/(alpha*t_r*parameters['highpass_frequency'])
     highpass_cmd = join(fsl_bin_folder, 'fslmaths') + " %s -bptf %s -1 -add %s %s" % (regfilt_output, hpsigma, tmp_output_mean, tmp_highpassfilter_output)
 
     # run external commands
@@ -128,35 +129,47 @@ def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, fwhm=None):
     _output = tmp_highpassfilter_output
     _img = nb.load(_output)
 
-    _img = smooth_img(_img, fwhm)
+    _img = smooth_img(_img, parameters['fwhm'])
 
     denoised = DataObj(data_type='bold')
     denoised.label = 'Non-aggressively denoised data'
     denoised.data = _img.get_fdata()
+    denoised.img = _img
+
     return denoised
 
 
-def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, fwhm=None):
+def bold_denoising(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, parameters):
     """
-        Loops over all voxel not in mask for non_agg_denoise, which does what fsl_regfilt does.
+        BOLD signal denoising based on non-aggressive denoising.
+        Steps:
+            - non-aggressive denoising (similar to what fsl_regfilt do)
+            - highpass filtering (similar to fslmaths -bptf), using parameters['highpass_frequency'] (value in Hz)
+            - re-add mean BOLD signal to filtered data
+            - spatial smoothing using parameters['fwhm']
+        Note: this function does not rely on FSL.
 
     Args:
         bold_fn: path to 4D nii to denoise
-        mask_fn: path to mask
+        mask_fn: path to BOLD mask
         melodic_mixing_df: pandas df with IC's
         noise_indexes: list of int labelling the noise, 0-based
-        fwhm: smoothing parameter. If None, no smoothing is done.
+        parameters: dict, whose elements 'fwhm' and 'highpass_frequency' only are used.
+            If parameters['fwhm'] is None, no smoothing is applied. parameters['highpass_frequency'] is passed to
+            nilean.image.clean_img.
 
     Returns:
-        DataObj containing denoised data. Voxels outside mask as set to 0.
+        DataObj, containing denoised data. Voxels outside mask as set to 0.
     """
-    from nilearn.image import smooth_img
+    from nilearn.image import clean_img, smooth_img, mean_img
     import nibabel as nb
     bold_img = nb.load(bold_fn)
     bold_data = bold_img.get_fdata()
     mask = nb.load(mask_fn).get_fdata()
 
     _img_data = bold_data.copy()
+
+    # non-aggressive denoising
 
     nx, ny, nz = bold_data.shape[:3]
     for x in np.arange(nx):
@@ -171,35 +184,32 @@ def denoise(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, fwhm=None):
                     _img_data[x, y, z, :] = int(0)
 
     _img = nb.Nifti1Image(_img_data, bold_img.affine, bold_img.header)
-    _img = smooth_img(_img, fwhm)
-    _img = high_pass_filter(_img)
+
+    # get mean for later use
+
+    _mean_img = mean_img(_img)
+
+    # highpass filter
+
+    t_r = _img.header.get_zooms()[-1]
+    _img = clean_img(imgs=_img, standardize=False, detrend=False, high_pass=parameters['highpass_frequency'], t_r=t_r)
+
+    # re-add constant term
+
+    _img = add_cst_img_to_series(_img, _mean_img)
+
+    # spatial smoothing
+
+    _img = smooth_img(_img, parameters['fwhm'])
+
+    # finish
 
     denoised = DataObj(data_type='bold')
     denoised.label = 'Non-aggressively denoised data'
     denoised.data = _img.get_fdata()
+    denoised.img = _img
 
     return denoised
-
-
-def high_pass_filter(img):
-    """
-        Basically a wrapper for nilearn.image.clean_img tuned to remove non-zero frequencies lower than 1/(2*60) Hz.
-        The function first computes the mean, then apply the filter, then re-add the mean. Signal is also
-        detrended but no standardized.
-        The value 1/(2*60) Hz corresponds to the duration of the breathing challenge.
-
-    Args:
-        img: nilearn img to filter
-    Returns:
-        img with non-zero frequencies lower than 1/(2*60)Hz filtered out
-    """
-    from nilearn.image import mean_img, clean_img, math_img
-    _mean_img = mean_img(img)
-    t_r = img.header.get_zooms()[-1]
-    high_pass_frequency = 1/(2*60)  # in Hz
-    _img = clean_img(imgs=img, standardize=False, detrend=True, high_pass=high_pass_frequency, t_r=t_r)
-
-    return add_cst_img_to_series(_img, _mean_img)
 
 
 def add_cst_img_to_series(img, cst_img):

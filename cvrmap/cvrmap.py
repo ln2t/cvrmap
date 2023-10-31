@@ -104,9 +104,8 @@ def main():
                 denoised.data_type = preproc.data_type
             else:
                 msg_info("Data denoising in progress")
-                denoised = fsl_preprocessing(preproc.path, melodic_mixing_path, corrected_noise, parameters['fwhm'])
-                # experimental denoising:
-                #denoised = denoise(preproc.path, mask.path, melodic_mixing_df, corrected_noise, parameters['fwhm'])
+                denoised = bold_denoising(preproc.path, mask.path, melodic_mixing_df, corrected_noise, parameters)
+
 
             denoised.measurement_type = 'denoised BOLD'
             denoised.units = 'arbitrary'
