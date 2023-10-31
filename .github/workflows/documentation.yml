@@ -27,9 +27,3 @@ jobs:
       run: |
         cd docs  # navigate to your docs directory if it's named differently, adjust as needed
         make html
-
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/build/html
