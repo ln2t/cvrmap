@@ -1,0 +1,40 @@
+package: cvrmap
+title: Visual report for participant '{subject}'
+sections:
+- name: Summary
+  reportlets:
+  - bids: {datatype: figures, suffix: summary}
+- name: Physiological
+  reportlets:
+  - bids:
+      datatype: figures
+      extension: [.svg]
+      suffix: breathing
+    caption: This graph shows the original breathing data with the reconstructed upper envelope and corresponding (units are mmmHg)
+      baseline.
+
+- name: <em>etCO<sub>2</sub></em> versus Global BOLD signal
+  reportlets:
+  - bids:
+      datatype: figures
+      suffix: boldmean
+      extension: [.svg]
+    caption: This graph shows the estimated <em>etCO<sub>2</sub></em> (in mmHg) and the global BOLD signal (arbitrary units).
+
+- name: Delay maps
+  reportlets:
+  - bids: {datatype: figures, suffix: delay}
+    extension: [.svg]
+    caption: Estimated delays (seconds), with the convention that zero delay corresponds to <em>etCO<sub>2</sub></em> synchronized with global BOLD signal.
+
+- name: Cerebrovascular Reactivity
+  reportlets:
+  - bids: {datatype: figures, suffix: cvr}
+    extension: [.svg]
+    caption: Estimated CVR (units are % of BOLD signal variation/mmHg)
+- name: Info on denoising
+  reportlets:
+  - bids: {datatype: figures, suffix: denoising}
+- name: About
+  reportlets:
+  - bids: {datatype: figures, desc: about, suffix: T1w}

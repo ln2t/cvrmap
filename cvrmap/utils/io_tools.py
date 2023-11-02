@@ -49,7 +49,6 @@ def arguments_manager(version):
                              'Default: \'MNI152NLin2009cAsym\'.'
                              'Also accepts resolution modifier '
                              '(e.g. \'MNI152NLin2009cAsym:res-2\') as in fmriprep options.')
-    parser.add_argument('--work_dir', help='Work dir for temporary files. If omitted, set to \'output_dir/work\'')
     parser.add_argument('--sloppy',
                         help='Only for testing, computes a small part of the maps to save time. Off by default.',
                         action='store_true')
@@ -287,25 +286,29 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
     """
     from pathlib import Path  # to create dirs
     import os
+
     # create output_dir/sub-XXX directory
     subject_output_dir = os.path.join(output_dir,
                                       "sub-" + subject_label)
     Path(subject_output_dir).mkdir(parents=True, exist_ok=True)
 
-    # directory for figures
+    # directory for figures in work dir
     figures_dir = os.path.join(subject_output_dir, 'figures')
     Path(figures_dir).mkdir(parents=True, exist_ok=True)
 
-    # directory for extras
+    # directory for extras in the derivatives
     extras_dir = os.path.join(subject_output_dir, 'extras')
     Path(extras_dir).mkdir(parents=True, exist_ok=True)
 
     # set paths for various outputs
     outputs = {}
+
+    # add denoise label
     if args.use_aroma:
         denoise_label = "_denoising-AROMA"
     else:
         denoise_label = ''
+
     subject_prefix = os.path.join(subject_output_dir,
                                   "sub-" + subject_label)
     if res is None:
@@ -336,10 +339,10 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
     outputs['globalsignal'] = os.path.join(extras_dir, 'sub-' + subject_label + '_desc-globalsignal_timecourse')
 
     # figures (for the report)
-    outputs['breathing_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_breathing' + '.png')
-    outputs['boldmean_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_boldmean' + '.png')
-    outputs['vesselsignal_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_vesselsignal' + '.png')
-    outputs['globalsignal_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_globalsignal' + '.png')
+    outputs['breathing_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_breathing' + '.svg')
+    outputs['boldmean_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_boldmean' + '.svg')
+    outputs['vesselsignal_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_vesselsignal' + '.svg')
+    outputs['globalsignal_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + '_globalsignal' + '.svg')
 
     if res is None:
         outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
@@ -359,6 +362,10 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
                                                     + custom_label + '_vesselmask' + figures_extension)
         outputs['globalmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res
                                                     + custom_label + '_globalmask' + figures_extension)
+
+    # html reportlets
+    outputs['summary_reportlet'] = os.path.join(figures_dir, 'sub-' + subject_label + '_summary' + '.html')
+    outputs['denoising_reportlet'] = os.path.join(figures_dir, 'sub-' + subject_label + '_denoising' + '.html')
 
     return outputs
 
@@ -556,10 +563,10 @@ def save_figs(results, outputs, mask):
 
     Args:
         results: dict, containing the results to save
-        outputs: dict, witht the paths where to save the figures
+        outputs: dict, with the paths where to save the figures
         mask: DataObj, to mask the delaymap image
     Returns:
-        0 if successful
+        0
     """
     # Breathing data
 
@@ -601,11 +608,11 @@ def save_figs(results, outputs, mask):
     from .viz import gather_figures
     if results['physio'] is not None:
         breathing_fig = gather_figures([results['probe'], results['baseline'], results['physio']])
-        breathing_fig.write_image(outputs['breathing_figure'])
+        plotly_formatted_svg_write_image(breathing_fig, outputs['breathing_figure'])
 
     # BOLD mean and etCO2
     boldmean_fig = gather_figures([results['global_signal'], results['probe']])
-    boldmean_fig.write_image(outputs['boldmean_figure'])
+    plotly_formatted_svg_write_image(boldmean_fig, outputs['boldmean_figure'])
 
     # CVR and delay map
     import nilearn.plotting as plotting
@@ -631,11 +638,112 @@ def save_figs(results, outputs, mask):
     if results['vesselsignal']:
         _ = plotting.plot_roi(results['vesselmask'], bg_img=results['meanepi'], cmap='cool', vmin=0,
                           vmax=1, draw_cross=False).savefig(outputs['vesselmask_figure'])
-        results['probe'].figs['plot'].write_image(outputs['vesselsignal_figure'])
+        plotly_formatted_svg_write_image(results['probe'].figs['plot'], outputs['vesselsignal_figure'])
 
     if results['globalsignal']:
         _ = plotting.plot_roi(results['globalmask'], bg_img=results['meanepi'], cmap='cool', vmin=0,
                           vmax=1, draw_cross=False).savefig(outputs['globalmask_figure'])
-        results['probe'].figs['plot'].write_image(outputs['globalsignal_figure'])
+        plotly_formatted_svg_write_image(results['probe'].figs['plot'], outputs['globalsignal_figure'])
     return 0
 
+
+def save_html_reportlets(subject_label, task, space, args, version, aroma_noise_ic_list,
+                                 global_signal_shift, corrected_noise, parameters, outputs):
+    """
+        Save html reporlets with various data from execution of the pipeline. The reportles will be collected using
+        nireports.
+
+    Args:
+        subject_label: str
+        task: str
+        space: str
+        args: dict
+        version: str
+        aroma_noise_ic_list: list
+        global_signal_shift: float
+        corrected_noise: list
+        parameters: dict
+        outputs: dict
+
+    Returns:
+        0
+    """
+
+    SUMMARY_TEMPLATE = """\
+    \t<h3 class="elem-title">Summary</h3>
+	\t\t<ul class="elem-desc">
+    \t\t\t<li>Subject ID: {subject_label}</li>
+    \t\t\t<li>Functional Task: {task}</li>
+    \t\t\t<li>Output space(s): {spaces}</li>
+    \t\t\t<li>CVRmap version: {version}</li>
+    \t\t\t<li>Command line options: {cmd_line_options}</li>
+    \t\t</ul>
+    """
+
+    DENOISING_TEMPLATE = """\
+    \t<h3 class="elem-title">Informations on denoising</h3>
+    \t\t<ul class="elem-desc">
+    \t\t\t<li>Noise regressors as classified by AROMA: {aroma_noise}</li>
+    \t\t\t<li>Noise regressors after discarding regressors correlated with probe: {refined_noise}</li>
+    \t\t\t<li>CVR maps where smoothed with fwhm of (0=no smoothing): {fwhm} mm</li>
+    \t\t</ul>
+    """
+
+    # remove uninteresting or empty arguments
+
+    args_dict = dict()
+    exclude_list = ['bids_dir', 'output_dir', 'fmriprep_dir', 'config']
+    for key in args.__dict__.keys():
+        if key not in exclude_list:
+            if not args.__dict__[key] is None:
+                args_dict[key] = args.__dict__[key]
+
+    with open(outputs['summary_reportlet'], 'w') as file:
+        file.write(SUMMARY_TEMPLATE.format(subject_label=subject_label, task=task, spaces=space,
+                            version=version, cmd_line_options=args_dict))
+
+    if parameters['fwhm'] is None:
+        fwhm = 0
+    else:
+        fwhm = parameters['fwhm']
+
+    corrected_noise_one_based = []
+    for xx in corrected_noise:
+        corrected_noise_one_based.append(str(xx + 1))
+
+    with open(outputs['denoising_reportlet'], 'w') as file:
+        file.write(DENOISING_TEMPLATE.format(aroma_noise=aroma_noise_ic_list, refined_noise=corrected_noise_one_based, fwhm=fwhm))
+
+    return 0
+
+
+def plotly_formatted_svg_write_image(fig, output_path):
+    """
+        The plotly.io.write_image function write svg files without proper xml indentation (svg files are xml files,
+        by the way). This causes an issue when using nireports run_reports function, that corrupt the svg files if
+        indentation is not standard.
+        To solve this bug, we must ensure the save svg files have the correct indentation, and we do this using the
+        xmlformatter library.
+        The original svg file is replaced in-place after being create by plotly.
+
+    Args:
+        fig: a plotly Figure
+        output_path: path to where the svg must be saved
+
+    Returns:
+        0
+    """
+
+    # plotly save image
+    fig.write_image(output_path)
+
+    # format svg file
+    from xmlformatter import Formatter
+    formatter = Formatter(indent="1", indent_char='\t', encoding_output="ISO-8859-1", preserve=["literal"])
+    formatted_bytes = formatter.format_file(output_path)
+
+    # replace original file with formatted content
+    with open(output_path, 'wb') as file:
+        file.write(formatted_bytes)
+
+    return 0

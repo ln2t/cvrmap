@@ -41,8 +41,8 @@ def main():
     layout = setup_output_dir(args, __version__, layout)
     output_dir = layout.derivatives['cvrmap'].root
     flags = set_flags(args)
-    flags['no-shift'] = False  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
-    flags['no-denoising'] = False  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
+    flags['no-shift'] = True  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
+    flags['no-denoising'] = True  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
     parameters = read_config_file(args.config)
 
     if flags['no-shift']:
@@ -183,8 +183,13 @@ def main():
 
             msg_info("Building report...")
 
-            build_report(subject_label, args, __version__, physio, probe, baseline, global_signal, global_signal_shift,
-                         aroma_noise_ic_list, corrected_noise, parameters['fwhm'], t1w, outputs, results['cvr'], results)
+            save_html_reportlets(subject_label, task, space, args, __version__, aroma_noise_ic_list,
+                                 global_signal_shift, corrected_noise, parameters, outputs)
+
+            from nireports.assembler.tools import run_reports
+            cvrmap_bootstrap_file = '/mnt/erasme/git/ln2t/cvrmap/cvrmap/data/reports_config.yml'
+            run_reports(output_dir, subject_label, 'madeoutuuid', bootstrap_file=cvrmap_bootstrap_file,
+                        reportlets_dir=output_dir)
 
     # running group level
     elif args.analysis_level == "group":
