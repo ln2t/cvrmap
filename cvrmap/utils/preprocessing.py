@@ -5,9 +5,7 @@ Preprocessing tools for physiological and fMRI data
 from .processing import DataObj
 import numpy as np
 from scipy.ndimage import gaussian_filter
-import peakutils
 from scipy.interpolate import interp1d
-from statsmodels.regression.linear_model import OLS
 
 
 def endtidalextract(physio):
@@ -20,6 +18,8 @@ def endtidalextract(physio):
         etco2: DataObj with basically the upper enveloppe of physio.data
         baseline: DataObj with the baseline of the etco2 curve
     """
+
+    import peakutils
 
     sampling_freq = physio.sampling_frequency
     physio_raw = physio.data
@@ -72,6 +72,8 @@ def masksignalextract(preproc, mask):
 
     """
     from nilearn.masking import apply_mask
+    import peakutils
+
     sampling_freq = preproc.sampling_frequency
     data = apply_mask(imgs=preproc.path, mask_img=mask)
     masksignal = np.mean(data, axis=-1)
@@ -189,6 +191,9 @@ def non_agg_denoise(signal, design_matrix_df, noise_indexes):
         This is work in progress and is not used in the main script.
 
     """
+
+    from statsmodels.regression.linear_model import OLS
+
     # define model with ALL regressors
     model = OLS(signal, design_matrix_df.values)
     # fit the model
