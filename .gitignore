@@ -8,5 +8,4 @@ venv/*
 dist/*
 CVRmap.egg-info/*
 build/*
-docs/build/html/*
 cvrmap/__pycache__/*
