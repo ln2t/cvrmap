@@ -2,10 +2,6 @@
 Preferences for the shell prints: colors, messaging and progress bars
 """
 
-# imports
-
-from datetime import datetime
-
 # classes
 
 class bcolors:
@@ -40,6 +36,7 @@ def msg_info(msg):
     Returns:
         None
     """
+    from datetime import datetime
     now = datetime.now()
     time_stamp = now.strftime("(%Y-%m-%d-%H-%M-%S) ")
     # print('(py) ' + f"{bcolors.INFO}INFO{bcolors.ENDC} " + time_stamp + msg, flush=True)
@@ -56,6 +53,7 @@ def msg_error(msg):
     Returns:
         None
         """
+    from datetime import datetime
     now = datetime.now()
     time_stamp = now.strftime("(%Y-%m-%d-%H-%M-%S) ")
     # print('(py) ' + f"{bcolors.ERROR}ERROR{bcolors.ENDC} " + time_stamp + msg, flush=True)
@@ -72,6 +70,7 @@ def msg_warning(msg):
     Returns:
         None
         """
+    from datetime import datetime
     now = datetime.now()
     time_stamp = now.strftime("(%Y-%m-%d-%H-%M-%S) ")
     # print('(py) ' + f"{bcolors.WARNING}WARNING{bcolors.ENDC} " + time_stamp + msg, flush=True)

@@ -13,7 +13,7 @@ Created: May 2022
 # imports
 import os  # to interact with dirs
 from bids import BIDSLayout as bidslayout  # to handle BIDS data
-from utils import *  # custom utilities
+from .utils import *  # custom utilities
 
 def main():
     """

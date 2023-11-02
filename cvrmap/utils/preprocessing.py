@@ -82,72 +82,17 @@ def masksignalextract(preproc, mask):
     return probe, baseline
 
 
-def fsl_preprocessing(fmri_input, melodic_mixing, corrected_noise, parameters):
-    """
-        Wrapper for the fsl preprocessing, including non-agressive denoising.
-
-    The steps are as follows:
-    - non-aggressive denoising (using fsl_regfilt command)
-    - highpass filtering (using fslmaths)
-    - spatial smoothing (if fwhm is not none)
-
-    highpass filtering is done using the -bptf option of fsl_math with argument hpsigma = 128/2/TR
-
-    Args:
-        fmri_input: str, path to fMRI data to preprocess
-        melodic_mixing: str, path to melodic mixing matrix saved as a .tsv (as in fMRIPrep)
-        corrected_noise: np array containing the labels (integers) of the ICA components to consider as noise
-        fwhm: int, FWHM for extrat smoothing (optional)
-
-    Returns:
-        DataObj for cleaned (denoised) fMRI data
-
-    """
-    from .shell_tools import run
-    import uuid
-    import nibabel as nb
-    from os.path import join
-    from nilearn.image import smooth_img
-    _corrected_noise = [str(i) for i in list(np.array(corrected_noise) + 1)]  # corrected_noise is zero-based
-    regfilt_output = '/tmp/tmp_fsl_regfilt_output_' + str(uuid.uuid4()) + '.nii.gz'
-    tmp_output_mean = '/tmp/tmp_fsl_regfilt_output_' + str(uuid.uuid4()) + '.nii.gz'
-    tmp_highpassfilter_output = '/tmp/tmp_fsl_regfilt_output_' + str(uuid.uuid4()) + '.nii.gz'
-    fsl_bin_folder = "/opt/fsl/bin"
-    fsl_regfilt_cmd = join(fsl_bin_folder, 'fsl_regfilt') + " --in=%s --filter=%s --design=%s --out=%s" % (fmri_input, ','.join(_corrected_noise), melodic_mixing, regfilt_output)
-    compute_mean_cmd = join(fsl_bin_folder, 'fslmaths') + " %s -Tmean %s" % (regfilt_output, tmp_output_mean)
-    t_r = nb.load(fmri_input).header.get_zooms()[-1]
-    alpha = 2.35  # this is sqrt(8*log(2)), see fsl doc/mailing list
-    hpsigma = 1/(alpha*t_r*parameters['highpass_frequency'])
-    highpass_cmd = join(fsl_bin_folder, 'fslmaths') + " %s -bptf %s -1 -add %s %s" % (regfilt_output, hpsigma, tmp_output_mean, tmp_highpassfilter_output)
-
-    # run external commands
-
-    run(fsl_regfilt_cmd)
-    run(compute_mean_cmd)
-    run(highpass_cmd)
-
-    _output = tmp_highpassfilter_output
-    _img = nb.load(_output)
-
-    _img = smooth_img(_img, parameters['fwhm'])
-
-    denoised = DataObj(data_type='bold')
-    denoised.label = 'Non-aggressively denoised data'
-    denoised.data = _img.get_fdata()
-    denoised.img = _img
-
-    return denoised
-
-
 def bold_denoising(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, parameters):
     """
         BOLD signal denoising based on non-aggressive denoising.
-        Steps:
-            - non-aggressive denoising (similar to what fsl_regfilt do)
-            - highpass filtering (similar to fslmaths -bptf), using parameters['highpass_frequency'] (value in Hz)
-            - re-add mean BOLD signal to filtered data
-            - spatial smoothing using parameters['fwhm']
-        Note: this function does not rely on FSL.
+
+    Steps:
+        - non-aggressive denoising (similar to what fsl_regfilt do)
+        - highpass filtering (similar to fslmaths -bptf), using parameters['highpass_frequency'] (value in Hz)
+        - re-add mean BOLD signal to filtered data
+        - spatial smoothing using parameters['fwhm']
+
+    Note: this function does not rely on FSL.
 
     Args:
         bold_fn: path to 4D nii to denoise
@@ -155,8 +100,8 @@ def bold_denoising(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, parameter
         melodic_mixing_df: pandas df with IC's
         noise_indexes: list of int labelling the noise, 0-based
         parameters: dict, whose elements 'fwhm' and 'highpass_frequency' only are used.
-            If parameters['fwhm'] is None, no smoothing is applied. parameters['highpass_frequency'] is passed to
-            nilean.image.clean_img.
+        If parameters['fwhm'] is None, no smoothing is applied. parameters['highpass_frequency'] is passed to
+        nilean.image.clean_img.
 
     Returns:
         DataObj, containing denoised data. Voxels outside mask as set to 0.

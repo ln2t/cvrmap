@@ -16,7 +16,7 @@ author = 'Antonin Rovai'
 extensions = ['sphinx.ext.autodoc']
 
 templates_path = ['_templates']
-autodoc_mock_imports = ["peakutils", "statsmodels", "utils", "scipy", "datetime"]
+autodoc_mock_imports = ["peakutils", "statsmodels", "scipy", "datetime"]
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 
@@ -30,4 +30,5 @@ html_baseurl = 'docs/build'
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../cvrmap'))
+sys.path.insert(0, os.path.abspath('../../../cvrmap'))
+#sys.path.insert(0, os.path.abspath('/mnt/erasme/git/ln2t/cvrmap'))
