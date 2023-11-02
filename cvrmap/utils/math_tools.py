@@ -121,7 +121,8 @@ def tccorr(data_object1, data_object2):
 def build_shifted_signal(probe, target, delta_t):
     """
         Shifts the probe signal by the amount delta_t, putting baseline values when extrapolation is needed.
-        The baseline is read from probe.baseline; if undefined, the function first calls probe.build_baseline() to ensure it exists.
+        The baseline is read from probe.baseline; if undefined, the function first calls probe.build_baseline()
+        to ensure it exists.
         Target is a signal used as a reference for the length and sampling frequency of the output.
 
     Arguments:
