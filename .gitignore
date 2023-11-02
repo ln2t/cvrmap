@@ -9,4 +9,4 @@ dist/*
 CVRmap.egg-info/*
 build/*
 docs/build/*
-cvrmap/__pycache__
+cvrmap/__pycache__/*
