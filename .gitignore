@@ -8,3 +8,4 @@ venv/*
 dist/*
 CVRmap.egg-info/*
 build/*
+docs/build/*
