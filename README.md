@@ -1,3 +1,6 @@
+[![codecov](https://codecov.io/gh/ln2t/cvrmap/graph/badge.svg?token=VGQPJX5078)](https://codecov.io/gh/ln2t/cvrmap)
+
+
 # About
 
 CVRmap is an opensource (license AGPLv3) software to compute maps of Cerebro-Vascular Reactivity (CVR).
