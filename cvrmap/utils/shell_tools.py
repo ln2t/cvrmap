@@ -139,7 +139,7 @@ def printProgressBar (iteration, total, prefix='', suffix='Complete', decimals=4
         print()
 
 
-def get_version ():
+def get_version():
     """
         Print version from git info
 
