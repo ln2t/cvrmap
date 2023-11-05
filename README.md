@@ -8,7 +8,7 @@ The software is compatible with the Brain Imagning Data Structure (BIDS) standar
 
 The paper describing the toolbox will be pulished (hopefully!) soon.
 
-A normative dataset can be downloaded from openneuro: https://openneuro.org/datasets/ds004604
+A normative dataset can be downloaded from openneuro: [ds004604](https://openneuro.org/datasets/ds004604)
 
 CVRmap is also distributed as a package, the full API documentation being [here](https://ln2t.github.io/cvrmap).
 
