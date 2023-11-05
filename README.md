@@ -1,5 +1,6 @@
 [![codecov](https://codecov.io/gh/ln2t/cvrmap/graph/badge.svg?token=VGQPJX5078)](https://codecov.io/gh/ln2t/cvrmap)
 
+[License](https://img.shields.io/github/license/ln2t/cvrmap)
 
 # About
 
