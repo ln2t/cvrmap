@@ -27,7 +27,7 @@ docker pull arovai/cvrmap:v1.0
 ```
 
 where of course `v1.0` can be replaced by any other available version.
-Check out the docker hub page (https://hub.docker.com/repository/docker/arovai/cvrmap/general) to find more info on the available images.
+Check out the [`cvrmap` docker hub page](https://hub.docker.com/repository/docker/arovai/cvrmap/general) to find more info on the available images.
 
 To test your installation, you can use for instance
 
