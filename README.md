@@ -1,6 +1,4 @@
-[![codecov](https://codecov.io/gh/ln2t/cvrmap/graph/badge.svg?token=VGQPJX5078)](https://codecov.io/gh/ln2t/cvrmap)
-
-![License](https://img.shields.io/github/license/ln2t/cvrmap)
+[![codecov](https://codecov.io/gh/ln2t/cvrmap/graph/badge.svg?token=VGQPJX5078)](https://codecov.io/gh/ln2t/cvrmap) ![License](https://img.shields.io/github/license/ln2t/cvrmap)
 
 # About
 
@@ -11,6 +9,8 @@ The software is compatible with the Brain Imagning Data Structure (BIDS) standar
 The paper describing the toolbox will be pulished (hopefully!) soon.
 
 A normative dataset can be downloaded from openneuro: https://openneuro.org/datasets/ds004604
+
+CVRmap is also distributed as a package, the full API documentation being [here](https://ln2t.github.io/cvrmap).
 
 # Installation
 
