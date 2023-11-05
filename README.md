@@ -10,14 +10,13 @@ The paper describing the toolbox will be pulished (hopefully!) soon.
 
 A normative dataset can be downloaded from openneuro: [ds004604](https://openneuro.org/datasets/ds004604)
 
-CVRmap is also distributed as a package, the full API documentation being [here](https://ln2t.github.io/cvrmap).
+CVRmap is also distributed as a package, the full API documentation being [here](https://ln2t.github.io/cvrmap)
 
 # Installation
 
 # Note about dependencies
 
-Apart from the python3 dependencies specified in `requirements.txt`, the package uses FSL (see https://fsl.fmrib.ox.ac.uk/fsl/fslwiki).
-If you are using the container solutions below (option 1 and 2), you don't have to worry about installing FSL as the container already has it.
+All dependencies are specified in `requirements.txt`.
 
 # Option 1: docker (recommended option!)
 
@@ -78,12 +77,11 @@ The most basic way to install `cvrmap` is to clone this git repo, make `cvrmap` 
 pip install -r requirements.txt
 ```
 
-Regarding the FSL binaries used by `cvrmap`, they should be located at `/opt/fsl/bin`.
- `cvrmap` can then be launched by typing `cvrmap` in a terminal after you moved to your locally copy of the git folder:
+`cvrmap` can then be launched by executing `cvrmap.py` in a terminal after you moved to your locally copy of the git folder:
 
 ```
 cd /path/to/git/clone/cvrmap/cvrmap
-cvrmap --version
+cvrmap.py --version
 ```
 
 By the way: in this setup we recommend to use a python3 virtual environment. We can do this using e.g. `conda`:
@@ -101,9 +99,9 @@ Note that the docker image is essentially build using this procedure, as you can
 
 # Usage
 
-To run CVRmap, you must first have data to crunch. If you don't have data, and you want to test CVRmap, you can download the publicly available dataset on openneuro (https://openneuro.org/datasets/ds004604) which include compatible rawdata, fmriprep derivatives, as well as `cvrmap` (v1.0) outputs.
+To run CVRmap, you must first have data to crunch. If you don't have data, and you want to test CVRmap, you can download the publicly available dataset on openneuro [ds004604](https://openneuro.org/datasets/ds004604) which include compatible rawdata, fmriprep derivatives, as well as `cvrmap` (v1.0) outputs.
 If you have your own data that you want to analyze with CVRmap, make sure to observe the following:
-first of all, the data are supposed to a BIDS (https://bids-specification.readthedocs.io/en/stable/) dataset. For each subject, you must have a T1w image, a BOLD image and a physiological file containing the breathing data (CO2) recorded during the fMRI scan. For instance, for `sub-01`, the data should look like this:
+first of all, the data are supposed to a [BIDS](https://bids-specification.readthedocs.io/en/stable/) dataset. For each subject, you must have a T1w image, a BOLD image and a physiological file containing the breathing data (CO2) recorded during the fMRI scan. For instance, for `sub-01`, the data should look like this:
 
 ```
 sub-01/anat/sub-01_T1w.nii.gz
@@ -135,7 +133,7 @@ In this example, the `sub-01/func/sub-01_task-gas_physio.tsv.gz` must have only 
 Note though that the `StartTime` field is not used at all by `cvrmap`, as it explores various time lags by itself.
 If the CO2 readings are in percentage of co2 concentration (which is also often used), the "Units" field must be "%", and in that case `cvrmap` will convert percentages to mmHg automatically. Finally, the total duration of the CO2 recording must not necessarily match the duration of the BOLD acquisition: depending on the case, CVRmap trims or uses a baseline extrapolation automatically.
 
-The rawdata must also have been processed using fMRIPrep (https://fmriprep.org/en/stable). A minimalistic fMRIPrep call compatible with CVRmap is:
+The rawdata must also have been processed using [fMRIPrep](https://fmriprep.org/en/stable). A minimalistic fMRIPrep call compatible with CVRmap is:
 
 ```
 fmriprep /path/to/bids_dir /path/to/derivatives/fmriprep participant --fs-license-file /path/to/fslicense --use-aroma
