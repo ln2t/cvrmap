@@ -112,3 +112,35 @@ def test_get_space():
     with pytest.raises(SystemExit) as e:
         get_space(args, layout)
     assert e.type == SystemExit
+
+
+def test_setup_output_dir():
+    """
+        Function to test setup_output_dir()
+
+    """
+    from ..io_tools import setup_output_dir
+    from bids import BIDSLayout
+    from argparse import Namespace
+    import os
+
+    # initiate dummy derivative folder
+
+    args = Namespace(**{'output_dir': '/tmp/tmp_pytest_output_dir'})
+    layout = BIDSLayout('.', validate=False)
+
+    version = 'some_dummy_version'
+
+    dataset_description = os.path.join(args.output_dir,
+                                       'dataset_description.json')
+
+    if os.path.isfile(dataset_description):
+        os.remove(dataset_description)
+
+    layout = setup_output_dir(args, version, layout)
+
+    assert os.path.isfile(dataset_description)
+    assert 'cvrmap' in layout.derivatives.keys()
+
+    if os.path.isfile(dataset_description):
+        os.remove(dataset_description)
