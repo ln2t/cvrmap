@@ -46,3 +46,4 @@ xmlformatter==0.2.4
 urllib3==2.0.2
 uuid==1.30
 wrapt==1.15.0
+pytest==7.4.3

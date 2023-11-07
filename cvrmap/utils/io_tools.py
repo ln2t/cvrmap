@@ -109,6 +109,7 @@ def get_fmriprep_dir(args):
     """
     from os.path import join, isdir
     from .shell_tools import msg_error
+    import sys
     #  fmriprep dir definition
     if args.fmriprep_dir:
         fmriprep_dir = args.fmriprep_dir
@@ -117,6 +118,7 @@ def get_fmriprep_dir(args):
     # exists?
     if not isdir(fmriprep_dir):
         msg_error("fmriprep dir %s not found." % fmriprep_dir)
+        sys.exit(1)
 
     return fmriprep_dir
 
