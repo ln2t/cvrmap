@@ -244,7 +244,46 @@ def test_get_physio_data():
     assert np.all(physio.data == data.T[1])
 
 
+def test_get_aroma_noise_ic_list():
+    """
+        Function to test get_aroma_noise_ic_list()
 
+    """
+    from ..io_tools import get_aroma_noise_ic_list
+    from bids import BIDSLayout
+    from pathlib import Path
+    from shutil import rmtree
+
+    test_root = '/tmp/tmp_pytest'
+
+    if os.path.isdir(test_root):
+        rmtree(test_root)
+
+    Path(test_root).mkdir(parents=True, exist_ok=True)
+
+    layout = BIDSLayout(test_root, validate=False)
+
+    bids_filter = dict()
+
+    bids_filter['task'] = 'dummytask'
+    bids_filter['subject'] = 'dummysub'
+    bids_filter['space'] = 'dummyspace'
+
+    dummy_ica_list = '1,2,3,42'
+
+    data_dir = os.path.join(test_root, 'derivatives', 'fmriprep', 'sub-' + bids_filter['subject'], 'func')
+
+    Path(data_dir).mkdir(parents=True, exist_ok=True)
+
+    fn = 'sub-' + bids_filter['subject'] + '_task-' + bids_filter['task'] + '_physio.tsv.gz'
+    fn_full = os.path.join(data_dir, fn)
+
+    with open(fn_full, 'w') as f:
+        f.write(dummy_ica_list)
+
+    # get_aroma_noise_ic_list(bids_filter, layout)
+
+    # work in progress
 
 
 
