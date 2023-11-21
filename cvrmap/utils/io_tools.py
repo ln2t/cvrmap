@@ -264,7 +264,7 @@ def set_flags(args):
     flags['vesselsignal'] = args.vesselsignal
     flags['globalsignal'] = args.globalsignal
     if flags['ica_aroma']:
-        from shell_tools import msg_info
+        from .shell_tools import msg_info
         msg_info("All the noise regressors found by aroma will be used.")
 
     return flags

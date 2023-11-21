@@ -1,6 +1,8 @@
 """
 pytest test_ file for io_tools.py module
 """
+import os
+
 
 def test_arguments_manager():
     """
@@ -93,10 +95,19 @@ def test_get_space():
     from argparse import Namespace
     import pytest
     import os
+    from shutil import rmtree
+    from pathlib import Path
 
     # initiate dummy derivative folder
 
-    dataset_description = os.path.join('.',
+    test_root = '/tmp/tmp_pytest'
+
+    if os.path.isdir(test_root):
+        rmtree(test_root)
+
+    Path(test_root).mkdir(exist_ok=True, parents=True)
+
+    dataset_description = os.path.join(test_root,
                                        'dataset_description.json')
     with open(dataset_description, 'w') as ds_desc:
         ds_desc.write(('{"Name": "dummy_value", "BIDSVersion": "dummy_value", '
@@ -105,7 +116,7 @@ def test_get_space():
         ds_desc.close()
 
     args = Namespace(**{'space': 'random_spacename'})
-    layout = BIDSLayout('.', validate=False)
+    layout = BIDSLayout(test_root, validate=False)
     layout.add_derivatives('some_crazy_name')
     #assert layout.get_spaces(scope='derivatives') == []
 
@@ -114,33 +125,165 @@ def test_get_space():
     assert e.type == SystemExit
 
 
-def test_setup_output_dir():
+def test_set_flags():
     """
-        Function to test setup_output_dir()
+        Function to test set_flags()
 
     """
-    from ..io_tools import setup_output_dir
-    from bids import BIDSLayout
+    from ..io_tools import set_flags
+    from argparse import Namespace
+
+    args = Namespace(**{'sloppy': 'value1', 'overwrite': 'value2',
+                        'use_aroma': 'value3', 'vesselsignal': 'value4',
+                        'globalsignal': 'value5'
+                        })
+
+    flags = set_flags(args)
+
+    assert flags['sloppy'] == args.sloppy
+    assert flags['overwrite'] == args.overwrite
+    assert flags['ica_aroma'] == args.use_aroma
+    assert flags['vesselsignal'] == args.vesselsignal
+    assert flags['globalsignal'] == args.globalsignal
+
+
+def test_setup_subject_output_paths():
+    """
+        Function to test setup_subject_output_paths()
+
+    """
+    from ..io_tools import setup_subject_output_paths
     from argparse import Namespace
     import os
+    from shutil import rmtree
 
-    # initiate dummy derivative folder
+    args = Namespace(**{'sloppy': 'value1', 'overwrite': 'value2',
+                        'use_aroma': 'value3', 'vesselsignal': 'value4',
+                        'globalsignal': 'value5'
+                        })
+    output_dir = '/tmp/tmp_pytest'
+    subject_label = 'dummylabel'
+    space = 'dummyspace'
+    res = None
+    custom_label = 'dummycustomlabel'
 
-    args = Namespace(**{'output_dir': '/tmp/tmp_pytest_output_dir'})
-    layout = BIDSLayout('.', validate=False)
+    if os.path.isdir(output_dir):
+        rmtree(output_dir)
 
-    version = 'some_dummy_version'
+    outputs = setup_subject_output_paths(output_dir, subject_label, space, res, args, custom_label)
 
-    dataset_description = os.path.join(args.output_dir,
-                                       'dataset_description.json')
+    assert isinstance(outputs, dict)
+    assert os.path.isdir(output_dir)
 
-    if os.path.isfile(dataset_description):
-        os.remove(dataset_description)
+    keys_to_check = ['report', 'cvr', 'delay', 'denoised', 'etco2', 'vesselsignal', 'globalsignal', 'breathing_figure',
+     'boldmean_figure', 'vesselsignal_figure', 'globalsignal_figure', 'cvr_figure', 'delay_figure', 'vesselmask_figure',
+     'globalmask_figure', 'summary_reportlet', 'denoising_reportlet']
 
-    layout = setup_output_dir(args, version, layout)
+    assert keys_to_check == list(outputs.keys())
 
-    assert os.path.isfile(dataset_description)
-    assert 'cvrmap' in layout.derivatives.keys()
+    if os.path.isdir(output_dir):
+        rmtree(output_dir)
 
-    if os.path.isfile(dataset_description):
-        os.remove(dataset_description)
+def test_get_physio_data():
+    """
+        Function to test get_physio_data()
+
+    """
+    from ..io_tools import get_physio_data
+    from bids import BIDSLayout
+    import numpy as np
+    from pathlib import Path
+    from shutil import rmtree
+
+    test_root = '/tmp/tmp_pytest'
+
+    if os.path.isdir(test_root):
+        rmtree(test_root)
+
+
+    bids_filter = dict()
+
+    bids_filter['task'] = 'dummytask'
+    bids_filter['subject'] = 'dummysub'
+    bids_filter['space'] = 'dummyspace'
+
+    data_dir = os.path.join(test_root, 'sub-' + bids_filter['subject'], 'func')
+
+    Path(data_dir).mkdir(parents=True, exist_ok=True)
+
+    fn = 'sub-' + bids_filter['subject'] + '_task-' + bids_filter['task'] + '_physio.tsv.gz'
+    fn_json = 'sub-' + bids_filter['subject'] + '_task-' + bids_filter['task'] + '_physio.json'
+    fn_full = os.path.join(data_dir, fn)
+    fn_json_full = os.path.join(data_dir, fn_json)
+
+    data = np.random.random([10, 2])
+
+    np.savetxt(fn_full, data)
+
+    json_content = """
+    {
+        "SamplingFrequency": 100,
+        "StartTime": 0,
+        "Columns": [
+            "co2"
+        ],
+        "co2": {
+            "Units": "dummyunits"
+        }
+    }
+    """
+
+    with open(fn_json_full, 'w') as f:
+        f.write(json_content)
+
+    layout = BIDSLayout(test_root, validate=False)
+
+    physio = get_physio_data(bids_filter, layout)
+
+    assert physio.units == 'dummyunits'
+    assert np.all(physio.data == data.T[1])
+
+
+def test_get_aroma_noise_ic_list():
+    """
+        Function to test get_aroma_noise_ic_list()
+
+    """
+    from ..io_tools import get_aroma_noise_ic_list
+    from bids import BIDSLayout
+    from pathlib import Path
+    from shutil import rmtree
+
+    test_root = '/tmp/tmp_pytest'
+
+    if os.path.isdir(test_root):
+        rmtree(test_root)
+
+    Path(test_root).mkdir(parents=True, exist_ok=True)
+
+    layout = BIDSLayout(test_root, validate=False)
+
+    bids_filter = dict()
+
+    bids_filter['task'] = 'dummytask'
+    bids_filter['subject'] = 'dummysub'
+    bids_filter['space'] = 'dummyspace'
+
+    dummy_ica_list = '1,2,3,42'
+
+    data_dir = os.path.join(test_root, 'derivatives', 'fmriprep', 'sub-' + bids_filter['subject'], 'func')
+
+    Path(data_dir).mkdir(parents=True, exist_ok=True)
+
+    fn = 'sub-' + bids_filter['subject'] + '_task-' + bids_filter['task'] + '_physio.tsv.gz'
+    fn_full = os.path.join(data_dir, fn)
+
+    with open(fn_full, 'w') as f:
+        f.write(dummy_ica_list)
+
+    # get_aroma_noise_ic_list(bids_filter, layout)
+
+    # work in progress
+
+
+
