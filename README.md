@@ -23,22 +23,22 @@ All dependencies are specified in `requirements.txt`.
 The easiest way to install `cvrmap` is to use docker:
 
 ```
-docker pull arovai/cvrmap:v1.0
+docker pull arovai/cvrmap:VERSION
 ```
 
-where of course `v1.0` can be replaced by any other available version.
+where of course `VERSION` must be replaced by any other available version (e.g. 2.0.0).
 Check out the [`cvrmap` docker hub page](https://hub.docker.com/repository/docker/arovai/cvrmap/general) to find more info on the available images.
 
 To test your installation, you can use for instance
 
 ```
-docker run arovai/cvrmap:v1.0 --version
+docker run arovai/cvrmap:VERSION --version
 ```
 
 This will output the version and exit. You can also type
 
 ```
-docker run arovai/cvrmap:v1.0 --help
+docker run arovai/cvrmap:VERSION --help
 ```
 
 for help.
@@ -46,7 +46,7 @@ for help.
 For the reader not familiar with docker, you can pass some data to the docker image with
 
 ```
-docker run -v /path/to/your/bids/folder:/rawdata -v /path/to/your/derivatives:/derivatives arovai/cvrmap:v1.0 /rawdata /derivatives/cvrmap participant
+docker run -v /path/to/your/bids/folder:/rawdata -v /path/to/your/derivatives:/derivatives arovai/cvrmap:VERSION /rawdata /derivatives/cvrmap participant
 ```
 
 For more information about the command line options, see the **Usage** section.
@@ -56,43 +56,44 @@ For more information about the command line options, see the **Usage** section.
 You can also build a Singularity image file using
 
 ```
-singularity build arovai.cvrmap.v1.0.sif docker://arovai/cvrmap:v1.0
+singularity build arovai.cvrmap.VERSION.sif docker://arovai/cvrmap:VERSION
 ```
 
-You can for instance run this command inside your home directory, and then you'll have a singularity image file named `arovai.cvrmap.v1.0.sif` in there. To run it, still in the folder where the image is located, run
+You can for instance run this command inside your home directory, and then you'll have a singularity image file named `arovai.cvrmap.VERSION.sif` in there. To run it, still in the folder where the image is located, run
 
 ```
-singularity run -B /path/to/your/bids/folder:/rawdata -B /path/to/your/derivatives:/derivatives arovai.cvrmap.v1.0.sif /rawdata /derivatives/cvrmap participant
+singularity run -B /path/to/your/bids/folder:/rawdata -B /path/to/your/derivatives:/derivatives arovai.cvrmap.VERSION.sif /rawdata /derivatives/cvrmap participant
 ```
 
 Make sure that the folder `/path/to/your/derivatives` exists before launching this command.
 
 Of course, you are free to place the image where ever suits you; you'll simply have to adapt the path when calling `singularity`.
 
-# Option 3: python environment (using git)
+# Option 3: python environment (using pip)
 
-The most basic way to install `cvrmap` is to clone this git repo, make `cvrmap` executable and add it to your path. Make sure you have all python3 dependencies installed:
-
-```
-pip install -r requirements.txt
-```
-
-`cvrmap` can then be launched by executing `cvrmap.py` in a terminal after you moved to your locally copy of the git folder:
+`cvrmap` is also available on [pypi](https://pypi.org/manage/project/cvrmap/releases). We strongly recommend that you install it in a virtual environement.
+First, install `virtualenv`:
 
 ```
-cd /path/to/git/clone/cvrmap/cvrmap
-cvrmap.py --version
+pip install virtualenv
 ```
 
-By the way: in this setup we recommend to use a python3 virtual environment. We can do this using e.g. `conda`:
+Then create a virtual env. To deal with potential conflicts in versions of the required packages withing `cvrmap`, we recommend you create one environment for each `cvrmap` version:
 
 ```
-# create empty environment named "cvrmap"
-conda create -n cvrmap python
-# activate
-conda activate -n cvrmap
-# install the packages
-pip install -r requirements.txt
+export VERSION="2.0.0"
+virtualenv cvrmap-env-$VERSION
+```
+
+Activate the environment and install `cvrmap`:
+```
+source cvrmap-env-$VERSION/bin/activate && pip install cvrmap==$VERSION
+```
+
+This will add a command in you `PATH` so that you can directly launch `cvrmap`:
+
+```
+cvrmap -h
 ```
 
 Note that the docker image is essentially build using this procedure, as you can see in the `Dockerfile` located in the `docker` folder of this repo.
@@ -162,15 +163,17 @@ sub-01/extras/sub-01_desc-etco2_timecourse.tsv.gz
 sub-01/extras/sub-01_desc-etco2_timecourse.json
 sub-01/extras/sub-01_space-MNI152NLin2009cAsym_denoised.nii.gz
 sub-01/extras/sub-01_space-MNI152NLin2009cAsym_denoised.json
-sub-01/figures/sub-01_boldmean.png
-sub-01/figures/sub-01_breathing.png
+sub-01/figures/sub-01_boldmean.svg
+sub-01/figures/sub-01_breathing.svg
+sub-01/figures/sub-001_denoising.html
+sub-01/figures/sub-001_summary.html
 sub-01/figures/sub-01_space-MNI152NLin2009cAsym_cvr.svg
 sub-01/figures/sub-01_space-MNI152NLin2009cAsym_delay.svg
 sub-01/sub-01_space-MNI152NLin2009cAsym_delay.nii.gz
 sub-01/sub-01_space-MNI152NLin2009cAsym_delay.json
 sub-01/sub-01_space-MNI152NLin2009cAsym_cvr.nii.gz
 sub-01/sub-01_space-MNI152NLin2009cAsym_cvr.json
-sub-01_report.html
+sub-01.html
 ```
 
 The `extras` folder contains the `etco2` file with the end-tidal timecourse extracted from the original CO2 readings as well as the non-aggressively denoised BOLD series (the series are also high-pass filtered and smoothed at 5mm FWHM). Some pictures for the report are stored within `figures`. The delay map contains the computed time delays (or time lags) in seconds, and normalized to the global signal delay. The main map of interest is of course the CVR map! For a quick analysis, the html report is also included.
