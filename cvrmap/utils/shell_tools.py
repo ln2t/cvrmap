@@ -146,9 +146,10 @@ def get_version():
     Returns:
         __version__
     """
-    from os.path import join, dirname, realpath
-    # version = open(join(dirname(realpath(__file__)), '..', '..', '..', '.git',
-    #                        'HEAD')).read()
-    version = open(join(dirname(realpath(__file__)), '..', '..', 'VERSION')).read()
+
+    import importlib.metadata
+
+    version = importlib.metadata.version('cvrmap')
+    print(version)
 
     return version

@@ -19,7 +19,7 @@ def arguments_manager(version):
     """
     import argparse
     #  Deal with arguments
-    parser = argparse.ArgumentParser(description='Entrypoint script.')
+    parser = argparse.ArgumentParser()
     parser.add_argument('bids_dir', help='The directory with the input '
                                          'dataset formatted according to '
                                          'the BIDS standard.')
@@ -57,7 +57,7 @@ def arguments_manager(version):
     parser.add_argument('--overwrite', help='If set, existing results will be overwritten if they exist.',
                         action='store_true')
     parser.add_argument('--label', help='If set, labels the output with custom label.')
-    parser.add_argument('-v', '--version', action='version', version='BIDS-App example version {}'.format(version))
+    parser.add_argument('-v', '--version', action='version', version='cvrmap version {}'.format(version))
     parser.add_argument('--vesselsignal', help='If set, will extract BOLD signal from vessels as a '
                                                'surrogate for CO2 partial pressure. '
                                                'Results in measures of relative CVR.',
