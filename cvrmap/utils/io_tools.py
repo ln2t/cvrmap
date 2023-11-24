@@ -252,7 +252,7 @@ def set_flags(args):
         Set various flags for options in the main script
 
     Args:
-        args: dict, argument of the script
+        args: NameSpace, argument of the script
     Returns:
         dict, with values for the flags as set by the options
     """
@@ -263,9 +263,17 @@ def set_flags(args):
     flags['ica_aroma'] = args.use_aroma
     flags['vesselsignal'] = args.vesselsignal
     flags['globalsignal'] = args.globalsignal
+
     if flags['ica_aroma']:
         from .shell_tools import msg_info
         msg_info("All the noise regressors found by aroma will be used.")
+
+    flags['no-shift'] = False
+    flags['no-denoising'] = False
+
+    if args.sloppy:
+        flags['no-shift'] = True  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
+        flags['no-denoising'] = True  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
 
     return flags
 
