@@ -13,7 +13,7 @@ Created: May 2022
 # imports
 import os  # to interact with dirs
 from bids import BIDSLayout as bidslayout  # to handle BIDS data
-from utils import *  # custom utilities
+from .utils import *  # custom utilities
 
 def main():
     """
@@ -41,8 +41,6 @@ def main():
     layout = setup_output_dir(args, __version__, layout)
     output_dir = layout.derivatives['cvrmap'].root
     flags = set_flags(args)
-    flags['no-shift'] = True  # no shifts used in voxel-wise regression / saves a lot of time / set to True for testing
-    flags['no-denoising'] = True  # skip denoising, use preproc from fmriprep / saves time / set to True  for testing
     parameters = read_config_file(args.config)
 
     if flags['no-shift']:
@@ -119,14 +117,14 @@ def main():
 
             if not os.path.exists(outputs['delay']) or flags['overwrite']:
 
-                if flags['sloppy']:
-                    msg_warning('Working in sloppy mode, only for quick testing!')
-                    zmask = mask.data
-                    zmask[:, :, :59] = np.zeros(zmask[:, :, :59].shape)
-                    zmask[:, :, 61:] = np.zeros(zmask[:, :, 61:].shape)
-                    denoised.mask = zmask
-                else:
-                    denoised.mask = mask.data
+                # if flags['sloppy']:
+                    # msg_warning('Working in sloppy mode, only for quick testing!')
+                    # zmask = mask.data
+                    # zmask[:, :, :59] = np.zeros(zmask[:, :, :59].shape)
+                    # zmask[:, :, 61:] = np.zeros(zmask[:, :, 61:].shape)
+                    # denoised.mask = zmask
+
+                denoised.mask = mask.data
 
                 # build the shifted data needed to compute delays
                 shift_options = dict()
