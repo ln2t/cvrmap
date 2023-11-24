@@ -90,7 +90,7 @@ Activate the environment and install `cvrmap`:
 source cvrmap-env-$VERSION/bin/activate && pip install cvrmap==$VERSION
 ```
 
-This will add a command in you `PATH` so that you can directly launch `cvrmap`:
+This will add a command in your `PATH` so that you can directly launch `cvrmap`:
 
 ```
 cvrmap -h
