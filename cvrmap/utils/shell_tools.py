@@ -141,15 +141,14 @@ def printProgressBar (iteration, total, prefix='', suffix='Complete', decimals=4
 
 def get_version():
     """
-        Print version from git info
+        Print version from package
 
     Returns:
-        __version__
+        str
     """
 
     import importlib.metadata
 
     version = importlib.metadata.version('cvrmap')
-    print(version)
 
     return version

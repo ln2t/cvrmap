@@ -185,8 +185,7 @@ def main():
                                  global_signal_shift, corrected_noise, parameters, outputs)
 
             from nireports.assembler.tools import run_reports
-            cvrmap_bootstrap_file = '/mnt/erasme/git/ln2t/cvrmap/cvrmap/data/reports_config.yml'
-            run_reports(output_dir, subject_label, 'madeoutuuid', bootstrap_file=cvrmap_bootstrap_file,
+            run_reports(output_dir, subject_label, 'madeoutuuid', bootstrap_file=get_report_config(),
                         reportlets_dir=output_dir)
 
     # running group level

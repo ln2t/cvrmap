@@ -567,6 +567,11 @@ def read_config_file(file=None):
     return params
 
 
+def get_report_config():
+    import importlib.resources
+    with importlib.resources.path('cvrmap.data', 'reports_config.yml') as file_p:
+        return file_p
+
 def save_figs(results, outputs, mask):
     """
         Generate and saves cvr and delay figures.
