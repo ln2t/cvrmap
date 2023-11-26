@@ -10,3 +10,5 @@ CVRmap.egg-info/*
 build/*
 cvrmap/__pycache__/*
 .coverage
+*.pyc
+cvrmap.egg-info/*
