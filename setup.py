@@ -7,7 +7,7 @@ def read_requirements():
 
 setup(
     name='cvrmap',
-    version='2.0.10',
+    version='2.0.13',
     url='https://github.com/ln2t/cvrmap',
     author='Antonin Rovai',
     author_email='antonin.rovai@hubruxelles.be',
@@ -17,6 +17,6 @@ setup(
     entry_points={
         'console_scripts': [
             'cvrmap = cvrmap.cvrmap:main',
-        ]}
-
+        ]},
+    include_package_data=True
 )

@@ -71,7 +71,7 @@ Of course, you are free to place the image where ever suits you; you'll simply h
 
 # Option 3: python environment (using pip)
 
-`cvrmap` is also available on [pypi](https://pypi.org/manage/project/cvrmap/releases). We strongly recommend that you install it in a virtual environement.
+`cvrmap` is also available on [pypi](https://pypi.org/manage/project/cvrmap/releases). We strongly recommend that you install it in a virtual environment.
 First, install `virtualenv`:
 
 ```
@@ -90,7 +90,7 @@ Activate the environment and install `cvrmap`:
 source cvrmap-env-$VERSION/bin/activate && pip install cvrmap==$VERSION
 ```
 
-Warning: make sure you are using Python version 3.8 (or more recent)!
+Warning: make sure you are using Python version 3.10 (or more recent)!
 
 This will add a command in your `PATH` so that you can directly launch `cvrmap`:
 
