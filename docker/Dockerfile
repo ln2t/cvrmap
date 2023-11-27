@@ -4,9 +4,11 @@ FROM ubuntu:20.04
 RUN apt-get update
 RUN apt-get -y upgrade
 RUN apt-get update --fix-missing && apt-get -y upgrade
-RUN apt-get install -y python3 pip
+RUN apt-get install -y python3
+RUN apt-get install -y pip
+RUN pip install -U pip
 
-# Install cvrmap from pip
+# Install cvrmap from pypi
 RUN pip install -U cvrmap
 
 # Set entrypoint to entrypoint script
