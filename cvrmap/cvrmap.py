@@ -12,7 +12,6 @@ Created: May 2022
 
 # imports
 import os  # to interact with dirs
-from bids import BIDSLayout as bidslayout  # to handle BIDS data
 from .utils import *  # custom utilities
 
 def main():
@@ -32,7 +31,7 @@ def main():
 
     msg_info("Indexing BIDS dataset...")
 
-    layout = bidslayout(args.bids_dir, validate=not args.skip_bids_validator)
+    layout = get_bidslayout(args)
     layout.add_derivatives(fmriprep_dir)
     subjects_to_analyze = get_subjects_to_analyze(args, layout)
     task = get_task(args, layout)

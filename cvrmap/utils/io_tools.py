@@ -72,6 +72,22 @@ def arguments_manager(version):
     return parser.parse_args()
 
 
+def get_bidslayout(args):
+    """
+    Wrapper for bidslayout
+
+    Args:
+        args: NameSpace
+
+    Returns:
+        BIDSLayout object
+
+    """
+    from bids import BIDSLayout as bidslayout
+    return bidslayout(args.bids_dir, validate=not args.skip_bids_validator)
+
+
+
 def get_subjects_to_analyze(args, layout):
     """
         Generate list of subjects to analyze given the options and available subjects

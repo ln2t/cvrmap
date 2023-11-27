@@ -7,7 +7,7 @@ def read_requirements():
 
 setup(
     name='cvrmap',
-    version='2.0.14',
+    version='2.0.15',
     url='https://github.com/ln2t/cvrmap',
     author='Antonin Rovai',
     author_email='antonin.rovai@hubruxelles.be',
