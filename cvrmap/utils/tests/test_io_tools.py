@@ -29,7 +29,8 @@ def test_get_subjects_to_analyze():
     from bids import BIDSLayout
     from argparse import Namespace
     import pytest
-    layout = BIDSLayout('.', validate=False)
+    dummy_data_path = 'cvrmap/utils/tests/data'
+    layout = BIDSLayout(dummy_data_path, validate=False)
     args = Namespace(**{'participant_label': '007'})
     with pytest.raises(SystemExit) as e:
         get_subjects_to_analyze(args, layout)
@@ -61,7 +62,8 @@ def test_get_task():
     from bids import BIDSLayout
     from argparse import Namespace
     import pytest
-    layout = BIDSLayout('.', validate=False)
+    dummy_data_path = 'cvrmap/utils/tests/data'
+    layout = BIDSLayout(dummy_data_path, validate=False)
     args = Namespace(**{'task': 'some_task'})
     with pytest.raises(SystemExit) as e:
         get_task(args, layout)
