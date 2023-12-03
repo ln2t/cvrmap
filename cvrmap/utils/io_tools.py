@@ -770,7 +770,8 @@ def plotly_formatted_svg_write_image(fig, output_path):
 
     # format svg file
     from xmlformatter import Formatter
-    formatter = Formatter(indent="1", indent_char='\t', encoding_output="ISO-8859-1", preserve=["literal"])
+    #formatter = Formatter(indent="1", indent_char='\t', encoding_output="ISO-8859-1", preserve=["literal"])
+    formatter = Formatter(indent="1", indent_char='\t', encoding_output="UTF-8", preserve=["literal"])
     formatted_bytes = formatter.format_file(output_path)
 
     # replace original file with formatted content
