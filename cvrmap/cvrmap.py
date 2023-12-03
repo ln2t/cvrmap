@@ -112,6 +112,13 @@ def main():
             # get global signal
             global_signal = compute_global_signal(denoised)
 
+            # build once and for all the shifted versions of the probe
+            probe.shift_ref = DataObj(sampling_frequency=denoised.sampling_frequency,
+                                      data_type='timecourse', data=denoised.data[0, 0, 0, :])
+            probe.shift_array = parameters['absolute_shift_list']
+            probe.shifted_dataobjects = None
+            probe.build_shifted()
+
             global_signal_shift = compute_delays(global_signal, probe, parameters['absolute_shift_list'])[0]
 
             if not os.path.exists(outputs['delay']) or flags['overwrite']:
@@ -132,6 +139,14 @@ def main():
 
                 # compute delays for all voxels
                 msg_info("Computing delays")
+
+                # build once and for all the shifted versions of the probe
+                probe.shift_ref = DataObj(sampling_frequency=denoised.sampling_frequency,
+                                          data_type='timecourse', data=denoised.data[0, 0, 0, :])
+                probe.shift_array = shift_options['origin'] + shift_options['relative_values']
+                probe.shifted_dataobjects = None
+                probe.build_shifted()
+
                 results = compute_delays(denoised, probe, shift_options)
                 results['delay'].units = 'seconds'
                 results['delay'].measurement_type = 'delay'

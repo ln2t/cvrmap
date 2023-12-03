@@ -27,18 +27,22 @@ class DataObj:
 
     """
     def __init__(self, data=None, sampling_frequency=None, data_type=None, path=None, label=None, figs=None,
-                 measurement_type=None, mask=None, baseline=None, units=None, img=None):
+                 measurement_type=None, mask=None, baseline=None, units=None, img=None, shift_ref=None, shift_array=None, shifted_dataobjects=None):
         self.sampling_frequency = sampling_frequency  # sampling frequency at which data are recorded
         self.data = data  # the actual data
         self.data_type = data_type  # keep track of type of data, such as 'bold' or 'timecourse'
         self.path = path  # path to the file
         self.label = label  # some descriptive label
         self.figs = figs  # figs created with plotly
-        self.measurement_type = measurement_type  #
+        self.measurement_type = measurement_type  # nature of the data, e.g. 'delays' for time delays,
+        # or 'binary' for a mask
         self.mask = mask  # some mask img associated with the data, can be anything
         self.baseline = baseline  # baseline for time courses
         self.units = units  # units of the data
         self.img = img  # niimg object from nilean
+        self.shift_ref = shift_ref  # some DataObj used as a reference (for data length and sampling frequency) shifting
+        self.shift_array = shift_array  # numpy array of shift values
+        self.shifted_dataobjects = shifted_dataobjects  # dict of DataObjects containing the shifted values of data
 
     def bids_load(self, layout, filters, data_type, **kwargs):
         """
@@ -288,6 +292,37 @@ class DataObj:
         if self.data_type == 'timecourse':
             self.baseline = round(np.mean(peakutils.baseline(self.data)), 6)
 
+    def build_shifted(self):
+        """
+            Computes the shifted version of the data if type is timecourse. Uses as reference self.shift_ref and
+            the lag values in self.shift_array
+
+        """
+
+        import numpy as np
+
+        if self.shifted_dataobjects is None:
+            self.shifted_dataobjects = dict()
+
+            if self.data_type == 'timecourse':
+                if self.shift_ref is None:
+                    msg_warning('Trying to shift and resample without reference, something is wrong!')
+
+                if self.shift_array is None or not isinstance(self.shift_array, np.ndarray):
+                    msg_warning('Trying to shift without values to shift to... something is wrong!')
+
+                for delta_t in self.shift_array:
+                    self.shifted_dataobjects[delta_t] = build_shifted_signal(self, self.shift_ref, delta_t)
+
+
+            else:
+                msg_warning('Function build_shifted works only for timecourses. What follows is probably meaningless.')
+
+
+
+
+
+
 # functions
 
 
@@ -387,6 +422,8 @@ def compute_delays(reference, probe, shifts_option):
     shifted_probes = dict()
     script_progress_sentence = "Computing delays....."
 
+
+
     if reference.data_type == 'bold':
         # level 4
         # prepare shift data
@@ -469,10 +506,10 @@ def compute_delays(reference, probe, shifts_option):
                 # level 2
                 # shift the probe signal and then proceed with the fit
                 # here shifts_option is an int used to build keys in the dict shifted_probes
-                if shifts_option not in shifted_probes:
-                    shifted_probes[shifts_option] = build_shifted_signal(probe, reference, shifts_option)
+                # if shifts_option not in shifted_probes:
+                #    shifted_probes[shifts_option] = build_shifted_signal(probe, reference, shifts_option)
 
-                return compute_delays(reference, shifted_probes[shifts_option], None)
+                return compute_delays(reference, probe.shifted_dataobjects[shifts_option], None)
         else:
             # level 1
             return scipy.stats.linregress(probe.data, reference.data)
