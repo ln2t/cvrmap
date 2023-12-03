@@ -446,7 +446,7 @@ def compute_delays(reference, probe, shifts_option):
         if shifts_option is not None:
 
             # shifts_option is then either a np array or int
-            if not type(shifts_option) == int:
+            if type(shifts_option) is not int:
                 # level 3
                 # prepare arrays to search maximum correlation
                 number_of_shifts = len(shifts_option)
