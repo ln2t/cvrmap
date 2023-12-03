@@ -26,18 +26,19 @@ class DataObj:
         mask is a binary map, can be used to mask data in the case of 'map' or 'bold'data_type.
 
     """
-    def __init__(self, data=None, sampling_frequency=None, data_type=None, path=None, label=None, figs=None, measurement_type=None, mask=None, baseline=None, units=None, img=None):
-        self.sampling_frequency = sampling_frequency
-        self.data = data
-        self.data_type = data_type
-        self.path = path
-        self.label = label
-        self.figs = figs
-        self.measurement_type = measurement_type
-        self.mask = mask
-        self.baseline = baseline
-        self.units = units
-        self.img = img
+    def __init__(self, data=None, sampling_frequency=None, data_type=None, path=None, label=None, figs=None,
+                 measurement_type=None, mask=None, baseline=None, units=None, img=None):
+        self.sampling_frequency = sampling_frequency  # sampling frequency at which data are recorded
+        self.data = data  # the actual data
+        self.data_type = data_type  # keep track of type of data, such as 'bold' or 'timecourse'
+        self.path = path  # path to the file
+        self.label = label  # some descriptive label
+        self.figs = figs  # figs created with plotly
+        self.measurement_type = measurement_type  #
+        self.mask = mask  # some mask img associated with the data, can be anything
+        self.baseline = baseline  # baseline for time courses
+        self.units = units  # units of the data
+        self.img = img  # niimg object from nilean
 
     def bids_load(self, layout, filters, data_type, **kwargs):
         """
