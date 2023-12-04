@@ -141,6 +141,10 @@ def bold_denoising(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, parameter
     t_r = _img.header.get_zooms()[-1]
     _img = clean_img(imgs=_img, standardize=False, detrend=False, high_pass=parameters['highpass_frequency'], t_r=t_r)
 
+    # re-add temporal mean
+
+    _img = add_cst_img_to_series(_img, _mean_img)
+
     # spatial smoothing
 
     _img = smooth_img(_img, parameters['fwhm'])
