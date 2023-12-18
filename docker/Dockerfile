@@ -9,7 +9,7 @@ RUN apt-get install -y pip
 RUN pip install -U pip
 
 # Install cvrmap from pypi
-RUN pip install -U cvrmap==2.0.15
+RUN pip install -U cvrmap==2.0.19
 
 # Set entrypoint to entrypoint script
 COPY entrypoint.sh /opt/cvrmap/entrypoint.sh

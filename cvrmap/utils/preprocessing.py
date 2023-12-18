@@ -84,6 +84,59 @@ def masksignalextract(preproc, mask):
     return probe, baseline
 
 
+def scipy_gaussian_hp_filter(signal, sigma):
+    """
+    Gaussian highpass filter, build out of scipy.nbimage.gaussian_filter
+
+    Args:
+        signal: numpy array, input signal to filter
+        sigma: float
+
+    Returns:
+        numpy array, the filtered time series
+
+    """
+    from scipy.ndimage import gaussian_filter as scipy_gaussian_filter
+    lowpass = scipy_gaussian_filter(signal, sigma)
+    filtered_signal = signal - lowpass
+    filtered_signal = filtered_signal - np.mean(filtered_signal)  # this is because sometimes the filter doesn't remove accurately the mean. Worst case it does nothing.
+    return filtered_signal
+
+
+def gaussian_high_pass_filter(input_img, mask_img, sigma):
+    """
+    Gaussian highpass filter along the time dimension. Uses scipy.nbimage.gaussian_filter.
+    Sigma is expressed in units of volumes (i.e. not in seconds, unless of course t_r = 1s)
+
+    Args:
+        input_img: niimg, 4D data to filter along the time direction
+        mask_img: niimg, 3D mask. Whatever is outside the mask is set to zero
+        sigma: parametrizes the strengh of the filtering
+
+    Returns:
+        niimg, 4D data filtering
+    """
+    import nibabel as nb
+
+    input_data = input_img.get_fdata()
+    mask_data = mask_img.get_fdata()
+    nx, ny, nz, nt = input_data.shape
+
+    x_range = np.arange(nx)
+    y_range = np.arange(ny)
+    z_range = np.arange(nz)
+
+    output_data = np.nan * np.zeros([nx, ny, nz, nt])
+
+    for x in x_range:
+        for y in y_range:
+            for z in z_range:
+                if mask_data[x, y, z] > 0:
+                    output_data[x, y, z, :] = scipy_gaussian_hp_filter(input_data[x, y, z, :], sigma)
+
+    return nb.Nifti1Image(output_data, affine=input_img.affine)  # note: this replaces NaNs by 0 in the data
+
+
 def bold_denoising(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, parameters):
     """
         BOLD signal denoising based on non-aggressive denoising.
@@ -112,7 +165,8 @@ def bold_denoising(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, parameter
     import nibabel as nb
     bold_img = nb.load(bold_fn)
     bold_data = bold_img.get_fdata()
-    mask = nb.load(mask_fn).get_fdata()
+    mask_img = nb.load(mask_fn)
+    mask = mask_img.get_fdata()
 
     _img_data = bold_data.copy()
 
@@ -138,8 +192,9 @@ def bold_denoising(bold_fn, mask_fn, melodic_mixing_df, noise_indexes, parameter
 
     # highpass filter
 
-    t_r = _img.header.get_zooms()[-1]
-    _img = clean_img(imgs=_img, standardize=False, detrend=False, high_pass=parameters['highpass_frequency'], t_r=t_r)
+    #t_r = _img.header.get_zooms()[-1]
+    #_img = clean_img(imgs=_img, standardize=False, detrend=False, high_pass=parameters['highpass_frequency'], t_r=t_r)
+    _img = gaussian_high_pass_filter(_img, mask_img, parameters['highpass_sigma'])
 
     # re-add temporal mean
 
