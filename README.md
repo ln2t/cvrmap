@@ -81,7 +81,7 @@ pip install virtualenv
 Then create a virtual env. To deal with potential conflicts in versions of the required packages withing `cvrmap`, we recommend you create one environment for each `cvrmap` version:
 
 ```
-export VERSION="2.0.0"
+export VERSION="2.0.19"
 virtualenv cvrmap-env-$VERSION
 ```
 
