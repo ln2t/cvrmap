@@ -627,6 +627,12 @@ def save_figs(results, outputs, mask):
                                  'xlabel': r'$\text{Time (s)}$',
                                  'ylabel': _probe_yaxis})
 
+    results['shifted_probe'].make_fig(fig_type='plot',
+                              **{'title': _probe_title,
+                                 'xlabel': r'$\text{Time (s)}$',
+                                 'ylabel': _probe_yaxis})
+
+
     results['baseline'].make_fig(fig_type='plot',
                       **{'title': r'$\text{Raw CO}_2$',
                          'xlabel': r'$\text{Time (s)}$',
@@ -643,7 +649,7 @@ def save_figs(results, outputs, mask):
         plotly_formatted_svg_write_image(breathing_fig, outputs['breathing_figure'])
 
     # BOLD mean and etCO2
-    boldmean_fig = gather_figures([results['global_signal'], results['probe']])
+    boldmean_fig = gather_figures([results['global_signal'], results['shifted_probe']])
     plotly_formatted_svg_write_image(boldmean_fig, outputs['boldmean_figure'])
 
     # CVR and delay map

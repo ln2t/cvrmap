@@ -188,6 +188,7 @@ def main():
                 results['globalsignal'] = False
 
             results['probe'] = probe
+            results['shifted_probe'] = probe.shifted_dataobjects[global_signal_shift]
             results['baseline'] = baseline
             results['global_signal'] = global_signal
 
