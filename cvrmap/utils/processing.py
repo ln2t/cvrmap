@@ -551,3 +551,24 @@ def compute_response(intercept, slope, regressorbaseline, regressormean):
     response = DataObj(data=response_data, data_type='map')
 
     return response
+
+
+def compute_roi_mean(map, mask):
+    """
+        Compute mean of map masked by mask.
+
+    Args:
+        map: path to nii.gz
+        mask: path to nii.gz (will be binarized with a threshold of 0.1)
+
+    Returns:
+        float
+    """
+
+    from nilearn import image, masking
+    import numpy as np
+
+    resampled_mask = image.resample_to_img(mask, map, interpolation='nearest')
+    binarized = image.binarize_img(resampled_mask, threshold=0.1)
+
+    return np.mean(masking.apply_mask(map, binarized))

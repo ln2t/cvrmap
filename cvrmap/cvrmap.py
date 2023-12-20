@@ -12,6 +12,8 @@ Created: May 2022
 
 # imports
 import os  # to interact with dirs
+import sys
+
 from .utils import *  # custom utilities
 
 def main():
@@ -205,7 +207,47 @@ def main():
 
     # running group level
     elif args.analysis_level == "group":
-        print('No group level analysis is implemented yet.')
+
+        msg_info("Starting group analysis!")
+        subjects = get_processed_subjects(layout)
+        msg_info("Number of subjects detected: %s" % len(subjects))
+
+        import pandas as pd
+
+        participants_fn = layout.get(return_type='filename', extension='.tsv', scope='raw')[0]
+        participants_df = pd.read_csv(participants_fn, sep='\t')
+
+        tissue_list = ['GM', 'WM']
+
+        for tissue in tissue_list:
+            participants_df[tissue] = ""
+
+
+        for _sub in subjects:
+            _cvr = layout.derivatives['cvrmap'].get(subject=_sub, return_type='filename', suffix='cvr', extension='.nii.gz', space=space)
+            if len(_cvr) == 1:
+                _cvr = _cvr[0]
+            else:
+                msg_error('Several CVR maps found for subject %s' % _sub)
+                sys.exit()
+
+            _masks = dict()
+            _roi_mean = dict()
+
+            for _tissue in tissue_list:
+                _masks[_tissue] = layout.derivatives['fMRIPrep'].get(subject=_sub, return_type='filename', suffix='probseg', extension='.nii.gz', space=space, label=_tissue)[0]
+
+                _roi_mean[_tissue] = compute_roi_mean(map=_cvr, mask=_masks[_tissue])
+
+                participants_df.loc[participants_df['participant_id'] == 'sub-' + sub, tissue] = cvr_mean[(sub, tissue)]
+
+
+
+
+
+
+
+
 
     msg_info("The End!")
 
