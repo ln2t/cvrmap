@@ -10,7 +10,7 @@ The paper describing the toolbox will be pulished (hopefully!) soon.
 
 A normative dataset can be downloaded from openneuro: [ds004604](https://openneuro.org/datasets/ds004604)
 
-CVRmap is also distributed as a package, the full API documentation being [here](https://ln2t.github.io/cvrmap)
+CVRmap is also distributed as a package, the full API documentation being [here](https://ln2t.github.io/cvrmap).
 
 # Installation
 
@@ -134,7 +134,7 @@ Note that the `sub-01/func/sub-01_task-gas_physio.json` file must contain a `Sam
 
 In this example, the `sub-01/func/sub-01_task-gas_physio.tsv.gz` must have only one column, giving the CO2 readings at a sampling frequency of 100 Hz, starting at time 0 with respect to the first valid fMRI volume, in the units of mmHg.
 Note though that the `StartTime` field is not used at all by `cvrmap`, as it explores various time lags by itself.
-If the CO2 readings are in percentage of co2 concentration (which is also often used), the "Units" field must be "%", and in that case `cvrmap` will convert percentages to mmHg automatically. Finally, the total duration of the CO2 recording must not necessarily match the duration of the BOLD acquisition: depending on the case, CVRmap trims or uses a baseline extrapolation automatically.
+If the CO2 readings are in percentage of CO2 concentration (which is also often used), the "Units" field must be "%", and in that case `cvrmap` will convert percentages to mmHg automatically. Finally, the total duration of the CO2 recording must not necessarily match the duration of the BOLD acquisition: depending on the case, CVRmap trims or uses a baseline extrapolation automatically.
 
 The rawdata must also have been processed using [fMRIPrep](https://fmriprep.org/en/stable). A minimalistic fMRIPrep call compatible with CVRmap is:
 
@@ -158,7 +158,7 @@ Notes:
 - if you want to use the ICA-AROMA classification for signal confounds, then add `--use-aroma`. Otherwise, when the flag is omitted, CVRmap will perform non-aggressive denoising itself using a refinement of the ICA-AROMA classification of noise sources (see paper for more details).
 - more info and options can be found when asking politely for help with `cvrmap --help`.
 
-`cvrmap` will run for about 3 hours per participant on recent computers. The results are stored in `/path/to/derivatives/cvrmap` following BIDS standard for derivatives.  More specifically, the outputs are as follows:
+`cvrmap` will run for about 15 minutes per participant on recent computers. The results are stored in `/path/to/derivatives/cvrmap` following BIDS standard for derivatives.  More specifically, the outputs are as follows:
 
 ```
 sub-01/extras/sub-01_desc-etco2_timecourse.tsv.gz
