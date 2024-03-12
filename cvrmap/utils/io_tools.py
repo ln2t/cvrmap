@@ -273,7 +273,6 @@ def set_flags(args):
     flags = dict()
     # sloppiness
     flags['sloppy'] = args.sloppy
-    flags['overwrite'] = args.overwrite
     flags['ica_aroma'] = args.use_aroma
     flags['vesselsignal'] = args.vesselsignal
     flags['globalsignal'] = args.globalsignal
