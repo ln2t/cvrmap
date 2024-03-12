@@ -121,56 +121,40 @@ def main():
 
             global_signal_shift = compute_delays(global_signal, probe, parameters['absolute_shift_list'])[0]
 
-            if not os.path.exists(outputs['delay']) or flags['overwrite']:
+            denoised.mask = mask.data
 
-                # if flags['sloppy']:
-                    # msg_warning('Working in sloppy mode, only for quick testing!')
-                    # zmask = mask.data
-                    # zmask[:, :, :59] = np.zeros(zmask[:, :, :59].shape)
-                    # zmask[:, :, 61:] = np.zeros(zmask[:, :, 61:].shape)
-                    # denoised.mask = zmask
+            # build the shifted data needed to compute delays
+            shift_options = dict()
+            shift_options['origin'] = global_signal_shift
+            shift_options['relative_values'] = parameters['relative_shift_list']
 
-                denoised.mask = mask.data
+            # compute delays for all voxels
+            msg_info("Computing delays")
 
-                # build the shifted data needed to compute delays
-                shift_options = dict()
-                shift_options['origin'] = global_signal_shift
-                shift_options['relative_values'] = parameters['relative_shift_list']
+            # build once and for all the shifted versions of the probe
+            probe.shift_ref = DataObj(sampling_frequency=denoised.sampling_frequency,
+                                      data_type='timecourse', data=denoised.data[0, 0, 0, :])
+            probe.shift_array = shift_options['origin'] + shift_options['relative_values']
+            probe.shifted_dataobjects = None
+            probe.build_shifted()
 
-                # compute delays for all voxels
-                msg_info("Computing delays")
+            results = compute_delays(denoised, probe, shift_options)
+            results['delay'].units = 'seconds'
+            results['delay'].measurement_type = 'delay'
 
-                # build once and for all the shifted versions of the probe
-                probe.shift_ref = DataObj(sampling_frequency=denoised.sampling_frequency,
-                                          data_type='timecourse', data=denoised.data[0, 0, 0, :])
-                probe.shift_array = shift_options['origin'] + shift_options['relative_values']
-                probe.shifted_dataobjects = None
-                probe.build_shifted()
+            # save the obtained map
+            results['delay'].save(outputs['delay'], denoised.path)
 
-                results = compute_delays(denoised, probe, shift_options)
-                results['delay'].units = 'seconds'
-                results['delay'].measurement_type = 'delay'
-
-                # save the obtained map
-                results['delay'].save(outputs['delay'], denoised.path)
-
-                # compute and save response maps
-                results['cvr'] = compute_response(results['intercept'], results['slope'], probe.baseline, np.mean(probe.data))
-                if flags['vesselsignal']:
-                    results['cvr'].units = "Arbitrary units"
-                    results['cvr'].measurement_type = 'relative-CVR'
-                    results['cvr'].data = 10*results['cvr'].data/np.nanstd(results['cvr'].data)  # this rescaling is mostly for visual purposes
-                else:
-                    results['cvr'].units = "Percentage of BOLD variation/%s" % probe.units
-                    results['cvr'].measurement_type = 'CVR'
-                results['cvr'].save(outputs['cvr'], denoised.path)
+            # compute and save response maps
+            results['cvr'] = compute_response(results['intercept'], results['slope'], probe.baseline, np.mean(probe.data))
+            if flags['vesselsignal']:
+                results['cvr'].units = "Arbitrary units"
+                results['cvr'].measurement_type = 'relative-CVR'
+                results['cvr'].data = 10*results['cvr'].data/np.nanstd(results['cvr'].data)  # this rescaling is mostly for visual purposes
             else:
-                results = dict()
-                results['delay'] = DataObj(measurement_type='delay')
-                results['delay'].nifti_load(outputs['delay'])
-                results['cvr'] = DataObj()
-                results['cvr'].nifti_load(outputs['cvr'])
+                results['cvr'].units = "Percentage of BOLD variation/%s" % probe.units
                 results['cvr'].measurement_type = 'CVR'
+            results['cvr'].save(outputs['cvr'], denoised.path)
 
             results['physio'] = physio
             if flags['vesselsignal']:

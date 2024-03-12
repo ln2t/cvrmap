@@ -54,8 +54,6 @@ def arguments_manager(version):
                         action='store_true')
     parser.add_argument('--use_aroma', help='If set, the noise regressors will be those as determined by aroma.',
                         action='store_true')
-    parser.add_argument('--overwrite', help='If set, existing results will be overwritten if they exist.',
-                        action='store_true')
     parser.add_argument('--label', help='If set, labels the output with custom label.')
     parser.add_argument('-v', '--version', action='version', version='cvrmap version {}'.format(version))
     parser.add_argument('--vesselsignal', help='If set, will extract BOLD signal from vessels as a '
