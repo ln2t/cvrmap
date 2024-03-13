@@ -91,6 +91,9 @@ def main():
                 probe, baseline = endtidalextract(physio)
                 probe.save(outputs['etco2'])
 
+            if task == 'restingstate':
+                probe.baseline = np.mean(probe.data)
+
             corrected_noise = get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df,
                                                       preproc.sampling_frequency,
                                                       parameters['ic_threshold'], args.use_aroma)
