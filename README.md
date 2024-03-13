@@ -1,4 +1,7 @@
 [![codecov](https://codecov.io/gh/ln2t/cvrmap/graph/badge.svg?token=VGQPJX5078)](https://codecov.io/gh/ln2t/cvrmap) ![License](https://img.shields.io/github/license/ln2t/cvrmap)
+[![DOI](https://zenodo.org/badge/588501488.svg)](https://zenodo.org/doi/10.5281/zenodo.10400739)
+
+
 
 # About
 

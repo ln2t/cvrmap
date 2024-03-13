@@ -783,3 +783,29 @@ def plotly_formatted_svg_write_image(fig, output_path):
         file.write(formatted_bytes)
 
     return 0
+
+def get_processed_subjects(layout):
+    """
+        For group level analysis. Returns subjects for which CVR has been computed.
+
+    Args:
+        layout: BIDSLayout
+
+    Returns:
+        list of string with participant label
+    """
+
+    return layout.derivatives['cvrmap'].get_subjects()
+
+
+def get_cvr_maps(layout):
+    """
+
+    Args:
+        layout: BIDSLayout
+
+    Returns:
+        list of paths to the cvr maps generated at first level
+    """
+
+    return layout.get(return_type='filename', suffix='cvr', extension='.nii.gz')
