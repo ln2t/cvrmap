@@ -13,19 +13,29 @@ sections:
     caption: This graph shows the original breathing data with the reconstructed upper envelope and corresponding (units are mmmHg)
       baseline.
 
-- name: <em>etCO<sub>2</sub></em> versus Global BOLD signal
+- name: Vessel signal mask
+  reportlets:
+    - bids:
+        datatype: figure
+        extension: [.svg]
+        suffix: vesselmask
+      caption: This shows the mask used on the BOLD data to extract the vessel signal timecourse.
+
+- name: Probe versus Global BOLD signal
   reportlets:
   - bids:
       datatype: figures
       suffix: boldmean
       extension: [.svg]
-    caption: This graph shows the estimated <em>etCO<sub>2</sub></em> (in mmHg) and the global BOLD signal (arbitrary units).
+    caption: This graph shows the probe time course and the global BOLD signal (arbitrary units). 
+      If using physiological recordings, the probe is the estimated <em>etCO<sub>2</sub></em>, expressed in mmHg.
+      If using the vessel signal option, it is the vessel signal time course (in arbitrary units).
 
 - name: Delay maps
   reportlets:
   - bids: {datatype: figures, suffix: delay}
     extension: [.svg]
-    caption: Estimated delays (seconds), with the convention that zero delay corresponds to <em>etCO<sub>2</sub></em> synchronized with global BOLD signal.
+    caption: Estimated delays (seconds), with the convention that zero delay corresponds to he probe synchronized with global BOLD signal.
 
 - name: Cerebrovascular Reactivity
   reportlets:
