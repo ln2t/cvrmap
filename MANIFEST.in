@@ -1,1 +1,2 @@
 include cvrmap/data/reports_config.yml
+include cvrmap/data/VesselDensityLR.nii.gz
