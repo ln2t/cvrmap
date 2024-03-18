@@ -513,11 +513,13 @@ def get_vesselmask(preproc, threshold):
     Returns:
         niimg, mask for vessels in MNI space
     """
-    from os.path import join, dirname
     from nilearn.image import binarize_img, resample_to_img
-    vesselatlas = join(dirname(__file__), '..', 'data', 'VesselDensityLR.nii.gz')
-    _vesselatlas = resample_to_img(source_img=vesselatlas, target_img=preproc.path)
-    vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
+
+    import importlib.resources
+    with importlib.resources.path('cvrmap.data', 'VesselDensityLR.nii.gz') as vesselatlas:
+        print('DEBUG %s' % vesselatlas)
+        _vesselatlas = resample_to_img(source_img=vesselatlas, target_img=preproc.path)
+        vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
     return vessel_mask
 
 
