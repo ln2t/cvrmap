@@ -216,10 +216,6 @@ def get_space(args, layout):
         msg_error("Selected space %s is invalid. Valid spaces are %s" % (args.space, spaces))
         sys.exit(1)
 
-    if args.vesselsignal and space == 'T1w':
-        msg_error("The vesselsignal option is not supported in T1w space (yet)")
-        sys.exit(1)
-
     #todo: check if combination space+res is in fmriprep output
 
     return space, res
@@ -517,7 +513,6 @@ def get_vesselmask(preproc, threshold):
 
     import importlib.resources
     with importlib.resources.path('cvrmap.data', 'VesselDensityLR.nii.gz') as vesselatlas:
-        print('DEBUG %s' % vesselatlas)
         _vesselatlas = resample_to_img(source_img=vesselatlas, target_img=preproc.path)
         vessel_mask = binarize_img(img=_vesselatlas, threshold=threshold)
     return vessel_mask
@@ -532,14 +527,19 @@ def get_preproc(basic_filter, layout):
         layout: BIDS layout
 
     Returns:
-        DataObj, BOLD preprocessed image of the subject
+        DataObj, BOLD preprocessed image of the subject and the same but in MNI152NLin2009cAsym space (used only for vesselsignal)
     """
     from .preprocessing import DataObj
     _basic_filter = basic_filter.copy()
     _basic_filter.update({'desc': 'preproc', 'suffix': 'bold'})
     preproc = DataObj(label='Preprocessed BOLD images from fMRIPrep')
+    mni_preproc = DataObj(label='Preprocessed BOLD images from fMRIPrep')
     preproc.bids_load(layout, _basic_filter, 'bold')
-    return preproc
+
+
+    _basic_filter['space'] = 'MNI152NLin2009cAsym'
+    mni_preproc.bids_load(layout, _basic_filter, 'bold')
+    return preproc, mni_preproc
 
 
 def read_config_file(file=None):

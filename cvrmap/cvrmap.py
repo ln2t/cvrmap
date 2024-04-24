@@ -11,10 +11,10 @@ Created: May 2022
 """
 
 # imports
-import os  # to interact with dirs
 import sys
 
 from .utils import *  # custom utilities
+
 
 def main():
     """
@@ -66,33 +66,30 @@ def main():
 
             outputs = setup_subject_output_paths(output_dir, subject_label, space, res, args, custom_label)
 
-            preproc = get_preproc(basic_filter, layout)
+            preproc, mni_preproc = get_preproc(basic_filter, layout)
             mask = get_mask(basic_filter, layout)
-            t1w = get_t1w(basic_filter, space, layout)
             aroma_noise_ic_list = get_aroma_noise_ic_list(basic_filter, layout)
             melodic_mixing_df, melodic_mixing_path = get_melodic_mixing(basic_filter, layout)
 
             if flags['vesselsignal'] or flags['globalsignal']:
                 if flags['vesselsignal']:
-                    mask_img = get_vesselmask(preproc, parameters['vesseldensity_threshold'])
+                    # vesselsignal extraction must be done in MNI space
+                    mask_img = get_vesselmask(mni_preproc, parameters['vesseldensity_threshold'])
                     mask_output = outputs['vesselsignal']
                     signal_label = r'$vesselsignal timecourse$'
                 if flags['globalsignal']:
                     mask_img = mask.img
                     mask_output = outputs['globalsignal']
                     signal_label = r'$globalsignal timecourse$'
-                probe, baseline = masksignalextract(preproc, mask_img)
-                probe.label = signal_label
-                baseline.label = signal_label
-                probe.save(mask_output)
-                physio = None
+
+                args.use_aroma = True  # when using vessel or global signal,
+                                       # we don't have an external probe to refine ICA-AROMA
+                                       # classification of noise sources
+                probe = None
             else:
                 physio = get_physio_data(basic_filter, layout)
                 probe, baseline = endtidalextract(physio)
                 probe.save(outputs['etco2'])
-
-            if task == 'restingstate':
-                probe.baseline = np.mean(probe.data)
 
             corrected_noise = get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df,
                                                       preproc.sampling_frequency,
@@ -108,11 +105,20 @@ def main():
                 msg_info("Data denoising in progress")
                 denoised = bold_denoising(preproc.path, mask.path, melodic_mixing_df, corrected_noise, parameters)
 
-
             denoised.measurement_type = 'denoised BOLD'
             denoised.units = 'arbitrary'
             denoised.sampling_frequency = preproc.sampling_frequency
             denoised.save(outputs['denoised'], preproc.path)
+
+            if flags['vesselsignal'] or flags['globalsignal']:
+                probe, baseline = masksignalextract(mni_preproc, mask_img)
+                probe.label = signal_label
+                baseline.label = signal_label
+                probe.save(mask_output)
+                physio = None
+
+            if task == 'restingstate':
+                probe.baseline = np.mean(probe.data)
 
             # get global signal
             global_signal = compute_global_signal(denoised)
@@ -151,11 +157,13 @@ def main():
             results['delay'].save(outputs['delay'], denoised.path)
 
             # compute and save response maps
-            results['cvr'] = compute_response(results['intercept'], results['slope'], probe.baseline, np.mean(probe.data))
+            results['cvr'] = compute_response(results['intercept'], results['slope'], probe.baseline,
+                                              np.mean(probe.data))
             if flags['vesselsignal']:
                 results['cvr'].units = "Arbitrary units"
                 results['cvr'].measurement_type = 'relative-CVR'
-                results['cvr'].data = 10*results['cvr'].data/np.nanstd(results['cvr'].data)  # this rescaling is mostly for visual purposes
+                results['cvr'].data = 10*results['cvr'].data/np.nanstd(results['cvr'].data)
+                # this rescaling is mostly for visual purposes
             else:
                 results['cvr'].units = "Percentage of BOLD variation/%s" % probe.units
                 results['cvr'].measurement_type = 'CVR'
@@ -196,6 +204,7 @@ def main():
     elif args.analysis_level == "group":
 
         msg_info("Starting group analysis!")
+        msg_warning("Work in progress!")
         subjects = get_processed_subjects(layout)
         msg_info("Number of subjects detected: %s" % len(subjects))
 
@@ -209,9 +218,9 @@ def main():
         for tissue in tissue_list:
             participants_df[tissue] = ""
 
-
         for _sub in subjects:
-            _cvr = layout.derivatives['cvrmap'].get(subject=_sub, return_type='filename', suffix='cvr', extension='.nii.gz', space=space)
+            _cvr = layout.derivatives['cvrmap'].get(subject=_sub, return_type='filename', suffix='cvr',
+                                                    extension='.nii.gz', space=space)
             if len(_cvr) == 1:
                 _cvr = _cvr[0]
             else:
@@ -222,21 +231,16 @@ def main():
             _roi_mean = dict()
 
             for _tissue in tissue_list:
-                _masks[_tissue] = layout.derivatives['fMRIPrep'].get(subject=_sub, return_type='filename', suffix='probseg', extension='.nii.gz', space=space, label=_tissue)[0]
+                _masks[_tissue] = layout.derivatives['fMRIPrep'].get(subject=_sub, return_type='filename',
+                                                                     suffix='probseg', extension='.nii.gz',
+                                                                     space=space, label=_tissue)[0]
 
                 _roi_mean[_tissue] = compute_roi_mean(map=_cvr, mask=_masks[_tissue])
 
-                participants_df.loc[participants_df['participant_id'] == 'sub-' + sub, tissue] = cvr_mean[(sub, tissue)]
-
-
-
-
-
-
-
-
+                participants_df.loc[participants_df['participant_id'] == 'sub-' + _sub, _tissue] = _roi_mean[_tissue]
 
     msg_info("The End!")
+
 
 if __name__ == '__main__':
     main()

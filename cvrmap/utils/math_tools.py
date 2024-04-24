@@ -239,6 +239,11 @@ def get_corrected_noiselist(probe, aroma_noise_ic_list, melodic_mixing_df, sf, n
     for noise_idx in aroma_noise_ic_list:
         ic = DataObj(data=melodic_mixing_df.values[:, int(noise_idx) - 1],
                      sampling_frequency=sf, data_type='timecourse', path=None)
-        if tccorr(ic, probe) < noise_ic_pearson_r_threshold or aroma_flag:
+
+        if aroma_flag:
             corrected_noise.append(int(noise_idx) - 1)
+        else:
+            if probe is not None:
+                if tccorr(ic, probe) < noise_ic_pearson_r_threshold:
+                    corrected_noise.append(int(noise_idx) - 1)
     return corrected_noise
