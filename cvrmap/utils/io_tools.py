@@ -287,7 +287,7 @@ def set_flags(args):
     return flags
 
 
-def setup_subject_output_paths(output_dir, subject_label, space, res, args, custom_label):
+def setup_subject_output_paths(output_dir, subject_label, space, res, task, args, custom_label):
     """
         Setup various paths for subject output. Also creates subject output dir.
 
@@ -296,6 +296,7 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
         subject_label: str, subject label
         space: str, space entity
         res: int, resolution entity
+        task: str, task entity
         args: output of arguments_manager
         custom_label: str, custom label for outputs
 
@@ -330,10 +331,24 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
 
     subject_prefix = os.path.join(subject_output_dir,
                                   "sub-" + subject_label)
+
+    label = ''
+    suffix = '_cvr'
+
+
+    if args.vesselsignal:
+        label = '_label-vesselsignal'
+        suffix = '_rcvr'
+
+    if args.globalsignal:
+        label = '_label-globalsignal'
+        suffix = '_rcvr'
+
     if res is None:
-        prefix = subject_prefix + "_space-" + space + denoise_label + custom_label
+        prefix = subject_prefix + "_space-" + space + '_task-' + task + label + denoise_label + custom_label
     else:
-        prefix = subject_prefix + "_space-" + space + '_res-' + res + denoise_label + custom_label
+        prefix = subject_prefix + "_space-" + space + '_task-' + task + label + '_res-' + res + denoise_label + custom_label
+
     nifti_extension = '.nii.gz'
     report_extension = '.html'
     figures_extension = '.svg'
@@ -343,7 +358,7 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
                                      "sub-" + subject_label + '_report' + report_extension)
 
     # principal outputs (CVR and Delay map)
-    outputs['cvr'] = prefix + '_cvr' + nifti_extension
+    outputs['cvr'] = prefix + suffix + nifti_extension
     outputs['delay'] = prefix + '_delay' + nifti_extension
 
     # supplementary data (extras)
@@ -365,7 +380,7 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
 
     if res is None:
         outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
-                                             + custom_label + '_cvr' + figures_extension)
+                                             + custom_label + suffix + figures_extension)
         outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + denoise_label
                                              + custom_label + '_delay' + figures_extension)
         outputs['vesselmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space
@@ -374,7 +389,7 @@ def setup_subject_output_paths(output_dir, subject_label, space, res, args, cust
                                              + custom_label + '_globalmask' + figures_extension)
     else:
         outputs['cvr_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res + denoise_label
-                                             + custom_label + '_cvr' + figures_extension)
+                                             + custom_label + suffix + figures_extension)
         outputs['delay_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res + denoise_label
                                                + custom_label + '_delay' + figures_extension)
         outputs['vesselmask_figure'] = os.path.join(figures_dir, 'sub-' + subject_label + "_space-" + space + '_res-' + res

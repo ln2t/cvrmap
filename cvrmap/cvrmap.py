@@ -64,7 +64,7 @@ def main():
 
             basic_filter = dict(subject=subject_label, return_type='filename', space=space, res=res, task=task)
 
-            outputs = setup_subject_output_paths(output_dir, subject_label, space, res, args, custom_label)
+            outputs = setup_subject_output_paths(output_dir, subject_label, space, res, task, args, custom_label)
 
             preproc, mni_preproc = get_preproc(basic_filter, layout)
             mask = get_mask(basic_filter, layout)
@@ -197,7 +197,7 @@ def main():
                                  global_signal_shift, corrected_noise, parameters, outputs)
 
             from nireports.assembler.tools import run_reports
-            run_reports(output_dir, subject_label, 'madeoutuuid', bootstrap_file=get_report_config(),
+            run_reports(output_dir, subject_label + 'TEST', 'madeoutuuid', bootstrap_file=get_report_config(),
                         reportlets_dir=output_dir)
 
     # running group level
