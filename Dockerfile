@@ -3,7 +3,7 @@ FROM python:3.11
 WORKDIR /code
 
 COPY requirements.txt cvrmap/
-RUN pip install --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host pypi.python.org -r cvrmap/requirements.txt
+RUN pip install --trusted-host files.pythonhosted.org --trusted-host pypi.org --trusted-host pypi.python.org -r cvrmap/requirements.txt --timeout=600
 
 COPY cvrmap cvrmap/cvrmap
 COPY setup.py cvrmap/

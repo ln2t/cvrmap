@@ -197,7 +197,7 @@ def main():
                                  global_signal_shift, corrected_noise, parameters, outputs)
 
             from nireports.assembler.tools import run_reports
-            run_reports(output_dir, subject_label + 'TEST', 'madeoutuuid', bootstrap_file=get_report_config(),
+            run_reports(output_dir, subject_label, 'madeoutuuid', bootstrap_file=get_report_config(),
                         reportlets_dir=output_dir)
 
     # running group level
