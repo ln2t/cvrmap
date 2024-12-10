@@ -464,6 +464,7 @@ def get_melodic_mixing(bids_filter, layout):
     _bids_filter = bids_filter.copy()
     _bids_filter.update({'desc': 'MELODIC', 'suffix': 'mixing', 'extension': '.tsv'})
     _bids_filter.pop('space')
+    _bids_filter.pop('res')
     melodic_mixing = layout.get(**_bids_filter)[0]
 
     return pd.read_csv(melodic_mixing, sep='\t', header=None), melodic_mixing
