@@ -1,0 +1,108 @@
+Bootstrap: docker
+From: python:3.12-slim
+
+%labels
+    Author CVRMap Development Team
+    Version 4.3.1
+    Description Cerebrovascular Reactivity Mapping using BIDS-compatible physiological and BOLD fMRI data
+
+%help
+CVRmap - Cerebrovascular Reactivity Mapping Tool
+
+This container provides the CVRmap pipeline for processing physiological 
+signals (CO2) and BOLD fMRI data to generate cerebrovascular reactivity maps.
+
+Usage:
+    apptainer run cvrmap.sif <bids_dir> <output_dir> <analysis_level> [options]
+    
+Example:
+    apptainer run cvrmap.sif /data/bids /data/derivatives participant \
+        --derivatives fmriprep=/data/derivatives/fmriprep \
+        --task restingstate \
+        --participant_label 001
+
+For full help:
+    apptainer run cvrmap.sif --help
+
+Key Features:
+- BIDS-compatible data handling
+- Physiological signal preprocessing with ETCO2 extraction
+- ROI-based probe extraction (alternative to physiological recordings)
+- BOLD signal preprocessing with AROMA denoising
+- Cross-correlation analysis for delay mapping
+- Global signal analysis
+- Comprehensive output generation with visualizations
+
+%post
+    # Update and install system dependencies
+    apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        git \
+        libhdf5-dev \
+        libgomp1 \
+        && rm -rf /var/lib/apt/lists/*
+    
+    # Upgrade pip
+    pip install --no-cache-dir --upgrade \
+        --trusted-host pypi.org \
+        --trusted-host pypi.python.org \
+        --trusted-host files.pythonhosted.org \
+        pip setuptools wheel
+    
+    # Install Python dependencies
+    pip install --no-cache-dir \
+        --trusted-host pypi.org \
+        --trusted-host pypi.python.org \
+        --trusted-host files.pythonhosted.org \
+        numpy>=1.20.0 \
+        scipy>=1.7.0 \
+        pandas>=1.3.0 \
+        nibabel>=3.2.0 \
+        nilearn>=0.8.0 \
+        pybids>=0.15.0 \
+        scikit-learn>=1.0.0 \
+        peakutils>=1.3.0 \
+        joblib>=1.0.0 \
+        matplotlib>=3.4.0 \
+        PyYAML>=5.4.0
+    
+    # Create app directory
+    mkdir -p /opt/cvrmap
+    
+    # Copy the package (this will be done via %files or during build)
+    # For now, we'll install from PyPI or local source
+    
+%files
+    # Copy the entire cvrmap package into the container
+    cvrmap /opt/cvrmap/cvrmap
+    setup.py /opt/cvrmap/setup.py
+    pyproject.toml /opt/cvrmap/pyproject.toml
+
+%post
+    # Install CVRmap package
+    cd /opt/cvrmap && pip install --no-cache-dir \
+        --trusted-host pypi.org \
+        --trusted-host pypi.python.org \
+        --trusted-host files.pythonhosted.org \
+        .
+    
+    # Clean up apt cache only (do NOT clean /tmp or /var/tmp during build)
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+%environment
+    # Set matplotlib to use non-interactive backend
+    export MPLBACKEND=Agg
+    # Ensure UTF-8 encoding
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    # Prevent using user's local Python packages
+    export PYTHONNOUSERSITE=1
+
+%runscript
+    exec cvrmap "$@"
+
+%test
+    # Verify that cvrmap is installed and accessible
+    python -c "import cvrmap; print(f'CVRmap version: {cvrmap.__version__}')"
+    cvrmap --version

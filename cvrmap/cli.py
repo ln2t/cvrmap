@@ -1,4 +1,5 @@
 import argparse
+import os
 from . import __version__
 
 # Set matplotlib backend to non-GUI to avoid tkinter issues in parallel processing
@@ -55,12 +56,14 @@ def main():
                        help='ROI coordinates in millimeters (mm) in world space for spherical ROI extraction (e.g., --roi-coordinates 0 -52 26)')
     parser.add_argument('--roi-radius', type=float, default=6.0, 
                        help='Radius in millimeters (mm) for spherical ROI (default: 6.0)')
-    parser.add_argument('--roi-mask', type=str, 
-                       help='Path to binary mask NIfTI file for ROI extraction')
-    parser.add_argument('--roi-atlas', type=str, 
+    parser.add_argument('--roi-mask', type=str,
+                       help='Path to binary mask NIfTI file for ROI extraction, pattern with wildcards, or "SSS" to use the built-in Superior Sagittal Sinus mask')
+    parser.add_argument('--roi-atlas', type=str,
                        help='Path to atlas NIfTI file for ROI extraction')
-    parser.add_argument('--roi-region-id', type=int, 
+    parser.add_argument('--roi-region-id', type=int,
                        help='Region ID/label in atlas for ROI extraction')
+    parser.add_argument('--roi-label', type=str,
+                       help='Label for ROI-based outputs in BIDS naming (e.g., --roi-label myROI). Required when using --roi-mask with a custom path/pattern. Automatically set to "SSS" when using --roi-mask SSS.')
     
     args = parser.parse_args()
 
@@ -112,7 +115,7 @@ def main():
         logger.info(f"Baseline method set to: {args.baseline_method}")
     
     # Add task-specific recommendations for baseline method
-    if args.task and args.task.lower() == 'restingstate' or args.task.lower() == 'resting-state' or args.task.lower() == 'rest':
+    if args.task and (args.task.lower() == 'restingstate' or args.task.lower() == 'resting-state' or args.task.lower() == 'rest'):
         current_baseline_method = config.get('physio', {}).get('baseline_method', 'peakutils')
         if current_baseline_method == 'peakutils':
             logger.warning("WARNING: Task appears to be resting-state data. Consider using --baseline-method mean instead of peakutils for better baseline estimation in resting-state data without gas challenge.")
@@ -136,8 +139,21 @@ def main():
             
         elif args.roi_mask:
             config['roi_probe']['method'] = 'mask'
-            config['roi_probe']['mask_path'] = args.roi_mask
-            logger.info(f"ROI mask: {args.roi_mask}")
+            # Check for built-in mask keywords
+            if args.roi_mask.upper() == 'SSS':
+                # Use bundled Superior Sagittal Sinus mask
+                import pkg_resources
+                sss_mask_path = pkg_resources.resource_filename('cvrmap', 'data/SuperiorSagittalSinus_mask.nii.gz')
+                config['roi_probe']['mask_path'] = sss_mask_path
+                config['roi_probe']['label'] = 'SSS'
+                logger.info(f"Using built-in Superior Sagittal Sinus (SSS) mask: {sss_mask_path}")
+            else:
+                # Custom mask path/pattern requires --roi-label
+                if not args.roi_label:
+                    parser.error("When using --roi-mask with a custom path or pattern, --roi-label is required to identify outputs in BIDS naming.")
+                config['roi_probe']['mask_path'] = args.roi_mask
+                config['roi_probe']['label'] = args.roi_label
+                logger.info(f"ROI mask: {args.roi_mask}, label: {args.roi_label}")
             
         elif args.roi_atlas and args.roi_region_id is not None:
             config['roi_probe']['method'] = 'atlas'

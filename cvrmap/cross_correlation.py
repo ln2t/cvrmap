@@ -34,22 +34,22 @@ def cross_correlate(reference_container, shifted_probes_data, logger=None, confi
     best_delay_seconds = None
     
     reference_signal = reference_container.data
-    
+
     # Unpack the shifted probes data
     shifted_signals, time_delays_seconds = shifted_probes_data
-    
+
     if shifted_signals is None or time_delays_seconds is None:
         return 0.0, 0.0
-    
+
     n_delays = shifted_signals.shape[0]
-    
+
     for i in range(n_delays):
         # Both signals are normalized and of same length, so correlation is simply dot product / n_samples
         probe_signal = shifted_signals[i, :]
-        
+
         # Calculate correlation for normalized signals: dot product / n_samples
         correlation = np.dot(reference_signal, probe_signal) / len(reference_signal)
-        
+
         if correlation > best_correlation:
             best_correlation = correlation
             best_delay_seconds = time_delays_seconds[i]

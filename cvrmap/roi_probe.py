@@ -18,6 +18,130 @@ Key Features:
 
 import numpy as np
 import nibabel as nib
+import os
+import glob
+
+
+def resolve_roi_mask_pattern(pattern, fmriprep_dir, participant, task, space, logger=None):
+    """
+    Resolve ROI mask pattern to actual file path by searching in fMRIPrep derivatives.
+    
+    Parameters:
+    -----------
+    pattern : str
+        Pattern with wildcards/regex (e.g., "sub-*_task-*_brain*")
+    fmriprep_dir : str
+        Path to fMRIPrep derivatives directory
+    participant : str
+        Participant ID (without 'sub-' prefix)
+    task : str
+        Task name
+    space : str
+        Space entity
+    logger : logging.Logger, optional
+        Logger for messages
+        
+    Returns:
+    --------
+    str
+        Resolved file path
+        
+    Raises:
+    ------
+    FileNotFoundError
+        If no matching file is found or multiple files match
+    """
+    # Check if pattern contains wildcards (*, ?, [])
+    if not any(char in pattern for char in ['*', '?', '[']):
+        # No wildcards, return as-is (existing behavior)
+        return pattern
+    
+    # Import bids here to avoid circular imports
+    from bids import BIDSLayout
+    import re
+    
+    # Create BIDSLayout for fMRIPrep derivatives
+    try:
+        layout = BIDSLayout(fmriprep_dir, validate=False)
+    except Exception as e:
+        raise FileNotFoundError(f"Could not create BIDSLayout for fMRIPrep directory '{fmriprep_dir}': {e}")
+    
+    # Get all files for this subject, task, and space from fMRIPrep derivatives
+    try:
+        candidate_files = layout.get(
+            subject=participant,
+            task=task,
+            space=space,
+            return_type='filename',
+            extension=['.nii', '.nii.gz']
+        )
+    except Exception as e:
+        if logger:
+            logger.warning(f"Error querying BIDSLayout: {e}")
+        candidate_files = []
+    
+    if logger:
+        logger.debug(f"Found {len(candidate_files)} candidate files for subject={participant}, task={task}, space={space}")
+        logger.debug(f"Candidate files: {candidate_files}")
+    
+    if not candidate_files:
+        raise FileNotFoundError(
+            f"No files found in fMRIPrep derivatives for "
+            f"participant {participant}, task {task}, space {space}"
+        )
+    
+    # Convert pattern to regex
+    # Replace BIDS-style wildcards with regex equivalents
+    regex_pattern = pattern
+    regex_pattern = regex_pattern.replace('*', '.*')  # * becomes .*
+    regex_pattern = regex_pattern.replace('?', '.')   # ? becomes .
+    
+    # Ensure pattern matches the full filename (not just part of it)
+    if not regex_pattern.startswith('^'):
+        regex_pattern = '^.*' + regex_pattern
+    if not regex_pattern.endswith('$'):
+        regex_pattern = regex_pattern + '.*$'
+    
+    if logger:
+        logger.debug(f"Original pattern: {pattern}")
+        logger.debug(f"Regex pattern: {regex_pattern}")
+    
+    # Filter candidate files using regex pattern
+    matched_files = []
+    try:
+        regex_compiled = re.compile(regex_pattern, re.IGNORECASE)
+        for file_path in candidate_files:
+            # Extract just the filename for pattern matching
+            filename = os.path.basename(file_path)
+            if regex_compiled.match(filename):
+                matched_files.append(file_path)
+                if logger:
+                    logger.debug(f"Pattern matched: {filename}")
+            else:
+                if logger:
+                    logger.debug(f"Pattern did not match: {filename}")
+    except re.error as e:
+        raise ValueError(f"Invalid regex pattern '{regex_pattern}' derived from '{pattern}': {e}")
+    
+    if not matched_files:
+        raise FileNotFoundError(
+            f"No files matching pattern '{pattern}' found among {len(candidate_files)} candidate files "
+            f"for participant {participant}, task {task}, space {space}"
+        )
+    
+    if len(matched_files) > 1:
+        if logger:
+            logger.warning(f"Multiple files found matching pattern '{pattern}': {matched_files}")
+            logger.warning(f"Using the first match: {matched_files[0]}")
+        # Sort to ensure consistent selection
+        matched_files.sort()
+    
+    resolved_path = matched_files[0]
+    
+    if logger:
+        logger.info(f"Resolved ROI mask pattern '{pattern}' to: {resolved_path}")
+    
+    return resolved_path
 from .data_container import ProbeContainer
 
 
@@ -113,20 +237,20 @@ class ROIProbeExtractor:
             # Use the mean of the signal as baseline (recommended for resting-state)
             probe_container.baseline = np.mean(probe_signal)
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using mean method: {probe_container.baseline:.3f}")
+                self.logger.debug(f"Computed ROI probe baseline using mean method: {probe_container.baseline:.3f} BOLD units")
         else:
             # Use peakutils to detect baseline from signal troughs (default, recommended for gas challenge)
             import peakutils
             probe_baseline_array = peakutils.baseline(probe_signal)
             probe_container.baseline = np.mean(probe_baseline_array)
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using peakutils method: {probe_container.baseline:.3f}")
+                self.logger.debug(f"Computed ROI probe baseline using peakutils method: {probe_container.baseline:.3f} BOLD units")
         
         if self.logger:
             n_voxels = np.sum(roi_mask)
             self.logger.info(f"ROI probe extracted from {n_voxels} voxels, "
                            f"signal length: {len(probe_signal)} timepoints, "
-                           f"baseline: {probe_container.baseline:.3f}")
+                           f"baseline: {probe_container.baseline:.3f} BOLD units")
         
         return probe_container
     
@@ -200,14 +324,14 @@ class ROIProbeExtractor:
             # Use the mean of the signal as baseline (recommended for resting-state)
             probe_container.baseline = np.mean(probe_signal)
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using mean method: {probe_container.baseline:.3f}")
+                self.logger.debug(f"Computed ROI probe baseline using mean method: {probe_container.baseline:.3f} BOLD units")
         else:
             # Use peakutils to detect baseline from signal troughs (default, recommended for gas challenge)
             import peakutils
             probe_baseline_array = peakutils.baseline(probe_signal)
             probe_container.baseline = np.mean(probe_baseline_array)
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using peakutils method: {probe_container.baseline:.3f}")
+                self.logger.debug(f"Computed ROI probe baseline using peakutils method: {probe_container.baseline:.3f} BOLD units")
         
         if self.logger:
             n_voxels = np.sum(roi_mask)
@@ -287,14 +411,14 @@ class ROIProbeExtractor:
             # Use the mean of the signal as baseline (recommended for resting-state)
             probe_container.baseline = np.mean(probe_signal)
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using mean method: {probe_container.baseline:.3f}")
+                self.logger.debug(f"Computed ROI probe baseline using mean method: {probe_container.baseline:.3f} BOLD units")
         else:
             # Use peakutils to detect baseline from signal troughs (default, recommended for gas challenge)
             import peakutils
             probe_baseline_array = peakutils.baseline(probe_signal)
             probe_container.baseline = np.mean(probe_baseline_array)
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using peakutils method: {probe_container.baseline:.3f}")
+                self.logger.debug(f"Computed ROI probe baseline using peakutils method: {probe_container.baseline:.3f} BOLD units")
         
         if self.logger:
             n_voxels = np.sum(roi_mask)
@@ -426,7 +550,7 @@ class ROIProbeExtractor:
         return signal_interpolated
 
 
-def create_roi_probe_from_config(bold_container, config, logger=None):
+def create_roi_probe_from_config(bold_container, config, logger=None, participant=None, task=None, space=None, fmriprep_dir=None):
     """
     Factory function to create ROI probe based on configuration.
     
@@ -438,6 +562,14 @@ def create_roi_probe_from_config(bold_container, config, logger=None):
         Configuration dictionary with ROI probe settings
     logger : Logger, optional
         Logger instance
+    participant : str, optional
+        Participant ID (without 'sub-' prefix) for pattern resolution
+    task : str, optional
+        Task name for pattern resolution  
+    space : str, optional
+        Space entity for pattern resolution
+    fmriprep_dir : str, optional
+        Path to fMRIPrep derivatives directory for pattern resolution
         
     Returns:
     --------
@@ -469,10 +601,25 @@ def create_roi_probe_from_config(bold_container, config, logger=None):
     
     elif method == 'mask':
         mask_path = roi_config.get('mask_path')
-        
+
         if mask_path is None:
             raise ValueError("ROI mask path not specified in configuration")
-        
+
+        # Resolve pattern if necessary
+        if participant and task and space and fmriprep_dir:
+            try:
+                resolved_mask_path = resolve_roi_mask_pattern(
+                    mask_path, fmriprep_dir, participant, task, space, logger
+                )
+                mask_path = resolved_mask_path
+                # Update config with resolved path so other functions can use it
+                roi_config['mask_path'] = resolved_mask_path
+                roi_config['mask_path_resolved'] = resolved_mask_path
+            except Exception as e:
+                if logger:
+                    logger.warning(f"Failed to resolve ROI mask pattern '{mask_path}': {e}")
+                raise
+
         return extractor.extract_probe_from_mask(mask_path)
     
     elif method == 'atlas':

@@ -242,52 +242,15 @@ class ProbeContainer(DataContainer):
             # Store shifted signal in array
             self.shifted_signals[i, :] = data
 
-    def _resample_to_target(self, target_sampling_frequency):
-        """
-        Resample the shifted signals to a target sampling frequency.
-        
-        Parameters:
-        -----------
-        target_sampling_frequency : float
-            Target sampling frequency in Hz to resample shifted signals to.
-            
-        Returns:
-        --------
-        tuple
-            - resampled_shifted_signals: 2D numpy array (n_delays, n_target_timepoints)
-            - time_delays_seconds: 1D numpy array of time delays in seconds
-        """
-        import numpy as np
-        from scipy.signal import resample
-        
-        if self.data is None or self.sampling_frequency is None:
-            raise ValueError("ProbeContainer must have data and sampling_frequency to resample")
-        
-        if target_sampling_frequency <= 0:
-            raise ValueError("Target sampling frequency must be positive")
-        
-        if self.shifted_signals is None:
-            return None, None  # Return None if no shifted signals exist
-        
-        # Calculate new number of samples at target frequency based on actual shifted signals duration
-        # Use the actual shifted signals length (which may be truncated)
-        actual_n_samples = self.shifted_signals.shape[1]
-        actual_duration = actual_n_samples / self.sampling_frequency
-        target_n_samples = int(np.round(actual_duration * target_sampling_frequency))
-        
-        # Resample all shifted signals
-        n_delays = self.shifted_signals.shape[0]
-        resampled_shifted_signals = np.zeros((n_delays, target_n_samples))
-        
-        for i in range(n_delays):
-            resampled_shifted_signals[i, :] = resample(self.shifted_signals[i, :], target_n_samples)
-        
-        return resampled_shifted_signals, self.time_delays_seconds.copy()
-
     def get_resampled_shifted_signals(self, time_delays_seconds, target_sampling_frequency, target_duration_seconds):
         """
-        Compute time-shifted signals and resample them to a target sampling frequency.
-        
+        Compute time-shifted signals at a target sampling frequency.
+
+        CRITICAL: For TR-agnostic analysis, we must resample BEFORE shifting to avoid
+        quantization of delays to the original TR. This method:
+        1. Resamples the probe signal to target_sampling_frequency
+        2. Computes shifts on the resampled signal
+
         Parameters:
         -----------
         time_delays_seconds : np.ndarray
@@ -296,7 +259,7 @@ class ProbeContainer(DataContainer):
             Target sampling frequency in Hz to resample shifted signals to.
         target_duration_seconds : float
             Target duration in seconds to truncate the resampled signals to.
-            
+
         Returns:
         --------
         tuple
@@ -304,45 +267,66 @@ class ProbeContainer(DataContainer):
             - time_delays_seconds: 1D numpy array of time delays in seconds
         """
         import numpy as np
-        
+        from scipy.signal import resample
+
         if not isinstance(time_delays_seconds, np.ndarray):
             time_delays_seconds = np.array(time_delays_seconds)
-        
+
         if len(time_delays_seconds) == 0:
             raise ValueError("time_delays_seconds array cannot be empty")
-        
+
         if target_duration_seconds <= 0:
             raise ValueError("target_duration_seconds must be positive")
-        
-        # Compute shifted signals with the provided array
-        self._compute_shifted_signals(time_delays_seconds)
-        
-        if self.shifted_signals is None:
-            return None, None
-        
-        # Truncate shifted signals to target duration BEFORE resampling
-        original_n_samples = self.shifted_signals.shape[1]
+
+        # STEP 1: Resample the original probe signal to target sampling frequency
+        original_n_samples = len(self.data)
         original_duration = original_n_samples / self.sampling_frequency
-        
-        if target_duration_seconds < original_duration:
-            # Truncate to target duration
-            target_n_samples_original_sf = int(np.round(target_duration_seconds * self.sampling_frequency))
-            # Make sure we don't exceed the available samples
-            actual_n_samples = min(target_n_samples_original_sf, original_n_samples)
-            truncated_shifted_signals = self.shifted_signals[:, :actual_n_samples]
-            
-            # Temporarily store truncated signals for resampling
-            original_shifted_signals = self.shifted_signals
-            self.shifted_signals = truncated_shifted_signals
-        
-        # Resample the (potentially truncated) shifted signals to target sampling frequency
-        resampled_signals, delays = self._resample_to_target(target_sampling_frequency)
-        
-        # Restore original shifted signals if we truncated them
-        if target_duration_seconds < original_duration:
-            self.shifted_signals = original_shifted_signals
-        
-        return resampled_signals, delays
+
+        # Determine target number of samples
+        target_n_samples = int(np.round(min(original_duration, target_duration_seconds) * target_sampling_frequency))
+
+        # Resample the probe signal
+        resampled_probe_data = resample(self.data, target_n_samples)
+
+        if self.logger:
+            self.logger.debug(f"Resampled probe for shifting: {self.sampling_frequency:.3f} Hz ({original_n_samples} samples) "
+                            f"→ {target_sampling_frequency:.3f} Hz ({target_n_samples} samples)")
+
+        # STEP 2: Compute shifted signals using the RESAMPLED probe data at target sampling frequency
+        n_delays = len(time_delays_seconds)
+        shifted_signals = np.zeros((n_delays, target_n_samples))
+
+        # Get baseline value
+        if self.baseline is not None:
+            probe_baseline = self.baseline
+        else:
+            import peakutils
+            probe_baseline_array = peakutils.baseline(self.data)
+            probe_baseline = np.mean(probe_baseline_array)
+            self.baseline = probe_baseline
+            if self.logger:
+                self.logger.warning("Baseline was not pre-computed. Computing baseline using peakutils as fallback.")
+
+        # Compute shifts on the resampled data
+        for i, delta_t in enumerate(time_delays_seconds):
+            data = probe_baseline * np.ones(target_n_samples)
+
+            # Number of points corresponding to delta_t at TARGET sampling frequency
+            delta_n = int(delta_t * target_sampling_frequency)
+
+            # Shift and copy the resampled data
+            if delta_n == 0:
+                data[:] = resampled_probe_data
+            elif delta_n < 0:
+                # Negative delay: probe signal is delayed relative to data
+                data[:target_n_samples+delta_n] = resampled_probe_data[-delta_n:]
+            elif delta_n > 0:
+                # Positive delay: probe signal is advanced relative to data
+                data[delta_n:] = resampled_probe_data[:target_n_samples-delta_n]
+
+            shifted_signals[i, :] = data
+
+        return shifted_signals, time_delays_seconds
 
     def extrapolate(self, target_duration_seconds, type="baseline"):
         """
@@ -688,35 +672,40 @@ class BoldContainer(DataContainer):
         
         return global_signal_container
 
-    def save(self, output_dir):
+    def save(self, output_dir, label=None):
         """
         Save the BOLD container data to a NIfTI file.
-        
+
         Parameters:
         -----------
         output_dir : str
             Base output directory for BIDS derivatives.
-            
+        label : str, optional
+            ROI label for BIDS naming (e.g., 'SSS'). If provided, adds '_label-{label}' entity.
+
         Returns:
         --------
         str : Path where the data was saved
         """
         import os
         import nibabel as nib
-        
-        # Build BIDS path: output_dir/sub-{participant}/func/sub-{participant}_task-{task}_space-{space}_desc-denoised_bold.nii.gz
+
+        # Build BIDS path: output_dir/sub-{participant}/func/sub-{participant}_task-{task}_label-{label}_space-{space}_desc-denoised_bold.nii.gz
         participant_dir = f"sub-{self.participant}"
         func_dir = "func"
-        
+
         # Build filename components
         filename_parts = [f"sub-{self.participant}"]
-        
+
         if self.task:
             filename_parts.append(f"task-{self.task}")
-        
+
+        if label:
+            filename_parts.append(f"label-{label}")
+
         if self.space:
             filename_parts.append(f"space-{self.space}")
-        
+
         filename_parts.append("desc-denoised")
         filename_parts.append("bold.nii.gz")
         
@@ -741,3 +730,54 @@ class BoldContainer(DataContainer):
             raise ValueError("Cannot save BOLD data: data or affine matrix is None")
         
         return output_path
+
+    def resample_to_frequency(self, target_sampling_frequency):
+        """
+        Resample BOLD data to a target sampling frequency.
+
+        This is essential for TR-agnostic cross-correlation analysis. All signals
+        must be resampled to match the delay step (target_sf = 1/delay_step) to
+        ensure each delay increment actually shifts the signal.
+
+        Parameters:
+        -----------
+        target_sampling_frequency : float
+            Target sampling frequency in Hz (e.g., 1.0 Hz for 1-second delay steps)
+
+        Returns:
+        --------
+        None
+            Modifies self.data, self.sampling_frequency, and self.tr in place
+        """
+        import numpy as np
+        from scipy.signal import resample
+
+        if self.data is None:
+            raise ValueError("BOLD data must be loaded before resampling")
+
+        if self.sampling_frequency is None:
+            raise ValueError("BOLD sampling frequency must be set before resampling")
+
+        if target_sampling_frequency <= 0:
+            raise ValueError("Target sampling frequency must be positive")
+
+        # Calculate current duration and target number of samples
+        current_n_timepoints = self.data.shape[-1]
+        current_duration = current_n_timepoints / self.sampling_frequency
+        target_n_timepoints = int(np.round(current_duration * target_sampling_frequency))
+
+        if self.logger:
+            self.logger.info(f"Resampling BOLD data: {self.sampling_frequency:.3f} Hz ({current_n_timepoints} samples) → "
+                           f"{target_sampling_frequency:.3f} Hz ({target_n_timepoints} samples)")
+
+        # Resample along the time axis (last dimension)
+        # BOLD data shape: (x, y, z, time)
+        resampled_data = resample(self.data, target_n_timepoints, axis=-1)
+
+        # Update container
+        self.data = resampled_data
+        self.sampling_frequency = target_sampling_frequency
+        self.tr = 1.0 / target_sampling_frequency
+
+        if self.logger:
+            self.logger.info(f"BOLD data resampled successfully to {target_sampling_frequency} Hz (TR={self.tr:.3f}s)")

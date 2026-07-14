@@ -363,6 +363,27 @@ Instead of using end-tidal CO₂ (ETCO₂) from breathing recordings, the ROI pr
 3. **Uses this signal as a probe** for CVR analysis
 4. **Applies identical processing** (cross-correlation, delay mapping, CVR computation)
 
+### Two-Stage ROI Probe Extraction
+
+**Important**: ROI probe extraction occurs in two stages to ensure optimal processing:
+
+#### Stage 1: Raw Data Extraction (Pre-Denoising)
+- **When**: Before BOLD preprocessing and denoising
+- **Purpose**: Used for AROMA component refinement
+- **Function**: Helps identify which independent components (ICs) are signal vs. noise by correlating with the ROI probe
+- **Data source**: Raw preprocessed BOLD from fMRIPrep
+
+#### Stage 2: Denoised Data Extraction (Post-Denoising)
+- **When**: After the 4-step BOLD denoising pipeline
+- **Purpose**: Used for global delay estimation, CVR computation, and report figures
+- **Function**: Ensures consistency between ROI probe and global signal (both from denoised data)
+- **Data source**: Denoised BOLD after AROMA refinement, temporal filtering, and spatial smoothing
+
+**Why Two Stages?**
+- The first extraction is necessary for the denoising process itself (AROMA refinement needs a reference signal)
+- The second extraction ensures that probe and global signal comparisons are valid (same preprocessing applied to both)
+- This design guarantees that when the ROI mask matches the brain mask, the signals will be identical with zero delay
+
 ### ROI Definition Methods
 
 #### 1. Spherical Coordinates
@@ -482,6 +503,11 @@ physio:
 
 cross_correlation:
   delay_max: 30.0                    # Maximum delay range (seconds)
+  delay_step: 1.0                    # Delay step size (seconds) - signals resampled to 1/delay_step Hz
+  # IMPORTANT: delay_step controls the temporal resolution of delay estimation
+  # All signals are resampled to sampling_frequency = 1/delay_step to ensure
+  # TR-agnostic analysis. For delay_step=1.0s → 1 Hz resampling.
+  # This guarantees each delay increment actually shifts the signal, regardless of TR.
 
 delay:
   delay_correlation_threshold: 0.6   # Minimum correlation for delay maps

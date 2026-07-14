@@ -1,11 +1,20 @@
 from setuptools import setup, find_packages
+import os
+
+# Read version from cvrmap/__init__.py
+version = {}
+with open(os.path.join(os.path.dirname(__file__), 'cvrmap', '__init__.py')) as f:
+    for line in f:
+        if line.startswith('__version__'):
+            exec(line, version)
+            break
 
 setup(
     name="cvrmap",
-    version="4.3.0",
+    version=version['__version__'],
     packages=find_packages(),
     package_data={
-        'cvrmap': ['default_config.yaml', 'data/report_config.yaml'],
+        'cvrmap': ['default_config.yaml', 'data/report_config.yaml', 'data/*.nii.gz'],
     },
     include_package_data=True,
     entry_points={

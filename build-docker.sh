@@ -3,12 +3,12 @@
 # CVRmap Docker Build Script
 set -e
 
-# Get version from setup.py
+# Get version from cvrmap/__init__.py (single source of truth)
 VERSION=$(python -c "
-with open('setup.py', 'r') as f:
-    content = f.read()
 import re
-version_match = re.search(r'version=[\"\'](.*?)[\"\']', content)
+with open('cvrmap/__init__.py', 'r') as f:
+    content = f.read()
+version_match = re.search(r'__version__\s*=\s*[\"\'](.*?)[\"\']', content)
 if version_match:
     print(version_match.group(1))
 else:
@@ -55,7 +55,7 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  -v, --version VERSION   Set version tag (default: auto-detected from setup.py)"
+            echo "  -v, --version VERSION   Set version tag (default: auto-detected from cvrmap/__init__.py)"
             echo "  -i, --image IMAGE       Set image name (default: arovai/cvrmap)"
             echo "  -f, --file DOCKERFILE   Set Dockerfile path (default: Dockerfile)"
             echo "  --push                  Push image to registry after build"

@@ -4,7 +4,7 @@
 FROM python:3.12.11-slim
 
 # Build argument for version
-ARG CVRMAP_VERSION=4.3.0
+ARG CVRMAP_VERSION=4.3.1
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

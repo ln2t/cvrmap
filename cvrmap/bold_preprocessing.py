@@ -8,6 +8,18 @@ class BoldPreprocessor:
         self.etco2_container = etco2_container  # ETCO2 container for computing shifted probes
         self.time_delays_seconds = time_delays_seconds  # Array of time delays to consider in processing
 
+    def _get_roi_label_entity(self):
+        """
+        Get the ROI label entity string for BIDS naming.
+
+        Returns '_label-{label}' if ROI probe is enabled and has a label configured,
+        otherwise returns an empty string.
+        """
+        roi_config = self.config.get('roi_probe', {}) if self.config else {}
+        if roi_config.get('enabled') and roi_config.get('label'):
+            return f"_label-{roi_config['label']}"
+        return ''
+
     def run(self, bold_container):
         self.logger.info(f"Running BOLD preprocessing for participant {self.participant}")
         
@@ -33,8 +45,9 @@ class BoldPreprocessor:
         self._temporal_filtering()
         self._spatial_smooth()
         
-        # Save the processed data
-        output_path = self.bold_denoised.save(self.args.output_dir)
+        # Save the processed data with ROI label if applicable
+        roi_label = self.config.get('roi_probe', {}).get('label') if self.config else None
+        output_path = self.bold_denoised.save(self.args.output_dir, label=roi_label)
         self.logger.info(f"Processed BOLD data saved to: {output_path}")
         
         self.logger.info(f"BOLD preprocessing completed for participant {self.participant}")
@@ -427,9 +440,10 @@ class BoldPreprocessor:
         
         plt.tight_layout()
         plt.subplots_adjust(top=0.85)
-        
-        # Save the figure
-        output_path = figures_dir / f"sub-{self.participant}_task-{self.args.task}_desc-icclassification.png"
+
+        # Save the figure with label entity
+        label_entity = self._get_roi_label_entity()
+        output_path = figures_dir / f"sub-{self.participant}_task-{self.args.task}{label_entity}_desc-icclassification.png"
         plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
         plt.close()
         

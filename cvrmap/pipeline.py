@@ -5,6 +5,18 @@ class Pipeline:
         self.fmriprep_dir = fmriprep_dir
         self.config = config
 
+    def _get_roi_label_entity(self):
+        """
+        Get the ROI label entity string for BIDS naming.
+
+        Returns '_label-{label}' if ROI probe is enabled and has a label configured,
+        otherwise returns an empty string.
+        """
+        roi_config = self.config.get('roi_probe', {}) if self.config else {}
+        if roi_config.get('enabled') and roi_config.get('label'):
+            return f"_label-{roi_config['label']}"
+        return ''
+
     def run(self):
         if self.args.analysis_level == "participant":
             self._run_participant_level()
@@ -38,10 +50,21 @@ class Pipeline:
             roi_probe_enabled = self.config.get('roi_probe', {}).get('enabled', False)
             
             if roi_probe_enabled:
+                # STAGE 1: Extract ROI probe from RAW BOLD data (before denoising)
+                # This probe will be used for AROMA component refinement during BOLD preprocessing
                 self.logger.info(f"Using ROI-based probe for participant: {participant}")
+                self.logger.info("STAGE 1: Extracting ROI probe from raw BOLD data for AROMA refinement")
                 from .roi_probe import create_roi_probe_from_config
-                etco2_container = create_roi_probe_from_config(bold_container, self.config, self.logger)
-                self.logger.info(f"ROI probe extraction completed for participant: {participant}")
+                etco2_container = create_roi_probe_from_config(
+                    bold_container,  # Contains raw BOLD data from fMRIPrep
+                    self.config,
+                    self.logger,
+                    participant=participant,
+                    task=self.args.task,
+                    space=self.args.space,
+                    fmriprep_dir=self.fmriprep_dir
+                )
+                self.logger.info(f"STAGE 1 complete: ROI probe extracted from raw data for denoising")
                 
                 # No physio_preprocessor in ROI mode
                 physio_preprocessor = None
@@ -51,18 +74,25 @@ class Pipeline:
                 physio_preprocessor.run()
                 etco2_container = physio_preprocessor.get_upper_envelope()
                 self.logger.info(f"Physio preprocessing completed for participant: {participant}")
+                       
             
-            # Extrapolate etco2 to match BOLD duration, in case recording was incomplete
-            etco2_container.extrapolate(target_duration_seconds=bold_duration_seconds)
-            
-            # Build shifted etco2 probe using config parameters and BOLD sampling frequency
+            # Build shifted probe using config parameters
+            # IMPORTANT: For TR-agnostic analysis, signals must be resampled to match delay_step
+            # This ensures delay increments actually shift the signal at discrete sampling points
             max_delay_seconds = self.config.get('cross_correlation', {}).get('delay_max')
-            target_sampling_frequency = bold_container.sampling_frequency
+            delay_step_seconds = self.config.get('cross_correlation', {}).get('delay_step', 1.0)
+
+            # Target sampling frequency must match delay step for meaningful cross-correlation
+            # If delay_step = 1.0s, then sampling frequency = 1 Hz (one sample per second)
+            target_sampling_frequency = 1.0 / delay_step_seconds
             target_duration_seconds = bold_container.data.shape[-1] / bold_container.sampling_frequency  # BOLD duration
-            
-            # Build time delays array from -max_delay_seconds to +max_delay_seconds in 1-second steps
+
+            self.logger.info(f"Delay step: {delay_step_seconds}s → Target sampling frequency: {target_sampling_frequency} Hz")
+            self.logger.info(f"BOLD TR: {1.0/bold_container.sampling_frequency:.2f}s → BOLD sampling frequency: {bold_container.sampling_frequency:.3f} Hz")
+
+            # Build time delays array from -max_delay_seconds to +max_delay_seconds with delay_step increments
             import numpy as np
-            time_delays_seconds = np.arange(-max_delay_seconds, max_delay_seconds + 1, 1.0)
+            time_delays_seconds = np.arange(-max_delay_seconds, max_delay_seconds + delay_step_seconds, delay_step_seconds)
             
             # Create BOLD preprocessor and run it with the original time delays
             self.logger.info(f"Starting BOLD preprocessing for participant: {participant}")
@@ -71,18 +101,43 @@ class Pipeline:
             
             # Get IC classification stats if available
             ic_classification_stats = getattr(bold_preprocessor, 'ic_classification_stats', None)
-            
-            # Compute global BOLD signal on the denoised data
-            self.logger.info("Computing global BOLD signal across all voxels on denoised data")
+
+            # STAGE 2: For ROI probe mode, re-extract probe from DENOISED data
+            # The Stage 1 probe (from raw data) was used for AROMA component refinement
+            # Now we re-extract from denoised data to ensure consistency with global signal
+            # This guarantees that probe and global signal are computed from identical data
+            if roi_probe_enabled:
+                self.logger.info("STAGE 2: Re-extracting ROI probe from denoised BOLD data for global delay estimation")
+                etco2_container = create_roi_probe_from_config(
+                    bold_container,  # Now contains denoised data after 4-step preprocessing
+                    self.config,
+                    self.logger,
+                    participant=participant,
+                    task=self.args.task,
+                    space=self.args.space,
+                    fmriprep_dir=self.fmriprep_dir
+                )
+                self.logger.info("STAGE 2 complete: ROI probe extracted from denoised data (for comparison with global signal)")
+
+            # Resample BOLD data to target sampling frequency for TR-agnostic analysis
+            # This ensures voxel-by-voxel cross-correlation works regardless of original TR
+            self.logger.info(f"Resampling denoised BOLD data to target frequency: {target_sampling_frequency} Hz for TR-agnostic analysis")
+            bold_container.resample_to_frequency(target_sampling_frequency)
+
+            # Recalculate target duration after resampling
+            target_duration_seconds = bold_container.data.shape[-1] / bold_container.sampling_frequency
+
+            # Compute global BOLD signal on the resampled denoised data
+            self.logger.info("Computing global BOLD signal across all voxels on resampled denoised data")
             global_signal_container = bold_container.get_global_signal()
             self.logger.info(f"Global signal container created with {len(global_signal_container.data)} timepoints")
-            
+
             # Normalize global signal container
             self.logger.info("Normalizing global BOLD signal")
             normalized_global_signal, _ = global_signal_container.get_normalized_signals()
             self.logger.info("Global BOLD signal normalized")
-            
-            self.logger.info(f"Building resampled and normalized shifted ETCO2 probe with delays {time_delays_seconds[0]:.1f}s to {time_delays_seconds[-1]:.1f}s, target_sf={target_sampling_frequency}Hz, target_duration={target_duration_seconds}s")
+
+            self.logger.info(f"Building resampled and normalized shifted probe with delays {time_delays_seconds[0]:.1f}s to {time_delays_seconds[-1]:.1f}s, target_sf={target_sampling_frequency}Hz, target_duration={target_duration_seconds}s")
             resampled_shifted_signals, delays = etco2_container.get_resampled_normalized_shifted_signals(
                 time_delays_seconds=time_delays_seconds,
                 target_sampling_frequency=target_sampling_frequency,
@@ -92,10 +147,11 @@ class Pipeline:
             
             # Compute cross-correlation between normalized global signal and resampled normalized probes
             self.logger.info("Computing cross-correlation between global BOLD signal and ETCO2 probes")
+            self.logger.debug(f"Delays array shape: {delays.shape}, range: [{delays[0]:.1f}, {delays[-1]:.1f}]")
             from .cross_correlation import cross_correlate
-            best_correlation, global_delay = cross_correlate(normalized_global_signal, (resampled_shifted_signals, delays))
+            best_correlation, global_delay = cross_correlate(normalized_global_signal, (resampled_shifted_signals, delays), logger=self.logger)
             self.logger.info(f"Global delay found: {global_delay:.3f}s with correlation: {best_correlation:.3f}")
-            
+
             # Create OutputGenerator and save all results
             self.logger.info(f"Saving results for participant: {participant}")
             from .io import OutputGenerator
@@ -137,6 +193,9 @@ class Pipeline:
                 units="normalized",
                 logger=self.logger
             )
+            # Copy probe_type from original container
+            if hasattr(etco2_container, 'probe_type'):
+                shifted_etco2_container.probe_type = etco2_container.probe_type
             
             # Create a temporary container for the unshifted signal
             unshifted_etco2_container = ProbeContainer(
@@ -147,6 +206,9 @@ class Pipeline:
                 units="normalized",
                 logger=self.logger
             )
+            # Copy probe_type from original container
+            if hasattr(etco2_container, 'probe_type'):
+                unshifted_etco2_container.probe_type = etco2_container.probe_type
             
             # Create global signal correlation figure
             output_generator.create_global_signal_figure(
@@ -206,7 +268,8 @@ class Pipeline:
                 participant=participant,
                 task=self.args.task,
                 space=self.args.space,
-                global_delay=global_delay
+                global_delay=global_delay,
+                probe_container=etco2_container
             )
             self.logger.info("Delay maps and correlation maps saved successfully")
             
@@ -258,7 +321,8 @@ class Pipeline:
                 bold_container=bold_container,
                 participant=participant,
                 task=self.args.task,
-                space=self.args.space
+                space=self.args.space,
+                probe_container=etco2_container
             )
             self.logger.info("Coefficient maps saved successfully")
             
@@ -528,11 +592,12 @@ IQR: [{stats['delay_stats']['q25']:.2f}, {stats['delay_stats']['q75']:.2f}]s"""
                        verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
                 
                 plt.tight_layout()
-                delay_hist_path = figures_dir / f"sub-{participant}_task-{self.args.task}_desc-delayhist.png"
+                label_entity = self._get_roi_label_entity()
+                delay_hist_path = figures_dir / f"sub-{participant}_task-{self.args.task}{label_entity}_desc-delayhist.png"
                 plt.savefig(delay_hist_path, dpi=150, bbox_inches='tight', facecolor='white')
                 plt.close()
-                
-                stats['histogram_figures']['delay_histogram'] = f"sub-{participant}_task-{self.args.task}_desc-delayhist.png"
+
+                stats['histogram_figures']['delay_histogram'] = f"sub-{participant}_task-{self.args.task}{label_entity}_desc-delayhist.png"
                 self.logger.debug(f"Delay histogram saved to: {delay_hist_path}")
 
         # Process CVR maps
@@ -584,13 +649,14 @@ IQR: [{stats['cvr_stats']['q25']:.4f}, {stats['cvr_stats']['q75']:.4f}]"""
                        verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
                 
                 plt.tight_layout()
-                cvr_hist_path = figures_dir / f"sub-{participant}_task-{self.args.task}_desc-cvrhist.png"
+                label_entity = self._get_roi_label_entity()
+                cvr_hist_path = figures_dir / f"sub-{participant}_task-{self.args.task}{label_entity}_desc-cvrhist.png"
                 plt.savefig(cvr_hist_path, dpi=150, bbox_inches='tight', facecolor='white')
                 plt.close()
-                
-                stats['histogram_figures']['cvr_histogram'] = f"sub-{participant}_task-{self.args.task}_desc-cvrhist.png"
+
+                stats['histogram_figures']['cvr_histogram'] = f"sub-{participant}_task-{self.args.task}{label_entity}_desc-cvrhist.png"
                 self.logger.debug(f"CVR histogram saved to: {cvr_hist_path}")
 
         self.logger.info(f"Generated histogram statistics for {len(stats['delay_stats'])} delay metrics and {len(stats['cvr_stats'])} CVR metrics")
-        
+
         return stats

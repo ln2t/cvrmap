@@ -7,6 +7,7 @@ physio:
 
 cross_correlation:
   delay_max: 30.0  # maximum delay for cross-correlation analysis in seconds
+  delay_step: 1.0  # delay step size in seconds for cross-correlation grid (should be <= TR for TR-agnostic analysis)
 
 delay:
   delay_correlation_threshold: 0.6  # minimum correlation threshold for delay map masking
