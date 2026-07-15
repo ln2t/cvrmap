@@ -34,7 +34,6 @@ WORKDIR /opt/cvrmap
 # Copy application files
 COPY setup.py pyproject.toml ./
 COPY cvrmap/ ./cvrmap/
-COPY data/ ./data/
 
 # Install CVRmap and dependencies
 RUN pip install -U --no-cache-dir --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org . && \
