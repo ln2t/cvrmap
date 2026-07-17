@@ -65,6 +65,14 @@ def main():
     parser.add_argument('--roi-label', type=str,
                        help='Label for ROI-based outputs in BIDS naming (e.g., --roi-label myROI). Required when using --roi-mask with a custom path/pattern. Automatically set to "SSS" when using --roi-mask SSS.')
     
+    # Bandpass filter options for ROI probe
+    parser.add_argument('--probe-bandpass-filter', action='store_true',
+                       help='Enable bandpass filtering on the ROI probe signal. Only valid with --roi-probe. Requires --probe-highpass and/or --probe-lowpass.')
+    parser.add_argument('--probe-highpass', type=float, metavar='FREQ',
+                       help='Highpass cutoff frequency in Hz for probe bandpass filter (e.g., 0.02). Frequencies below this are removed.')
+    parser.add_argument('--probe-lowpass', type=float, metavar='FREQ',
+                       help='Lowpass cutoff frequency in Hz for probe bandpass filter (e.g., 0.04). Frequencies above this are removed.')
+    
     args = parser.parse_args()
 
     # Check if bids_dir exists
@@ -166,6 +174,40 @@ def main():
                         "  --roi-coordinates X Y Z (and optionally --roi-radius)\n"
                         "  --roi-mask PATH\n"
                         "  --roi-atlas PATH --roi-region-id ID")
+    
+    # Handle bandpass filter for ROI probe
+    if args.probe_bandpass_filter:
+        if not args.roi_probe:
+            parser.error("--probe-bandpass-filter can only be used with --roi-probe mode")
+        
+        # Use CLI values if provided, otherwise use defaults
+        highpass_hz = args.probe_highpass if args.probe_highpass is not None else 0.02
+        lowpass_hz = args.probe_lowpass if args.probe_lowpass is not None else 0.04
+        
+        # Add bandpass filter settings to config
+        if 'roi_probe' not in config:
+            config['roi_probe'] = {}
+        config['roi_probe']['bandpass_filter'] = {
+            'enabled': True,
+            'highpass': highpass_hz,
+            'lowpass': lowpass_hz
+        }
+        
+        logger.info(f"ROI probe bandpass filter enabled: highpass={highpass_hz} Hz, lowpass={lowpass_hz} Hz")
+    
+    # Also check config file for bandpass settings (CLI overrides config)
+    elif config.get('roi_probe', {}).get('bandpass_filter', {}).get('enabled', False):
+        bp_config = config['roi_probe']['bandpass_filter']
+        if bp_config.get('highpass') is None and bp_config.get('lowpass') is None:
+            logger.warning("Bandpass filter enabled in config but no cutoff frequencies specified. Disabling filter.")
+            config['roi_probe']['bandpass_filter']['enabled'] = False
+        else:
+            filter_desc = []
+            if bp_config.get('highpass') is not None:
+                filter_desc.append(f"highpass={bp_config['highpass']} Hz")
+            if bp_config.get('lowpass') is not None:
+                filter_desc.append(f"lowpass={bp_config['lowpass']} Hz")
+            logger.info(f"ROI probe bandpass filter from config: {', '.join(filter_desc)}")
     
     from .pipeline import Pipeline
     pipeline = Pipeline(args, logger, fmriprep_dir, config=config)

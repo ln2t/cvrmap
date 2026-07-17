@@ -1,10 +1,10 @@
-# CVRmap Docker Image v4.3.0
+# CVRmap Docker Image v4.4.1
 # Single-stage build for simplicity
 
 FROM python:3.12.11-slim
 
 # Build argument for version
-ARG CVRMAP_VERSION=4.3.1
+ARG CVRMAP_VERSION=4.4.1
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

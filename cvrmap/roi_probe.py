@@ -14,12 +14,115 @@ Key Features:
 - Integration with existing CVRmap pipeline
 - Support for various ROI definition methods (coordinates, masks, atlases)
 - Automatic signal processing and normalization
+- Optional bandpass filtering for isolating CVR-relevant frequency bands
 """
 
 import numpy as np
 import nibabel as nib
 import os
 import glob
+from scipy.signal import butter, filtfilt
+
+
+def apply_bandpass_filter(signal, sampling_frequency, highpass=None, lowpass=None, order=5, logger=None):
+    """
+    Apply bandpass filter to a probe signal using a Butterworth filter.
+    
+    This function applies a zero-phase bandpass filter (using filtfilt) to isolate
+    frequency components of interest in the ROI probe signal. It's particularly
+    useful for extracting low-frequency fluctuations relevant to CVR analysis.
+    
+    After filtering, the DC component (mean) of the original signal is restored
+    to ensure compatibility with baseline computation methods.
+    
+    Parameters:
+    -----------
+    signal : numpy.ndarray
+        1D array containing the probe signal to filter
+    sampling_frequency : float
+        Sampling frequency of the signal in Hz
+    highpass : float, optional
+        Highpass cutoff frequency in Hz. Frequencies below this are attenuated.
+        If None, no highpass filtering is applied.
+    lowpass : float, optional
+        Lowpass cutoff frequency in Hz. Frequencies above this are attenuated.
+        If None, no lowpass filtering is applied.
+    order : int, optional
+        Order of the Butterworth filter (default: 5). Higher orders give sharper cutoffs.
+    logger : Logger, optional
+        Logger instance for debug messages
+        
+    Returns:
+    --------
+    numpy.ndarray
+        Filtered signal with same shape as input, with DC component restored
+        
+    Raises:
+    -------
+    ValueError
+        If both highpass and lowpass are None, or if filter parameters are invalid
+        
+    Notes:
+    ------
+    - Uses scipy.signal.filtfilt for zero-phase filtering (no phase distortion)
+    - Recommended cutoff frequencies for CVR analysis: highpass=0.02 Hz, lowpass=0.04 Hz
+    - The Nyquist frequency (sampling_frequency/2) limits the valid cutoff range
+    - The DC component is restored after filtering to maintain compatibility with
+      baseline computation methods (mean or peakutils)
+    """
+    import numpy as np
+    
+    if highpass is None and lowpass is None:
+        raise ValueError("At least one of highpass or lowpass must be specified for bandpass filtering")
+    
+    nyquist = sampling_frequency / 2.0
+    
+    # Validate cutoff frequencies
+    if highpass is not None and highpass >= nyquist:
+        raise ValueError(f"Highpass frequency ({highpass} Hz) must be less than Nyquist frequency ({nyquist} Hz)")
+    if lowpass is not None and lowpass >= nyquist:
+        raise ValueError(f"Lowpass frequency ({lowpass} Hz) must be less than Nyquist frequency ({nyquist} Hz)")
+    if highpass is not None and lowpass is not None and highpass >= lowpass:
+        raise ValueError(f"Highpass frequency ({highpass} Hz) must be less than lowpass frequency ({lowpass} Hz)")
+    
+    # Store the original DC component (mean) before filtering
+    dc_component = np.mean(signal)
+    
+    # Determine filter type and cutoffs
+    if highpass is not None and lowpass is not None:
+        # Bandpass filter
+        btype = 'bandpass'
+        Wn = [highpass / nyquist, lowpass / nyquist]
+        filter_desc = f"bandpass [{highpass}-{lowpass}] Hz"
+    elif highpass is not None:
+        # Highpass only
+        btype = 'highpass'
+        Wn = highpass / nyquist
+        filter_desc = f"highpass {highpass} Hz"
+    else:
+        # Lowpass only
+        btype = 'lowpass'
+        Wn = lowpass / nyquist
+        filter_desc = f"lowpass {lowpass} Hz"
+    
+    if logger:
+        logger.debug(f"Applying {filter_desc} Butterworth filter (order={order})")
+    
+    # Design Butterworth filter
+    b, a = butter(order, Wn, btype=btype)
+    
+    # Apply zero-phase filter
+    filtered_signal = filtfilt(b, a, signal)
+    
+    # Restore the DC component (mean) after filtering
+    # This is important because bandpass/highpass filters remove the DC component,
+    # which would cause issues with baseline computation methods
+    filtered_signal = filtered_signal + dc_component
+    
+    if logger:
+        logger.info(f"Applied {filter_desc} filter to probe signal (DC component restored)")
+    
+    return filtered_signal
 
 
 def resolve_roi_mask_pattern(pattern, fmriprep_dir, participant, task, space, logger=None):
@@ -233,18 +336,21 @@ class ROIProbeExtractor:
         # Compute baseline for CVR calculations using configured method
         baseline_method = self.config.get('physio', {}).get('baseline_method', 'peakutils')
         
+        if self.logger:
+            self.logger.info(f"Computing ROI probe baseline using method: '{baseline_method}'")
+        
         if baseline_method == 'mean':
             # Use the mean of the signal as baseline (recommended for resting-state)
-            probe_container.baseline = np.mean(probe_signal)
+            probe_container.baseline = float(np.mean(probe_signal))
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using mean method: {probe_container.baseline:.3f} BOLD units")
+                self.logger.info(f"Computed ROI probe baseline using MEAN method: {probe_container.baseline:.6f} BOLD units")
         else:
             # Use peakutils to detect baseline from signal troughs (default, recommended for gas challenge)
             import peakutils
             probe_baseline_array = peakutils.baseline(probe_signal)
-            probe_container.baseline = np.mean(probe_baseline_array)
+            probe_container.baseline = float(np.mean(probe_baseline_array))
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using peakutils method: {probe_container.baseline:.3f} BOLD units")
+                self.logger.info(f"Computed ROI probe baseline using PEAKUTILS method: {probe_container.baseline:.6f} BOLD units")
         
         if self.logger:
             n_voxels = np.sum(roi_mask)
@@ -320,18 +426,21 @@ class ROIProbeExtractor:
         # Compute baseline using configured method
         baseline_method = self.config.get('physio', {}).get('baseline_method', 'peakutils')
         
+        if self.logger:
+            self.logger.info(f"Computing ROI probe baseline using method: '{baseline_method}'")
+        
         if baseline_method == 'mean':
             # Use the mean of the signal as baseline (recommended for resting-state)
-            probe_container.baseline = np.mean(probe_signal)
+            probe_container.baseline = float(np.mean(probe_signal))
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using mean method: {probe_container.baseline:.3f} BOLD units")
+                self.logger.info(f"Computed ROI probe baseline using MEAN method: {probe_container.baseline:.6f} BOLD units")
         else:
             # Use peakutils to detect baseline from signal troughs (default, recommended for gas challenge)
             import peakutils
             probe_baseline_array = peakutils.baseline(probe_signal)
-            probe_container.baseline = np.mean(probe_baseline_array)
+            probe_container.baseline = float(np.mean(probe_baseline_array))
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using peakutils method: {probe_container.baseline:.3f} BOLD units")
+                self.logger.info(f"Computed ROI probe baseline using PEAKUTILS method: {probe_container.baseline:.6f} BOLD units")
         
         if self.logger:
             n_voxels = np.sum(roi_mask)
@@ -407,18 +516,21 @@ class ROIProbeExtractor:
         # Compute baseline using configured method
         baseline_method = self.config.get('physio', {}).get('baseline_method', 'peakutils')
         
+        if self.logger:
+            self.logger.info(f"Computing ROI probe baseline using method: '{baseline_method}'")
+        
         if baseline_method == 'mean':
             # Use the mean of the signal as baseline (recommended for resting-state)
-            probe_container.baseline = np.mean(probe_signal)
+            probe_container.baseline = float(np.mean(probe_signal))
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using mean method: {probe_container.baseline:.3f} BOLD units")
+                self.logger.info(f"Computed ROI probe baseline using MEAN method: {probe_container.baseline:.6f} BOLD units")
         else:
             # Use peakutils to detect baseline from signal troughs (default, recommended for gas challenge)
             import peakutils
             probe_baseline_array = peakutils.baseline(probe_signal)
-            probe_container.baseline = np.mean(probe_baseline_array)
+            probe_container.baseline = float(np.mean(probe_baseline_array))
             if self.logger:
-                self.logger.debug(f"Computed ROI probe baseline using peakutils method: {probe_container.baseline:.3f} BOLD units")
+                self.logger.info(f"Computed ROI probe baseline using PEAKUTILS method: {probe_container.baseline:.6f} BOLD units")
         
         if self.logger:
             n_voxels = np.sum(roi_mask)
@@ -597,7 +709,7 @@ def create_roi_probe_from_config(bold_container, config, logger=None, participan
         if coordinates is None:
             raise ValueError("ROI coordinates not specified in configuration")
         
-        return extractor.extract_probe_from_coordinates(coordinates, radius)
+        probe_container = extractor.extract_probe_from_coordinates(coordinates, radius)
     
     elif method == 'mask':
         mask_path = roi_config.get('mask_path')
@@ -620,7 +732,7 @@ def create_roi_probe_from_config(bold_container, config, logger=None, participan
                     logger.warning(f"Failed to resolve ROI mask pattern '{mask_path}': {e}")
                 raise
 
-        return extractor.extract_probe_from_mask(mask_path)
+        probe_container = extractor.extract_probe_from_mask(mask_path)
     
     elif method == 'atlas':
         atlas_path = roi_config.get('atlas_path')
@@ -629,7 +741,46 @@ def create_roi_probe_from_config(bold_container, config, logger=None, participan
         if atlas_path is None or region_id is None:
             raise ValueError("Atlas path or region ID not specified in configuration")
         
-        return extractor.extract_probe_from_atlas(atlas_path, region_id)
+        probe_container = extractor.extract_probe_from_atlas(atlas_path, region_id)
     
     else:
         raise ValueError(f"Unknown ROI probe method: {method}")
+    
+    # Apply bandpass filter if enabled
+    bandpass_config = roi_config.get('bandpass_filter', {})
+    if bandpass_config.get('enabled', False):
+        highpass = bandpass_config.get('highpass')
+        lowpass = bandpass_config.get('lowpass')
+        
+        if highpass is not None or lowpass is not None:
+            if logger:
+                filter_desc = []
+                if highpass is not None:
+                    filter_desc.append(f"highpass={highpass} Hz")
+                if lowpass is not None:
+                    filter_desc.append(f"lowpass={lowpass} Hz")
+                logger.info(f"Applying bandpass filter to ROI probe: {', '.join(filter_desc)}")
+            
+            # Apply bandpass filter
+            probe_container.data = apply_bandpass_filter(
+                probe_container.data,
+                probe_container.sampling_frequency,
+                highpass=highpass,
+                lowpass=lowpass,
+                logger=logger
+            )
+            
+            # Store filter info in the container for later use (JSON sidecars, reports)
+            probe_container.bandpass_filter = {
+                'enabled': True,
+                'highpass': highpass,
+                'lowpass': lowpass
+            }
+            
+            if logger:
+                logger.info("Bandpass filter applied successfully to ROI probe signal")
+        else:
+            if logger:
+                logger.warning("Bandpass filter enabled but no cutoff frequencies specified. Skipping filter.")
+    
+    return probe_container

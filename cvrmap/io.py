@@ -176,6 +176,44 @@ class OutputGenerator:
 			return f"_label-{roi_config['label']}"
 		return ''
 
+	def _get_filter_entity(self):
+		"""
+		Get the filter entity string for BIDS naming when bandpass filter is enabled.
+
+		Returns '_filter-bandpass' if ROI probe bandpass filtering is enabled,
+		otherwise returns an empty string.
+
+		Returns:
+		--------
+		str
+			The filter entity string (e.g., '_filter-bandpass') or empty string.
+		"""
+		roi_config = self.config.get('roi_probe', {})
+		bandpass_config = roi_config.get('bandpass_filter', {})
+		if bandpass_config.get('enabled', False):
+			return '_filter-bandpass'
+		return ''
+
+	def _get_bandpass_filter_info(self):
+		"""
+		Get bandpass filter configuration details for JSON sidecars.
+
+		Returns:
+		--------
+		dict or None
+			Dictionary with filter parameters if enabled, None otherwise.
+		"""
+		roi_config = self.config.get('roi_probe', {})
+		bandpass_config = roi_config.get('bandpass_filter', {})
+		if bandpass_config.get('enabled', False):
+			return {
+				'BandpassFilterEnabled': True,
+				'BandpassHighpassHz': bandpass_config.get('highpass'),
+				'BandpassLowpassHz': bandpass_config.get('lowpass'),
+				'BandpassFilterDescription': 'Butterworth bandpass filter applied to ROI probe signal'
+			}
+		return None
+
 	def _create_standard_sidecar_base(self, description, units, space, task, data_type):
 		"""
 		Create a standard base JSON sidecar with common fields.
@@ -340,8 +378,9 @@ class OutputGenerator:
 		# Create BIDS paths
 		data_dir = "physio" if not is_roi_probe else "func"  # ROI probes go in func directory
 		label_entity = self._get_roi_label_entity()
+		filter_entity = self._get_filter_entity()
 		if is_roi_probe:
-			filename_base = f"sub-{participant}_task-{task}{label_entity}_desc-roiprobe_bold"
+			filename_base = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_desc-roiprobe_bold"
 		else:
 			filename_base = f"sub-{participant}_task-{task}_desc-etco2_physio"
 		
@@ -392,6 +431,17 @@ class OutputGenerator:
 		
 		# Add baseline value if available
 		self._add_baseline_to_sidecar(sidecar, etco2_container, is_roi_probe)
+		
+		# Add bandpass filter info if applicable
+		if is_roi_probe:
+			bandpass_info = self._get_bandpass_filter_info()
+			if bandpass_info:
+				sidecar.update(bandpass_info)
+				# Update processing description to include filtering
+				sidecar["ProcessingDescription"] = (
+					"Signal extracted by averaging BOLD timeseries across specified ROI voxels, "
+					"then bandpass filtered using a Butterworth filter"
+				)
 		
 		with open(json_path, 'w') as f:
 			safe_json_dump(sidecar, f, indent=2)
@@ -493,7 +543,8 @@ class OutputGenerator:
 
 		# Create BIDS filename with label entity
 		label_entity = self._get_roi_label_entity()
-		filename = f"sub-{participant}_task-{task}{label_entity}_desc-roiprobe.png"
+		filter_entity = self._get_filter_entity()
+		filename = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_desc-roiprobe.png"
 		fig_path = os.path.join(output_figures_dir, filename)
 
 		# Get ROI configuration details
@@ -580,7 +631,8 @@ class OutputGenerator:
 
 		# Create BIDS filename with label entity
 		label_entity = self._get_roi_label_entity()
-		filename = f"sub-{participant}_task-{task}{label_entity}_desc-roivisualization.png"
+		filter_entity = self._get_filter_entity()
+		filename = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_desc-roivisualization.png"
 		fig_path = os.path.join(output_figures_dir, filename)
 
 		# Get ROI configuration details
@@ -773,7 +825,8 @@ class OutputGenerator:
 
 		# Create BIDS paths with label entity
 		label_entity = self._get_roi_label_entity()
-		filename_base = f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-global_bold"
+		filter_entity = self._get_filter_entity()
+		filename_base = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-global_bold"
 		_, _, json_path, tsv_path, _ = self._create_bids_paths(participant, "func", filename_base)
 		
 		# Create time vector and DataFrame
@@ -847,9 +900,10 @@ class OutputGenerator:
 		output_figures_dir = os.path.join(self.output_dir, participant_dir, figures_dir)
 		os.makedirs(output_figures_dir, exist_ok=True)
 
-		# Create BIDS filename with label entity
+		# Create BIDS filename with label and filter entities
 		label_entity = self._get_roi_label_entity()
-		filename = f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-globalcorr.png"
+		filter_entity = self._get_filter_entity()
+		filename = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-globalcorr.png"
 		fig_path = os.path.join(output_figures_dir, filename)
 		
 		# Create time vectors
@@ -934,10 +988,11 @@ class OutputGenerator:
 		if masked_delay_maps is None or correlation_maps is None:
 			raise ValueError("Masked delay maps and correlation maps must not be None")
 
-		# Create BIDS paths with label entity
+		# Create BIDS paths with label and filter entities
 		label_entity = self._get_roi_label_entity()
-		delay_base = f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-delaymasked_bold"
-		correlation_base = f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-correlation_bold"
+		filter_entity = self._get_filter_entity()
+		delay_base = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-delaymasked_bold"
+		correlation_base = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-correlation_bold"
 
 		_, delay_nii_path, delay_json_path, _, _ = self._create_bids_paths(participant, "func", delay_base)
 		_, correlation_nii_path, correlation_json_path, _, _ = self._create_bids_paths(participant, "func", correlation_base)
@@ -1040,10 +1095,11 @@ class OutputGenerator:
 		import nibabel as nib
 		import numpy as np
 
-		# Create figures directory with label entity
+		# Create figures directory with label and filter entities
 		label_entity = self._get_roi_label_entity()
+		filter_entity = self._get_filter_entity()
 		_, _, _, _, fig_path = self._create_bids_paths(participant, "figures",
-		                                              f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-delaymasked")
+		                                              f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-delaymasked")
 		
 		# Load the delay map
 		delay_img = nib.load(delay_nii_path)
@@ -1131,9 +1187,10 @@ class OutputGenerator:
 		if cvr_maps is None:
 			raise ValueError("CVR maps must not be None")
 
-		# Create BIDS paths with label entity
+		# Create BIDS paths with label and filter entities
 		label_entity = self._get_roi_label_entity()
-		cvr_base = f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-cvr_bold"
+		filter_entity = self._get_filter_entity()
+		cvr_base = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-cvr_bold"
 		_, cvr_nii_path, cvr_json_path, _, _ = self._create_bids_paths(participant, "func", cvr_base)
 		
 		# Save CVR map as NIfTI
@@ -1222,10 +1279,11 @@ class OutputGenerator:
 		if b0_maps is None or b1_maps is None:
 			raise ValueError("Both b0_maps and b1_maps must be present in cvr_results")
 
-		# Create BIDS paths with label entity
+		# Create BIDS paths with label and filter entities
 		label_entity = self._get_roi_label_entity()
-		b0_base = f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-b0_bold"
-		b1_base = f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-b1_bold"
+		filter_entity = self._get_filter_entity()
+		b0_base = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-b0_bold"
+		b1_base = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-b1_bold"
 
 		_, b0_nii_path, b0_json_path, _, _ = self._create_bids_paths(participant, "func", b0_base)
 		_, b1_nii_path, b1_json_path, _, _ = self._create_bids_paths(participant, "func", b1_base)
@@ -1345,9 +1403,10 @@ class OutputGenerator:
 				shifted_signals, total_brain_voxels, n_jobs
 			)
 		
-		# Create BIDS paths with label entity
+		# Create BIDS paths with label and filter entities
 		label_entity = self._get_roi_label_entity()
-		regressor_base = f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-regressor4d_bold"
+		filter_entity = self._get_filter_entity()
+		regressor_base = f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-regressor4d_bold"
 		_, regressor_nii_path, regressor_json_path, _, _ = self._create_bids_paths(participant, "func", regressor_base)
 		
 		# Save 4D regressor map as NIfTI
@@ -1468,10 +1527,11 @@ class OutputGenerator:
 		import nibabel as nib
 		import numpy as np
 
-		# Create figures directory with label entity
+		# Create figures directory with label and filter entities
 		label_entity = self._get_roi_label_entity()
+		filter_entity = self._get_filter_entity()
 		_, _, _, _, fig_path = self._create_bids_paths(participant, "figures",
-		                                              f"sub-{participant}_task-{task}{label_entity}_space-{space}_desc-cvr")
+		                                              f"sub-{participant}_task-{task}{label_entity}{filter_entity}_space-{space}_desc-cvr")
 		
 		# Load the CVR map
 		cvr_img = nib.load(cvr_nii_path)

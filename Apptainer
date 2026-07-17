@@ -3,7 +3,7 @@ From: python:3.12-slim
 
 %labels
     Author CVRMap Development Team
-    Version 4.3.1
+    Version 4.4.1
     Description Cerebrovascular Reactivity Mapping using BIDS-compatible physiological and BOLD fMRI data
 
 %help
