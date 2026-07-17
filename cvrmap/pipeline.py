@@ -1,3 +1,6 @@
+import sys
+import json
+
 class Pipeline:
     def __init__(self, args, logger, fmriprep_dir, config=None):
         self.args = args
@@ -17,13 +20,59 @@ class Pipeline:
             return f"_label-{roi_config['label']}"
         return ''
 
+    def _get_filter_entity(self):
+        """
+        Get the filter entity string for BIDS naming.
+
+        Returns '_filter-bandpass' if ROI probe bandpass filter is enabled,
+        otherwise returns an empty string.
+        """
+        roi_config = self.config.get('roi_probe', {}) if self.config else {}
+        bandpass_config = roi_config.get('bandpass_filter', {})
+        if roi_config.get('enabled') and bandpass_config.get('enabled', False):
+            return '_filter-bandpass'
+        return ''
+
     def run(self):
+        # Capture command line for reproducibility
+        self.command_line = ' '.join(sys.argv)
+        
+        # Prepare config snapshot
+        self.config_snapshot = self._prepare_config_snapshot()
+        
         if self.args.analysis_level == "participant":
             self._run_participant_level()
         elif self.args.analysis_level == "group":
             self._run_group_level()
         else:
             raise ValueError(f"Unknown analysis level: {self.args.analysis_level}")
+
+    def _prepare_config_snapshot(self):
+        """
+        Prepare a JSON-serializable snapshot of the configuration for reproducibility documentation.
+        
+        Returns:
+        --------
+        dict
+            Configuration dictionary suitable for JSON serialization and YAML conversion
+        """
+        if not self.config:
+            return {}
+        
+        # Create a deep copy and ensure JSON serializability
+        try:
+            config_copy = json.loads(json.dumps(self.config))
+        except (TypeError, ValueError):
+            # If config contains non-serializable objects, convert to string representation
+            config_copy = {}
+            for key, value in self.config.items():
+                try:
+                    json.dumps(value)
+                    config_copy[key] = value
+                except (TypeError, ValueError):
+                    config_copy[key] = str(value)
+        
+        return config_copy
 
     def _run_participant_level(self):
         self.logger.info("Running participant level analysis...")
@@ -386,7 +435,9 @@ class Pipeline:
                     'best_correlation': best_correlation,
                     'max_delay_seconds': max_delay_seconds
                 },
-                'histogram_stats': histogram_stats
+                'histogram_stats': histogram_stats,
+                'command_line': self.command_line,
+                'config_snapshot': self.config_snapshot
             }
             
             report_generator.generate_report(**report_data)
@@ -593,11 +644,12 @@ IQR: [{stats['delay_stats']['q25']:.2f}, {stats['delay_stats']['q75']:.2f}]s"""
                 
                 plt.tight_layout()
                 label_entity = self._get_roi_label_entity()
-                delay_hist_path = figures_dir / f"sub-{participant}_task-{self.args.task}{label_entity}_desc-delayhist.png"
+                filter_entity = self._get_filter_entity()
+                delay_hist_path = figures_dir / f"sub-{participant}_task-{self.args.task}{label_entity}{filter_entity}_desc-delayhist.png"
                 plt.savefig(delay_hist_path, dpi=150, bbox_inches='tight', facecolor='white')
                 plt.close()
 
-                stats['histogram_figures']['delay_histogram'] = f"sub-{participant}_task-{self.args.task}{label_entity}_desc-delayhist.png"
+                stats['histogram_figures']['delay_histogram'] = f"sub-{participant}_task-{self.args.task}{label_entity}{filter_entity}_desc-delayhist.png"
                 self.logger.debug(f"Delay histogram saved to: {delay_hist_path}")
 
         # Process CVR maps
@@ -650,13 +702,15 @@ IQR: [{stats['cvr_stats']['q25']:.4f}, {stats['cvr_stats']['q75']:.4f}]"""
                 
                 plt.tight_layout()
                 label_entity = self._get_roi_label_entity()
-                cvr_hist_path = figures_dir / f"sub-{participant}_task-{self.args.task}{label_entity}_desc-cvrhist.png"
+                filter_entity = self._get_filter_entity()
+                cvr_hist_path = figures_dir / f"sub-{participant}_task-{self.args.task}{label_entity}{filter_entity}_desc-cvrhist.png"
                 plt.savefig(cvr_hist_path, dpi=150, bbox_inches='tight', facecolor='white')
                 plt.close()
 
-                stats['histogram_figures']['cvr_histogram'] = f"sub-{participant}_task-{self.args.task}{label_entity}_desc-cvrhist.png"
+                stats['histogram_figures']['cvr_histogram'] = f"sub-{participant}_task-{self.args.task}{label_entity}{filter_entity}_desc-cvrhist.png"
                 self.logger.debug(f"CVR histogram saved to: {cvr_hist_path}")
 
         self.logger.info(f"Generated histogram statistics for {len(stats['delay_stats'])} delay metrics and {len(stats['cvr_stats'])} CVR metrics")
 
         return stats
+

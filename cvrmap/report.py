@@ -58,6 +58,138 @@ class CVRReportGenerator:
         if roi_config.get('enabled') and roi_config.get('label'):
             return f"_label-{roi_config['label']}"
         return ''
+
+    def _get_filter_entity(self):
+        """
+        Get the filter entity string for BIDS naming.
+
+        Returns '_filter-bandpass' if ROI probe bandpass filter is enabled,
+        otherwise returns an empty string.
+        """
+        roi_config = self.config.get('roi_probe', {}) if self.config else {}
+        bandpass_config = roi_config.get('bandpass_filter', {})
+        if roi_config.get('enabled') and bandpass_config.get('enabled', False):
+            return '_filter-bandpass'
+        return ''
+    
+    def _sanitize_command_line(self, command_line):
+        """
+        Sanitize command line by replacing local paths with placeholders.
+        
+        Replaces:
+        - Path to cvrmap executable with <CVRMAP_BIN>
+        - BIDS dataset path (rawdata) with <BIDS_DIR>
+        - fMRIPrep derivatives path with <FMRIPREP_DIR>
+        - Any --derivatives paths with <DERIVATIVES_NAME>
+        
+        Parameters:
+        -----------
+        command_line : str
+            Original command line string
+            
+        Returns:
+        --------
+        str
+            Sanitized command line with paths replaced by placeholders
+        """
+        import re
+        import os
+        
+        # Replace cvrmap executable path with placeholder
+        # Match the full path to cvrmap executable
+        command_line = re.sub(
+            r'(/[^\s]+)?/cvrmap\b',
+            '<CVRMAP_BIN>',
+            command_line
+        )
+        
+        # Replace BIDS dataset path (the first positional argument after 'participant')
+        # Look for patterns like "participant <path>"
+        command_line = re.sub(
+            r'participant\s+(/[^\s/]+)*(/[^\s]+)',
+            r'participant <BIDS_DIR>',
+            command_line
+        )
+        
+        # Replace --bids-dir argument value
+        command_line = re.sub(
+            r'--bids-dir\s+/[^\s]+',
+            '--bids-dir <BIDS_DIR>',
+            command_line
+        )
+        
+        # Replace --derivatives fmriprep path
+        command_line = re.sub(
+            r'--derivatives\s+fmriprep=/[^\s]+',
+            '--derivatives fmriprep=<FMRIPREP_DIR>',
+            command_line
+        )
+        
+        # Replace any other --derivatives arguments
+        command_line = re.sub(
+            r'--derivatives\s+(\w+)=/[^\s]+',
+            r'--derivatives \1=<DERIVATIVES_\1>',
+            command_line
+        )
+        
+        return command_line
+
+    def _create_reproducibility_html(self, kwargs):
+        """
+        Create HTML for reproducibility information section.
+        
+        Parameters:
+        -----------
+        kwargs : dict
+            Dictionary containing command_line and config_snapshot keys
+            
+        Returns:
+        --------
+        str
+            HTML content for reproducibility section
+        """
+        import json
+        
+        command_line = kwargs.get('command_line', 'Not available')
+        config_snapshot = kwargs.get('config_snapshot', {})
+        
+        # Sanitize the command line to remove local paths
+        sanitized_command_line = self._sanitize_command_line(command_line)
+        
+        # Format the command line for display
+        command_html = f"""
+        <div class="summary-card" style="margin-bottom: 2rem;">
+            <h4><i class="fas fa-terminal"></i> Command Line Invocation</h4>
+            <div style="margin-top: 1rem; padding: 1rem; background: #272822; border-radius: 6px; border-left: 4px solid #66d9ef; font-family: 'Courier New', monospace; color: #f8f8f2; overflow-x: auto; font-size: 0.9em; line-height: 1.4;">
+                {sanitized_command_line}
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-top: 1rem;">
+                Copy and paste this command to reproduce the analysis with identical parameters. 
+                Replace the placeholders with paths appropriate for your system.
+            </p>
+        </div>
+        """
+        
+        # Format the configuration snapshot
+        config_html = f"""
+        <div class="summary-card">
+            <h4><i class="fas fa-cogs"></i> Configuration Snapshot</h4>
+            <p style="color: #666; font-size: 0.9em; margin-bottom: 1rem; margin-top: 0.5rem;">
+                Below is a complete snapshot of all configuration parameters used in this analysis. 
+                This configuration can be saved to a YAML file and reused to reproduce the analysis.
+            </p>
+            <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #28a745; font-family: 'Courier New', monospace; color: #333; overflow-x: auto; font-size: 0.85em; line-height: 1.5; max-height: 400px; overflow-y: auto;">
+                <pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">{json.dumps(config_snapshot, indent=2)}</pre>
+            </div>
+            <p style="color: #666; font-size: 0.9em; margin-top: 1rem;">
+                <strong>How to use:</strong> Save the above configuration to a YAML file (e.g., <code>config.yaml</code>), 
+                then run CVRmap with <code>--config config.yaml</code> to reproduce this analysis.
+            </p>
+        </div>
+        """
+        
+        return command_html + config_html
+
     
     def generate_report(self, **kwargs):
         """
@@ -139,15 +271,16 @@ class CVRReportGenerator:
         # Get figure paths - check for both physio and ROI probe figures
         figures_dir = os.path.join(self.participant_dir, 'figures')
         label_entity = self._get_roi_label_entity()
+        filter_entity = self._get_filter_entity()
         physio_figure = f"sub-{subject_label}_task-{task}_desc-physio.png"
-        roi_probe_figure = f"sub-{subject_label}_task-{task}{label_entity}_desc-roiprobe.png"
-        roi_visualization_figure = f"sub-{subject_label}_task-{task}{label_entity}_desc-roivisualization.png"
-        global_figure = f"sub-{subject_label}_task-{task}{label_entity}_space-{spaces}_desc-globalcorr.png"
-        delay_figure = f"sub-{subject_label}_task-{task}{label_entity}_space-{spaces}_desc-delaymasked.png"
-        cvr_figure = f"sub-{subject_label}_task-{task}{label_entity}_space-{spaces}_desc-cvr.png"
+        roi_probe_figure = f"sub-{subject_label}_task-{task}{label_entity}{filter_entity}_desc-roiprobe.png"
+        roi_visualization_figure = f"sub-{subject_label}_task-{task}{label_entity}{filter_entity}_desc-roivisualization.png"
+        global_figure = f"sub-{subject_label}_task-{task}{label_entity}{filter_entity}_space-{spaces}_desc-globalcorr.png"
+        delay_figure = f"sub-{subject_label}_task-{task}{label_entity}{filter_entity}_space-{spaces}_desc-delaymasked.png"
+        cvr_figure = f"sub-{subject_label}_task-{task}{label_entity}{filter_entity}_space-{spaces}_desc-cvr.png"
         ic_classification_figure = f"sub-{subject_label}_task-{task}{label_entity}_desc-icclassification.png"
-        delay_histogram_figure = f"sub-{subject_label}_task-{task}{label_entity}_desc-delayhist.png"
-        cvr_histogram_figure = f"sub-{subject_label}_task-{task}{label_entity}_desc-cvrhist.png"
+        delay_histogram_figure = f"sub-{subject_label}_task-{task}{label_entity}{filter_entity}_desc-delayhist.png"
+        cvr_histogram_figure = f"sub-{subject_label}_task-{task}{label_entity}{filter_entity}_desc-cvrhist.png"
         
         # Check which figures exist
         physio_exists = os.path.exists(os.path.join(figures_dir, physio_figure))
@@ -178,6 +311,22 @@ class CVRReportGenerator:
                     <h4 style="margin-bottom: 0.5rem; color: #0c5460;">ROI Mask Information</h4>
                     <p style="margin-bottom: 0.5rem;"><strong>Label:</strong> {roi_label}</p>
                     <p style="margin-bottom: 0; word-break: break-all;"><strong>Mask Path:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 3px; font-size: 0.85em;">{roi_mask_path}</code></p>
+                </div>
+            """
+
+        # Build bandpass filter info HTML for ROI probe mode
+        bandpass_filter_html = ""
+        if roi_probe_enabled:
+            bandpass_config = roi_config.get('bandpass_filter', {})
+            if bandpass_config.get('enabled', False):
+                highpass_hz = bandpass_config.get('highpass')
+                lowpass_hz = bandpass_config.get('lowpass')
+                bandpass_filter_html = f"""
+                <div class="summary-card" style="margin-bottom: 1.5rem; background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <h4 style="margin-bottom: 0.5rem; color: #856404;">Bandpass Filter Applied</h4>
+                    <p style="margin-bottom: 0.5rem;">The ROI probe timecourse has been bandpass filtered to isolate physiologically relevant frequency components.</p>
+                    <p style="margin-bottom: 0.25rem;"><strong>Highpass Cutoff:</strong> {highpass_hz} Hz (removes slow drifts)</p>
+                    <p style="margin-bottom: 0;"><strong>Lowpass Cutoff:</strong> {lowpass_hz} Hz (removes high-frequency noise)</p>
                 </div>
             """
 
@@ -482,6 +631,7 @@ class CVRReportGenerator:
                 <a href="#delay-maps">Delay Maps</a>
                 <a href="#cvr-maps">CVR Maps</a>
                 <a href="#statistics">Statistics</a>
+                <a href="#reproducibility">Reproducibility</a>
                 <a href="#references">References</a>
             </div>
         </div>
@@ -547,6 +697,7 @@ class CVRReportGenerator:
             </div>
             <div class="section-content">
                 {roi_mask_info_html}
+                {bandpass_filter_html}
                 {("<div class='figure-container'>" +
                 f"<img src='figures/{roi_probe_figure}' alt='ROI Probe Analysis' />" +
                 "<div class='figure-caption'>" +
@@ -837,6 +988,17 @@ class CVRReportGenerator:
                         The publication describes the methodology, validation, and implementation details of the cerebrovascular reactivity mapping pipeline used to generate this report.
                     </p>
                 </div>
+            </div>
+        </section>
+        
+        <!-- Reproducibility Section -->
+        <section id="reproducibility" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Reproducibility Information</h2>
+                <p class="section-subtitle">Analysis parameters and execution details for result reproduction</p>
+            </div>
+            <div class="section-content">
+                {self._create_reproducibility_html(kwargs)}
             </div>
         </section>
     </div>

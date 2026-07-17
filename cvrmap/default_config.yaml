@@ -54,3 +54,11 @@ roi_probe:
   # method: atlas
   # atlas_path: /opt/fsl/data/atlases/HarvardOxford/HarvardOxford-sub-maxprob-thr0-1mm.nii.gz
   # region_id: 13
+  
+  # Bandpass filter for ROI probe signal (optional)
+  # Use this to isolate low-frequency fluctuations relevant to CVR analysis
+  # Recommended values: highpass=0.02 Hz, lowpass=0.04 Hz for venous signals
+  bandpass_filter:
+    enabled: false  # Set to true to apply bandpass filtering to the ROI probe
+    highpass: 0.02  # Highpass cutoff frequency in Hz (removes slow drifts below this frequency)
+    lowpass: 0.04   # Lowpass cutoff frequency in Hz (removes noise above this frequency)
